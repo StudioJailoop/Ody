@@ -3542,13 +3542,16 @@
     { code:'K11-1101',type:'EC K',   pax:'3 pax', status:'occupied' },
     { code:'L12-1201',type:'DX-L12', pax:'4 pax', status:'free' }
   ];
-  // Couleurs alignées sur les tokens officiels Trident UI (develop.trident-ui.pro.clubmed) :
-  // red -> #C13C27, green -> #107A2A. occupied/locked (#0480a9) et calendar (#c35078)
-  // ne correspondent à aucun des 16 tokens nommés de la lib — gardées telles quelles du
-  // Figma faute de référence officielle, à confirmer avec Sébastien si un token existe ailleurs.
+  // Couleurs = variables du DS Odyssey (Ody Trident Ψ 2.0), lues via get_variable_defs
+  // sur le node Figma à jour — PAS les tokens Trident UI génériques (librairie web
+  // distincte, develop.trident-ui.pro.clubmed) qui ne s'appliquent pas à cet écran.
   const CAL_STATUS_COLOR = {
-    occupied:'#0480a9', maintenance:'#C13C27', presence:'#107A2A',
-    locked:'#0480a9', calendar:'#c35078', free:null
+    occupied:'#1E2643',   // Brand colors/Ultramarine blue
+    maintenance:'#BF2F17', // Primary colors/Red
+    presence:'#088A20',    // Layout colors/Green (= Content/Positive)
+    locked:'#1e2643',      // Background/Exclusive Collection
+    calendar:'#fdbe00',    // Surface/Brand
+    free:null
   };
   const CAL_STATUS_ICON = {
     occupied:'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
@@ -3558,20 +3561,20 @@
     calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>'
   };
   const CAL_BOOKINGS = [
-    { room:0, dayStart:0,  dayEnd:13, name:'MARTINS Sofia', dates:'12/09 - 30/09', tag:'Platinum', corpo:true,  pax:'+1', color:'#1E2A4A' },
+    { room:0, dayStart:0,  dayEnd:13, name:'MARTINS Sofia', dates:'12/09 - 30/09', tag:'Platinum', corpo:true,  pax:'+1', color:'#1e2643' },
     { room:1, dayStart:1,  dayEnd:3,  name:'Maintenance',   dates:'16/09 - 18/09', red:true },
-    { room:1, dayStart:4,  dayEnd:10, name:'PEREZ Carlos',  dates:'19/09 - 25/09', tag:'Gold',   corpo:true, pax:'+1', color:'#1E2A4A' },
-    { room:2, dayStart:2,  dayEnd:10, name:'FERREIRA Inês', dates:'17/09 - 25/09', tag:'Silver', corpo:true, pax:'+1', color:'#1E2A4A' },
-    { room:3, dayStart:0,  dayEnd:5,  name:'COSTA João',    dates:'15/09 - 20/09', tag:'Gold',   corpo:true, color:'#1E2A4A' },
-    { room:4, dayStart:1,  dayEnd:6,  name:'RIBEIRO Ana',   dates:'16/09 - 21/09', tag:'NGM', locked:true, corpo:true, color:'#107A2A' },
-    { room:4, dayStart:7,  dayEnd:10, name:'LOPES Mariana', dates:'22/09 - 25/09', tag:'Silver', color:'#1E2A4A' },
-    { room:4, dayStart:11, dayEnd:13, name:'SANTOS Miguel', dates:'26/09 - 28/09', tag:'Platinum', corpo:true, pax:'+2', color:'#1E2A4A' },
-    { room:5, dayStart:4,  dayEnd:13, name:'GOMES Beatriz', dates:'19/09 - 28/09', tag:'Gold', corpo:true, pax:'+1', color:'#1E2A4A' },
+    { room:1, dayStart:4,  dayEnd:10, name:'PEREZ Carlos',  dates:'19/09 - 25/09', tag:'Gold',   corpo:true, pax:'+1', color:'#1e2643' },
+    { room:2, dayStart:2,  dayEnd:10, name:'FERREIRA Inês', dates:'17/09 - 25/09', tag:'Silver', corpo:true, pax:'+1', color:'#1e2643' },
+    { room:3, dayStart:0,  dayEnd:5,  name:'COSTA João',    dates:'15/09 - 20/09', tag:'Gold',   corpo:true, color:'#1e2643' },
+    { room:4, dayStart:1,  dayEnd:6,  name:'RIBEIRO Ana',   dates:'16/09 - 21/09', tag:'NGM', locked:true, corpo:true, color:'#088a20' },
+    { room:4, dayStart:7,  dayEnd:10, name:'LOPES Mariana', dates:'22/09 - 25/09', tag:'Silver', color:'#1e2643' },
+    { room:4, dayStart:11, dayEnd:13, name:'SANTOS Miguel', dates:'26/09 - 28/09', tag:'Platinum', corpo:true, pax:'+2', color:'#1e2643' },
+    { room:5, dayStart:4,  dayEnd:13, name:'GOMES Beatriz', dates:'19/09 - 28/09', tag:'Gold', corpo:true, pax:'+1', color:'#1e2643' },
     { room:6, dayStart:7,  dayEnd:10, name:'Blocage propriétaire', dates:'22/09 - 25/09', red:true },
     { room:7, dayStart:0,  dayEnd:13, name:'ALMEIDA Clara', dates:'15/09 - 28/09', pax:'+1', color:'#fdbe00', dark:true },
-    { room:8, dayStart:0,  dayEnd:4,  name:'SILVA Rafael',  dates:'15/09 - 19/09', tag:'Silver', corpo:true, color:'#1E2A4A' },
-    { room:8, dayStart:5,  dayEnd:13, name:'OLIVEIRA Tiago',dates:'20/09 - 28/09', tag:'Gold',   corpo:true, pax:'+1', color:'#1E2A4A' },
-    { room:9, dayStart:9,  dayEnd:13, name:'FERNANDES Tomás',dates:'24/09 - 28/09', tag:'Silver', color:'#1E2A4A' }
+    { room:8, dayStart:0,  dayEnd:4,  name:'SILVA Rafael',  dates:'15/09 - 19/09', tag:'Silver', corpo:true, color:'#1e2643' },
+    { room:8, dayStart:5,  dayEnd:13, name:'OLIVEIRA Tiago',dates:'20/09 - 28/09', tag:'Gold',   corpo:true, pax:'+1', color:'#1e2643' },
+    { room:9, dayStart:9,  dayEnd:13, name:'FERNANDES Tomás',dates:'24/09 - 28/09', tag:'Silver', color:'#1e2643' }
   ];
 
   function renderCalendar() {
@@ -3608,7 +3611,7 @@
       const top = b.room * rowH + 4;
       const left = `calc(${b.dayStart * dayW}% + 2px)`;
       const width = `calc(${daySpan * dayW}% - 4px)`;
-      const bg = b.red ? '#C13C27' : (b.color || '#1E2A4A');
+      const bg = b.red ? '#bf2f17' : (b.color || '#1e2643');
       const color = b.dark ? '#000' : '#fff';
       // Réservations courtes (< 4 jours) : trop étroit pour les badges — on n'affiche
       // que nom + dates, comme dans la maquette Figma (les badges y apparaissent
@@ -3619,7 +3622,7 @@
           <span class="b-name">${b.name}</span>
           ${b.dates ? `<span class="b-date">${b.dates}</span>` : ''}
         </div>
-        ${showBadges && b.tag ? `<span class="b-tag" style="${b.locked ? 'background:#fff;color:#107A2A;' : ''}">${b.tag}</span>` : ''}
+        ${showBadges && b.tag ? `<span class="b-tag" style="${b.locked ? 'background:#fff;color:#088a20;' : ''}">${b.tag}</span>` : ''}
         ${showBadges && b.corpo ? `<span class="b-corpo">Excellence corpo</span>` : ''}
         ${showBadges && b.pax ? `<span class="b-pax">${b.pax}</span>` : ''}
       </div>`;
