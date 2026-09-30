@@ -1117,9 +1117,10 @@
         <!-- En-tête jours -->
         <div class="cal-header-row" id="cal-header-row"></div>
 
-        <!-- Corps : lignes chambres + calques réservations -->
-        <div class="cal-body" id="cal-body"></div>
-        <div class="cal-bookings-layer" id="cal-bookings-layer"></div>
+        <!-- Corps : lignes chambres + calque réservations (imbriqué pour partager la même origine) -->
+        <div class="cal-body" id="cal-body">
+          <div class="cal-bookings-layer" id="cal-bookings-layer"></div>
+        </div>
 
       </div>
 
@@ -3572,14 +3573,13 @@
   function renderCalendar() {
     const header = document.getElementById('cal-header-row');
     const body = document.getElementById('cal-body');
-    const layer = document.getElementById('cal-bookings-layer');
-    if (!header || !body || !layer) return;
+    if (!header || !body) return;
 
     header.innerHTML = '<div></div>' + CAL_DAYS.map(d =>
       `<div class="cal-header-cell${d.today ? ' today' : ''}"><div class="dow">${d.dow}</div><div class="dnum">${d.d}</div></div>`
     ).join('');
 
-    body.innerHTML = CAL_ROOMS.map(r => {
+    const roomsHtml = CAL_ROOMS.map(r => {
       const statusColor = CAL_STATUS_COLOR[r.status];
       const statusIcon = CAL_STATUS_ICON[r.status] || '';
       return `<div class="cal-room-row">
@@ -3599,7 +3599,7 @@
 
     const rowH = 54;
     const dayW = 100 / CAL_DAYS.length;
-    layer.innerHTML = CAL_BOOKINGS.map(b => {
+    const bookingsHtml = CAL_BOOKINGS.map(b => {
       const top = b.room * rowH + 4;
       const left = `calc(${b.dayStart * dayW}% + 2px)`;
       const width = `calc(${(b.dayEnd - b.dayStart + 1) * dayW}% - 4px)`;
@@ -3616,9 +3616,12 @@
       </div>`;
     }).join('');
 
+    // Le calque de réservations est un sibling ABSOLU imbriqué dans #cal-body,
+    // donc son top:0 correspond exactement au haut de la 1ère ligne chambre.
+    body.innerHTML = roomsHtml + `<div class="cal-bookings-layer" id="cal-bookings-layer">${bookingsHtml}</div>`;
+
     const bodyH = CAL_ROOMS.length * rowH;
     body.style.height = bodyH + 'px';
-    layer.style.height = bodyH + 'px';
   }
   renderCalendar();
 
