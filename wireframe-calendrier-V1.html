@@ -3600,19 +3600,24 @@
     const rowH = 54;
     const dayW = 100 / CAL_DAYS.length;
     const bookingsHtml = CAL_BOOKINGS.map(b => {
+      const daySpan = b.dayEnd - b.dayStart + 1;
       const top = b.room * rowH + 4;
       const left = `calc(${b.dayStart * dayW}% + 2px)`;
-      const width = `calc(${(b.dayEnd - b.dayStart + 1) * dayW}% - 4px)`;
+      const width = `calc(${daySpan * dayW}% - 4px)`;
       const bg = b.red ? '#bf2f17' : (b.color || '#1e2643');
       const color = b.dark ? '#000' : '#fff';
-      return `<div class="cal-booking" style="top:${top}px; left:${left}; width:${width}; background:${bg}; color:${color}; pointer-events:auto;">
-        <div style="display:flex;flex-direction:column;min-width:0;">
+      // Réservations courtes (< 4 jours) : trop étroit pour les badges — on n'affiche
+      // que nom + dates, comme dans la maquette Figma (les badges y apparaissent
+      // dans une infobulle au survol, hors scope de ce wireframe V1).
+      const showBadges = daySpan >= 4;
+      return `<div class="cal-booking" style="top:${top}px; left:${left}; width:${width}; background:${bg}; color:${color}; pointer-events:auto;" title="${b.name}${b.dates ? ' — ' + b.dates : ''}${b.tag ? ' — ' + b.tag : ''}${b.corpo ? ' — Excellence corpo' : ''}">
+        <div style="display:flex;flex-direction:column;min-width:0;overflow:hidden;">
           <span class="b-name">${b.name}</span>
           ${b.dates ? `<span class="b-date">${b.dates}</span>` : ''}
         </div>
-        ${b.tag ? `<span class="b-tag" style="${b.locked ? 'background:#fff;color:#088a20;' : ''}">${b.tag}</span>` : ''}
-        ${b.corpo ? `<span class="b-corpo">Excellence corpo</span>` : ''}
-        ${b.pax ? `<span class="b-pax">${b.pax}</span>` : ''}
+        ${showBadges && b.tag ? `<span class="b-tag" style="${b.locked ? 'background:#fff;color:#088a20;' : ''}">${b.tag}</span>` : ''}
+        ${showBadges && b.corpo ? `<span class="b-corpo">Excellence corpo</span>` : ''}
+        ${showBadges && b.pax ? `<span class="b-pax">${b.pax}</span>` : ''}
       </div>`;
     }).join('');
 
