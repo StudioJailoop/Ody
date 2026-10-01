@@ -880,6 +880,60 @@
     font-size: 12px; font-weight: 600; padding: 4px 8px; border: 1px solid var(--white);
     border-radius: 100px; display: flex; align-items: center; gap: 4px; flex-shrink: 0;
   }
+  .cal-room-card, .cal-booking { cursor: pointer; }
+
+  /* ══ Modale chambre (Room Assign/Lock/Switch) — slide-over droite, fidèle Figma ══ */
+  .cal-room-modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.32); z-index: 1500;
+  }
+  .cal-room-modal-overlay.open { display: block; }
+  .cal-room-modal {
+    position: absolute; top: 0; right: 0; bottom: 0; width: 560px; max-width: 100vw;
+    background: var(--white); box-shadow: -8px 0 32px rgba(0,0,0,.18);
+    display: flex; flex-direction: column; padding: 32px; overflow-y: auto;
+  }
+  .cal-rm-title { display: flex; align-items: center; gap: 12px; }
+  .cal-rm-title img { width: 30px; height: 30px; flex-shrink: 0; }
+  .cal-rm-title h2 { font-size: 28px; font-weight: 700; color: var(--navy); margin: 0; line-height: 34px; }
+  .cal-rm-subtitle { font-size: 16px; color: var(--grey-txt); margin: 4px 0 0 42px; }
+  .cal-rm-divider { height: 0; border: none; border-top: 1px solid #CCCCCC; opacity: .5; margin: 24px 0; width: 100%; flex-shrink: 0; }
+  .cal-rm-section-label {
+    font-size: 14px; font-weight: 600; color: #000; margin-bottom: 12px;
+  }
+  .cal-rm-stay-card { background: #F6EFE7; border-radius: 16px; padding: 16px; margin-bottom: 24px; }
+  .cal-rm-stay-name { font-size: 16px; font-weight: 600; color: #000; margin-bottom: 10px; }
+  .cal-rm-stay-columns { display: flex; gap: 48px; }
+  .cal-rm-stay-col { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+  .cal-rm-stay-field-label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #000; }
+  .cal-rm-stay-field-label img { width: 24px; height: 24px; flex-shrink: 0; }
+  .cal-rm-stay-field-value { font-size: 14px; color: #333; }
+  .cal-rm-stay-field-value.with-icon { display: flex; align-items: center; gap: 4px; }
+  .cal-rm-stay-field-value.with-icon img { width: 12px; height: 12px; flex-shrink: 0; }
+  .cal-rm-loyalty-badge {
+    display: inline-flex; width: fit-content; font-size: 12px; font-weight: 600; color: var(--white);
+    background: #1e2643; border-radius: 100px; padding: 4px 16px;
+  }
+  .cal-rm-stay-note { font-size: 12px; color: #000; margin-top: 10px; }
+  .cal-rm-travelers { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .cal-rm-traveler-row {
+    display: flex; align-items: center; gap: 10px; border: 1px solid #CCCCCC; border-radius: 8px;
+    padding: 8px 20px;
+  }
+  .cal-rm-traveler-row.primary { border-color: #999999; }
+  .cal-rm-traveler-row img { width: 16px; height: 16px; flex-shrink: 0; }
+  .cal-rm-traveler-name { font-size: 16px; color: #000; flex: 1; }
+  .cal-rm-traveler-name b { font-weight: 600; }
+  .cal-rm-traveler-role { font-size: 14px; color: #333; }
+  .cal-rm-char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; margin-bottom: 8px; }
+  .cal-rm-char-field-label { font-size: 12px; color: var(--grey-txt); margin-bottom: 2px; }
+  .cal-rm-char-field-value { font-size: 14px; font-weight: 600; color: var(--navy); }
+  .cal-rm-cta { display: flex; gap: 12px; margin-top: auto; padding-top: 8px; }
+  .cal-rm-btn {
+    flex: 1; height: 48px; border-radius: 100px; font-size: 16px; font-weight: 600;
+    cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center;
+  }
+  .cal-rm-btn.lock { background: var(--white); color: #000; border: 1px solid #000; }
+  .cal-rm-btn.solid { background: #000; color: var(--white); border: none; }
   </style>
 </head>
 <body>
@@ -1211,6 +1265,14 @@
     </div><!-- /content -->
 
   </main>
+</div>
+
+<!-- Modale chambre (Room Assign/Lock/Switch) — assigné / non assigné.
+     Sibling direct de <body> (pas sous .content/.main) pour échapper à leur
+     contexte d'empilement (z-index:1 sur .content) et passer au-dessus du
+     panel Loopcraft (z-index:999). -->
+<div class="cal-room-modal-overlay" id="cal-room-modal-overlay">
+  <div class="cal-room-modal" id="cal-room-modal"></div>
 </div>
 
 <!-- Panel wireframe -->
@@ -3750,6 +3812,50 @@
     }
   })(100);
 
+  // ── Enrichissement modale chambre (Room Assign/Lock/Switch) — caractéristiques
+  // chambre pour toutes les chambres + détails séjour pour les réservations réelles
+  // (hors Maintenance/Blocage), fidèle aux nœuds Figma 15733:7949 (assigné) et
+  // 15776:20299 (non assigné) — aucun champ inventé hors de ces deux maquettes.
+  (function enrichRoomCharacteristics() {
+    const FLOORS = ['Ground floor - EC Space', '1st - EC Space', '2nd - EC Space', '3rd - EC Space'];
+    const EXPOSURES = ['North East Caribbean ocean view', 'South West garden view', 'East pool view', 'West lagoon view'];
+    const BEDS = ['King + 2 children\'s beds', 'King bed', 'Twin beds', '2 Queen beds'];
+    CAL_ROOMS.forEach((r, i) => {
+      r.floor = FLOORS[i % FLOORS.length];
+      r.area = `${70 + (i % 5) * 7}m2`;
+      r.connecting = i % 4 === 0 ? 'Yes' : 'No';
+      r.exposure = EXPOSURES[i % EXPOSURES.length];
+      r.bed = BEDS[i % BEDS.length];
+      r.accessible = i % 7 === 0 ? 'Yes' : 'No';
+    });
+  })();
+  (function enrichBookingDetails() {
+    const EXTRA_FIRST = ['Iker','Léa','Laura','Noah','Chloé','Hugo'];
+    CAL_BOOKINGS.forEach((b, i) => {
+      if (b.red) return; // Maintenance / Blocage propriétaire — pas un vrai séjour GM
+      b.arrival = addDays(CAL_DATA_ORIGIN, b.dayStart);
+      b.departure = addDays(CAL_DATA_ORIGIN, b.dayEnd + 1);
+      // b.name = "SURNAME Firstname" — on sépare pour reconstruire "SURNAME Prénom" par
+      // voyageur (même nom de famille pour tous, fidèle au node Figma 15733:7949).
+      const spaceIdx = b.name.lastIndexOf(' ');
+      const familyName = spaceIdx > -1 ? b.name.slice(0, spaceIdx) : b.name;
+      const firstName = spaceIdx > -1 ? b.name.slice(spaceIdx + 1) : '';
+      b.memberNumber = `${900000 + i * 37 % 99999}`;
+      b.fileNumber = `${400000 + i * 53 % 99999}`;
+      b.statusLabel = 'Confirmed';
+      b.statusNote = 'Nothing to report for this stay.';
+      const extraCount = b.pax ? parseInt(b.pax.replace('+', ''), 10) || 0 : 0;
+      b.guestCount = 1 + extraCount;
+      b.travelers = [{ familyName, firstName, role: 'Primary guest', primary: true }];
+      for (let k = 0; k < extraCount; k++) {
+        b.travelers.push({
+          familyName, firstName: EXTRA_FIRST[(i + k) % EXTRA_FIRST.length],
+          role: k === 0 ? 'Adult' : 'Child', primary: false
+        });
+      }
+    });
+  })();
+
   // Filtres actifs — null/vide = pas de filtre (tout affiché). Alimentés par les
   // dropdowns Room/States ; recalculés par updateCalFilterCounts() au chargement.
   let CAL_STATUS_FILTER = new Set(); // sous-ensemble de statuts cochés, vide = tous
@@ -3800,7 +3906,7 @@
       const statusColor = CAL_STATUS_COLOR[r.status];
       const statusIcon = CAL_STATUS_ICON[r.status] || '';
       return `<div class="cal-room-row">
-        <div class="cal-room-card">
+        <div class="cal-room-card" data-room-idx="${i}">
           ${statusColor ? `<div class="cal-room-status" style="background:${statusColor};">${statusIcon}</div>` : '<div class="cal-room-status"></div>'}
           <div class="cal-room-info">
             <div class="cal-room-line1">
@@ -3815,7 +3921,7 @@
             </div>
           </div>
         </div>
-        ${CAL_DAYS.map(d => `<div class="cal-day-cell${d.today ? ' today' : ''}"></div>`).join('')}
+        ${CAL_DAYS.map(d => `<div class="cal-day-cell${d.today ? ' today' : ''}" data-room-idx="${i}"></div>`).join('')}
       </div>`;
     }).join('');
 
@@ -3825,7 +3931,7 @@
     // dont [dayStart,dayEnd] (absolus, origine CAL_DATA_ORIGIN) tombent hors de la
     // fenêtre visible [offset, offset+CAL_VIEW_DAYS) sont exclus ou découpés (clip).
     const offset = windowOffsetDays();
-    const bookingsHtml = CAL_BOOKINGS.map(b => {
+    const bookingsHtml = CAL_BOOKINGS.map((b, bi) => {
       const row = visibleRoomIndex[b.room];
       if (row === -1) return ''; // chambre masquée par un filtre
       const absStart = b.dayStart, absEnd = b.dayEnd;
@@ -3844,7 +3950,7 @@
       // que nom + dates, comme dans la maquette Figma (les badges y apparaissent
       // dans une infobulle au survol, hors scope de ce wireframe V1).
       const showBadges = daySpan >= 4;
-      return `<div class="cal-booking" style="top:${top}px; left:${left}; width:${width}; background:${bg}; color:${color}; pointer-events:auto;" title="${b.name}${b.dates ? ' — ' + b.dates : ''}${b.tag ? ' — ' + b.tag : ''}${b.corpo ? ' — Excellence corpo' : ''}">
+      return `<div class="cal-booking" data-booking-idx="${bi}" data-room-idx="${b.room}" style="top:${top}px; left:${left}; width:${width}; background:${bg}; color:${color}; pointer-events:auto;" title="${b.name}${b.dates ? ' — ' + b.dates : ''}${b.tag ? ' — ' + b.tag : ''}${b.corpo ? ' — Excellence corpo' : ''}">
         <div style="display:flex;flex-direction:column;min-width:0;overflow:hidden;">
           <span class="b-name">${b.name}</span>
           ${b.dates ? `<span class="b-date">${b.dates}</span>` : ''}
@@ -3862,6 +3968,126 @@
     body.style.height = (visibleRow * rowH) + 'px';
   }
   renderCalendar();
+
+  // ══ Modale chambre — clic réservation (assigné) ou chambre/cellule vide (routage) ══
+  // Fidèle aux nœuds Figma 15733:7949 (Room EC-01, assigné) et 15776:20299
+  // (Room A4-60, non assigné) — structure et contenu, pas d'action câblée (différé).
+  function formatModalDate(d) {
+    const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${MONTHS_SHORT[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  }
+  function findActiveBookingForRoom(roomIdx) {
+    // Réservation (non-red) dont [dayStart,dayEnd] couvre CAL_TODAY — définit l'état "assigné".
+    const todayOffset = Math.round((CAL_TODAY - CAL_DATA_ORIGIN) / 86400000);
+    return CAL_BOOKINGS.find(b => b.room === roomIdx && !b.red && b.dayStart <= todayOffset && b.dayEnd >= todayOffset);
+  }
+  function renderRoomCharacteristics(r) {
+    return `
+      <div class="cal-rm-char-grid">
+        <div><div class="cal-rm-char-field-label">Floor</div><div class="cal-rm-char-field-value">${r.floor}</div></div>
+        <div><div class="cal-rm-char-field-label">Exposure</div><div class="cal-rm-char-field-value">${r.exposure}</div></div>
+        <div><div class="cal-rm-char-field-label">Area</div><div class="cal-rm-char-field-value">${r.area}</div></div>
+        <div><div class="cal-rm-char-field-label">Bed</div><div class="cal-rm-char-field-value">${r.bed}</div></div>
+        <div><div class="cal-rm-char-field-label">Connecting</div><div class="cal-rm-char-field-value">${r.connecting}</div></div>
+        <div><div class="cal-rm-char-field-label">Accessible</div><div class="cal-rm-char-field-value">${r.accessible}</div></div>
+      </div>`;
+  }
+  function renderRoomModalContent(roomIdx, booking) {
+    const r = CAL_ROOMS[roomIdx];
+    const titleHtml = `
+      <div class="cal-rm-title">
+        <img src="assets-calendrier/icon-room-bedroom.svg" alt="" />
+        <h2>Room ${r.code}</h2>
+      </div>
+      <div class="cal-rm-subtitle">${r.type}</div>`;
+    if (booking) {
+      const fullName = `${booking.travelers[0].familyName.toUpperCase()} ${booking.travelers[0].firstName}`;
+      return `
+        ${titleHtml}
+        <hr class="cal-rm-divider" />
+        <div class="cal-rm-section-label">CURRENT STAY</div>
+        <div class="cal-rm-stay-card">
+          <div class="cal-rm-stay-name">${fullName}</div>
+          <div class="cal-rm-stay-columns">
+            <div class="cal-rm-stay-col">
+              <div class="cal-rm-stay-field-label"><img src="assets-calendrier/icon-transport-arrival.svg" alt="" />Arrival</div>
+              <div class="cal-rm-stay-field-value">${formatModalDate(booking.arrival)}</div>
+              <div class="cal-rm-stay-field-label">Guest</div>
+              <div class="cal-rm-stay-field-value">${booking.guestCount} pax</div>
+              <div class="cal-rm-stay-field-label">Members</div>
+              <div class="cal-rm-stay-field-value">${booking.memberNumber}</div>
+              <div class="cal-rm-stay-field-label">Status</div>
+              <div class="cal-rm-stay-field-value with-icon"><img src="assets-calendrier/icon-diamond.svg" alt="" />${booking.statusLabel}</div>
+            </div>
+            <div class="cal-rm-stay-col">
+              <div class="cal-rm-stay-field-label"><img src="assets-calendrier/icon-transport-departure.svg" alt="" />Departure</div>
+              <div class="cal-rm-stay-field-value">${formatModalDate(booking.departure)}</div>
+              <div class="cal-rm-stay-field-label">Type</div>
+              ${booking.tag ? `<span class="cal-rm-loyalty-badge">${booking.tag}</span>` : '<div class="cal-rm-stay-field-value">—</div>'}
+              <div class="cal-rm-stay-field-label">File</div>
+              <div class="cal-rm-stay-field-value">${booking.fileNumber}</div>
+            </div>
+          </div>
+          <div class="cal-rm-stay-note">${booking.statusNote}</div>
+        </div>
+        <div class="cal-rm-section-label">TRAVELERS ON THIS BOOKING</div>
+        <div class="cal-rm-travelers">
+          ${booking.travelers.map(t => `
+            <div class="cal-rm-traveler-row${t.primary ? ' primary' : ''}">
+              ${t.primary ? '<img src="assets-calendrier/icon-guest-primary.svg" alt="" />' : ''}
+              <span class="cal-rm-traveler-name"><b>${t.familyName.toUpperCase()}</b> ${t.firstName}</span>
+              <span class="cal-rm-traveler-role">${t.role}</span>
+            </div>`).join('')}
+        </div>
+        <div class="cal-rm-section-label">ROOM CHARACTERISTICS</div>
+        ${renderRoomCharacteristics(r)}
+        <hr class="cal-rm-divider" />
+        <div class="cal-rm-cta">
+          <button class="cal-rm-btn lock" id="cal-rm-btn-lock">Lock</button>
+          <button class="cal-rm-btn solid" id="cal-rm-btn-switch">Switch</button>
+        </div>`;
+    }
+    return `
+      ${titleHtml}
+      <hr class="cal-rm-divider" />
+      <div class="cal-rm-section-label">ROOM CHARACTERISTICS</div>
+      ${renderRoomCharacteristics(r)}
+      <hr class="cal-rm-divider" />
+      <div class="cal-rm-cta">
+        <button class="cal-rm-btn lock" id="cal-rm-btn-lock">Lock</button>
+        <button class="cal-rm-btn solid" id="cal-rm-btn-assign">Assign</button>
+      </div>`;
+  }
+  function openRoomModal(roomIdx, bookingIdx) {
+    // Une bande rouge (Maintenance/Blocage propriétaire) n'est pas un séjour GM —
+    // elle route vers l'état non assigné, jamais vers CURRENT STAY avec des champs absents.
+    let booking = bookingIdx != null ? CAL_BOOKINGS[bookingIdx] : findActiveBookingForRoom(roomIdx);
+    if (booking && booking.red) booking = undefined;
+    document.getElementById('cal-room-modal').innerHTML = renderRoomModalContent(roomIdx, booking);
+    document.getElementById('cal-room-modal-overlay').classList.add('open');
+    // Actions différées — câblage métier à venir (Lock/Assign/Switch hors scope V1 modale).
+    document.getElementById('cal-rm-btn-lock')?.addEventListener('click', () => alert('Action à câbler — Lock'));
+    document.getElementById('cal-rm-btn-switch')?.addEventListener('click', () => alert('Action à câbler — Switch'));
+    document.getElementById('cal-rm-btn-assign')?.addEventListener('click', () => alert('Action à câbler — Assign'));
+  }
+  function closeRoomModal() {
+    document.getElementById('cal-room-modal-overlay').classList.remove('open');
+  }
+  document.getElementById('cal-room-modal-overlay').addEventListener('click', e => {
+    if (e.target.id === 'cal-room-modal-overlay') closeRoomModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeRoomModal();
+  });
+  document.getElementById('cal-body').addEventListener('click', e => {
+    const bookingEl = e.target.closest('.cal-booking');
+    if (bookingEl) {
+      openRoomModal(parseInt(bookingEl.dataset.roomIdx, 10), parseInt(bookingEl.dataset.bookingIdx, 10));
+      return;
+    }
+    const roomEl = e.target.closest('[data-room-idx]');
+    if (roomEl) openRoomModal(parseInt(roomEl.dataset.roomIdx, 10));
+  });
 
   // ══ Barre de filtres Room/States — dropdowns CheckboxSelect (structure Trident UI) ══
   function buildFilterOptions() {
