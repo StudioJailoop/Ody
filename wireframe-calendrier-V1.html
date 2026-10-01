@@ -3589,6 +3589,64 @@
     { room:9, dayStart:9,  dayEnd:13, name:'FERNANDES Tomás',dates:'24/09 - 28/09', tag:'Silver', color:'#1e2643' }
   ];
 
+  // ── Extension à ~100 chambres pour tester le scroll — réutilise exactement
+  // les mêmes motifs que les 13 lignes vérifiées contre Figma ci-dessus
+  // (mêmes statuts, mêmes badges, mêmes patterns de noms/dates) — rien de nouveau inventé.
+  (function extendCalendarData(targetRoomCount) {
+    const LETTERS = 'MNOPQRSTUVWXYZ';
+    const TYPE_POOL = ['DX', 'EC S', 'EC S+', 'SUP', 'EC K'];
+    const STATUS_POOL = ['occupied','occupied','presence','free','free','locked','maintenance','occupied','presence','calendar'];
+    const SURNAMES = ['MARTINS','PEREZ','FERREIRA','COSTA','RIBEIRO','LOPES','SANTOS','GOMES','SILVA','OLIVEIRA','FERNANDES','ALMEIDA',
+      'PEREIRA','RODRIGUES','CARVALHO','TEIXEIRA','MOREIRA','ALVES','MENDES','NUNES','SOUSA','MARQUES','ANTUNES','CORREIA'];
+    const FIRST_NAMES = ['Sofia','Carlos','Inês','João','Ana','Mariana','Miguel','Beatriz','Rafael','Tiago','Tomás','Clara',
+      'Rui','Marta','Diogo','Catarina','Bruno','Helena','Paulo','Cristina'];
+    const TAGS = ['Platinum','Gold','Silver'];
+
+    const existingCount = CAL_ROOMS.length; // 13, déjà vérifiées contre Figma
+    for (let i = existingCount; i < targetRoomCount; i++) {
+      const letter = LETTERS[(i - existingCount) % LETTERS.length];
+      const buildingNum = i + 1;
+      const type = TYPE_POOL[i % TYPE_POOL.length];
+      const status = STATUS_POOL[i % STATUS_POOL.length];
+      const pax = (i % 6) + 1;
+      const room = {
+        code: `${letter}${buildingNum}-${buildingNum * 100 + 1}`,
+        type: type === 'DX' ? `DX-${letter}${buildingNum}` : (type === 'SUP' ? `SUP-${letter}` : type),
+        pax: status === 'maintenance' ? null : `${pax} pax`,
+        status
+      };
+      // Reprend les mêmes variantes GO/checkPax/separated vues sur C3-301/D4-401/L12-1201,
+      // appliquées à ~1 chambre sur 6 pour varier sans surcharger visuellement.
+      // GO/checkPax/separated n'ont de sens que si la chambre a un pax affiché (jamais en maintenance).
+      if (room.pax) {
+        if (i % 6 === 3) { room.go = true; room.checkPax = true; room.separated = `A${(i%8)+1}-${61+(i%5)} A${(i%8)+1}`; }
+        else if (i % 4 === 2) { room.checkPax = true; }
+      }
+      CAL_ROOMS.push(room);
+
+      // Réservation associée — même format que les données vérifiées (nom, dates, tag, corpo, pax).
+      if (status !== 'free' && status !== 'maintenance') {
+        const surname = SURNAMES[i % SURNAMES.length];
+        const first = FIRST_NAMES[i % FIRST_NAMES.length];
+        const dayStart = i % 5;
+        const dayEnd = Math.min(13, dayStart + 3 + (i % 8));
+        const tag = TAGS[i % TAGS.length];
+        const corpo = i % 3 !== 0;
+        const pax2 = i % 5 === 0 ? `+${1 + (i % 2)}` : null;
+        CAL_BOOKINGS.push({
+          room: i, dayStart, dayEnd,
+          name: `${surname} ${first}`,
+          dates: `${15 + dayStart}/09 - ${15 + dayEnd}/09`,
+          tag, corpo, pax: pax2,
+          color: status === 'presence' ? '#088a20' : '#1e2643',
+          locked: status === 'locked'
+        });
+      } else if (status === 'maintenance') {
+        CAL_BOOKINGS.push({ room: i, dayStart: i % 6, dayEnd: Math.min(13, (i % 6) + 2), name: 'Maintenance', dates: `${15 + (i%6)}/09 - ${15 + (i%6) + 2}/09`, red: true });
+      }
+    }
+  })(100);
+
   function renderCalendar() {
     const header = document.getElementById('cal-header-row');
     const body = document.getElementById('cal-body');
