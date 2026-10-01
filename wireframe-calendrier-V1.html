@@ -769,7 +769,7 @@
   }
   .cal-room-card {
     display: flex; align-items: center; gap: 8px; height: 54px;
-    border: 1px solid var(--grey-bd); border-top-left-radius: 16px; border-bottom-left-radius: 16px;
+    border: 1px solid #CCCCCC; border-top-left-radius: 16px; border-bottom-left-radius: 16px;
     padding-right: 8px; background: var(--white);
   }
   .cal-room-status {
@@ -779,14 +779,25 @@
   }
   .cal-room-status svg { width: 16px; height: 16px; }
   .cal-room-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-  .cal-room-line1 { display: flex; align-items: center; gap: 12px; }
-  .cal-room-code { font-size: 14px; font-weight: 600; color: var(--navy); white-space: nowrap; }
+  .cal-room-line1 { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; overflow: hidden; }
+  .cal-room-code { font-size: 14px; font-weight: 600; color: var(--navy); white-space: nowrap; margin-right: 8px; }
   .cal-room-pax {
     font-size: 12px; background: #F6EFE7; color: var(--navy);
     border-radius: 16px; padding: 0 4px;
   }
   .cal-room-type { font-size: 12px; color: #999; }
-  .cal-day-cell { border: 1px solid var(--grey-bd); border-left: none; background: var(--white); }
+  .cal-room-go {
+    font-size: 12px; font-weight: 600; color: #1e2643; background: var(--white);
+    border: 1px solid #1e2643; border-radius: 16px; padding: 0 4px; line-height: 14px;
+  }
+  .cal-room-check { width: 20px; height: 20px; flex-shrink: 0; }
+  .cal-room-separated {
+    display: flex; align-items: center; gap: 2px; font-size: 12px; color: #999;
+    background: var(--white); border: 1px solid #1e2643; border-radius: 16px; padding: 0 4px; line-height: 14px;
+  }
+  .cal-room-separated svg { width: 12px; height: 12px; flex-shrink: 0; }
+  .cal-room-line2 { display: flex; align-items: center; gap: 12px; }
+  .cal-day-cell { border: 1px solid #CCCCCC; border-left: none; background: var(--white); }
   .cal-day-cell.today { background: #FFE699; }
 
   .cal-bookings-layer { position: absolute; top: 0; left: 212px; right: 0; bottom: 0; pointer-events: none; }
@@ -3531,16 +3542,16 @@
     { code:'A1-101',  type:'DX-A1',  pax:'2 pax', status:'occupied' },
     { code:'A1-102',  type:'EC S+',  pax:null,    status:'maintenance' },
     { code:'B2-201',  type:'SUP-B',  pax:'3 pax', status:'occupied' },
-    { code:'C3-301',  type:'DX-C3',  pax:'1 pax', status:'free' },
-    { code:'D4-401',  type:'DX-D4',  pax:'5 pax', status:'free' },
+    { code:'C3-301',  type:'DX-C3',  pax:'1 pax', status:'free', go:true, checkPax:true, separated:'A4-61 A4' },
+    { code:'D4-401',  type:'DX-D4',  pax:'5 pax', status:'free', checkPax:true, separated:'A4-61 A4' },
     { code:'E5-501',  type:'EC S',   pax:'2 pax', status:'occupied' },
-    { code:'F6-601',  type:'EC S',   pax:'4 pax', status:'presence' },
-    { code:'G7-701',  type:'SUP-G',  pax:'3 pax', status:'presence' },
+    { code:'F6-601',  type:'EC S',   pax:'4 pax', status:'presence', checkPax:true },
+    { code:'G7-701',  type:'SUP-G',  pax:'3 pax', status:'presence', checkPax:true },
     { code:'H8-801',  type:'DX-H8',  pax:'1 pax', status:'occupied' },
     { code:'I9-901',  type:'DX-I9',  pax:'6 pax', status:'locked' },
-    { code:'J10-1001',type:'SUP-J',  pax:'2 pax', status:'calendar' },
+    { code:'J10-1001',type:'SUP-J',  pax:'2 pax', status:'calendar', checkPax:true },
     { code:'K11-1101',type:'EC K',   pax:'3 pax', status:'occupied' },
-    { code:'L12-1201',type:'DX-L12', pax:'4 pax', status:'free' }
+    { code:'L12-1201',type:'DX-L12', pax:'4 pax', status:'free', go:true, checkPax:true, separated:'A4-61 A4' }
   ];
   // Couleurs = variables du DS Odyssey (Ody Trident Ψ 2.0), lues via get_variable_defs
   // sur le node Figma à jour — PAS les tokens Trident UI génériques (librairie web
@@ -3586,6 +3597,8 @@
       `<div class="cal-header-cell${d.today ? ' today' : ''}"><div class="dow">${d.dow}</div><div class="dnum">${d.d}</div></div>`
     ).join('');
 
+    const SVG_CHECK_GREEN = '<svg viewBox="0 0 24 24" fill="none" stroke="#088A20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/></svg>';
+    const SVG_SEPARATED = '<svg viewBox="0 0 24 24" fill="none" stroke="#1e2643" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="8" height="10" rx="1"/><rect x="13" y="7" width="8" height="10" rx="1"/></svg>';
     const roomsHtml = CAL_ROOMS.map(r => {
       const statusColor = CAL_STATUS_COLOR[r.status];
       const statusIcon = CAL_STATUS_ICON[r.status] || '';
@@ -3595,9 +3608,14 @@
           <div class="cal-room-info">
             <div class="cal-room-line1">
               <span class="cal-room-code">${r.code}</span>
+              ${r.go ? `<span class="cal-room-go">GO</span>` : ''}
               ${r.pax ? `<span class="cal-room-pax">${r.pax}</span>` : ''}
+              ${r.checkPax ? `<svg class="cal-room-check">${SVG_CHECK_GREEN}</svg>` : ''}
             </div>
-            <span class="cal-room-type">${r.type}</span>
+            <div class="cal-room-line2">
+              <span class="cal-room-type">${r.type}</span>
+              ${r.separated ? `<span class="cal-room-separated">${SVG_SEPARATED}${r.separated}</span>` : ''}
+            </div>
           </div>
         </div>
         ${CAL_DAYS.map(d => `<div class="cal-day-cell${d.today ? ' today' : ''}"></div>`).join('')}
