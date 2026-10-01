@@ -947,6 +947,85 @@
   }
   .cal-rm-btn.lock { background: var(--white); color: #000; border: 1px solid #000; }
   .cal-rm-btn.solid { background: #000; color: var(--white); border: none; }
+  .cal-rm-btn.yellow { background: #FDBE00; color: #000; border: none; }
+
+  /* ══ Sous-modales Lock / Switch / Assign — déclenchées depuis les CTA de la
+     modale chambre principale, fidèles aux nœuds Figma 15748:10611 (Lock),
+     15753:12764 (Switch) et 15744:8216 (Assign). ══ */
+  .cal-rm-back-btn {
+    width: 48px; height: 48px; border-radius: 100px; border: 1px solid #000; background: var(--white);
+    display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; padding: 0;
+  }
+  .cal-rm-back-btn img { width: 24px; height: 24px; }
+  .cal-rm-title.with-back h2 .hl { color: #088a20; }
+  .cal-rm-assign-block {
+    background: #F8F8F8; border-radius: 16px; padding: 12px 20px; display: flex; align-items: center;
+    justify-content: space-between; gap: 16px; width: 100%; box-sizing: border-box; margin-bottom: 8px;
+  }
+  .cal-rm-assign-block p { font-size: 16px; color: #000; max-width: 244px; margin: 0; }
+  .cal-rm-room-card {
+    background: var(--white); border: 1px solid #CCCCCC; border-radius: 16px; display: flex; align-items: center;
+    gap: 8px; height: 54px; padding-right: 8px; flex-shrink: 0; width: 212px; box-sizing: border-box;
+  }
+  .cal-rm-room-card .stripe {
+    width: 24px; height: 54px; background: #088a20; border-radius: 16px 0 0 16px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .cal-rm-room-card .stripe img { width: 16px; height: 16px; }
+  .cal-rm-room-card .info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .cal-rm-room-card .l1 { display: flex; align-items: center; gap: 8px; }
+  .cal-rm-room-card .code { font-size: 14px; font-weight: 600; color: #000; white-space: nowrap; }
+  .cal-rm-room-card .pax { font-size: 12px; background: #F6EFE7; border-radius: 16px; padding: 0 4px; color: #000; }
+  .cal-rm-room-card .check { width: 20px; height: 20px; }
+  .cal-rm-room-card .type { font-size: 12px; color: #333; }
+  .cal-rm-section-label.small-gap { margin-bottom: 8px; }
+  .cal-rm-radio-group { display: flex; gap: 32px; margin-bottom: 24px; }
+  .cal-rm-radio { display: flex; align-items: center; gap: 12px; font-size: 16px; color: #000; cursor: pointer; }
+  .cal-rm-radio input { width: 20px; height: 20px; accent-color: #000; cursor: pointer; }
+  .cal-rm-textarea {
+    width: 100%; min-height: 97px; border: 1px solid #CCCCCC; border-radius: 16px; padding: 10px 24px;
+    font-size: 14px; color: #333; font-family: inherit; resize: vertical; box-sizing: border-box; margin-bottom: 24px;
+  }
+  .cal-rm-textarea::placeholder { color: #333; }
+  .cal-rm-stay-condensed { background: #F6EFE7; border-radius: 16px; padding: 16px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+  .cal-rm-swap-label { font-size: 16px; color: #000; margin: 0 0 12px; }
+  .cal-rm-swap-arrow { display: flex; justify-content: center; margin: 4px 0; }
+  .cal-rm-swap-arrow img { width: 24px; height: 16px; }
+  .cal-rm-swap-form {
+    background: #F8F8F8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column;
+    gap: 20px; width: 100%; box-sizing: border-box; margin-bottom: 16px;
+  }
+  .cal-rm-field-row { display: flex; gap: 20px; }
+  .cal-rm-field-row.end { align-items: flex-end; }
+  .cal-rm-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+  .cal-rm-field label { font-size: 16px; font-weight: 600; color: #000; text-align: center; }
+  .cal-rm-field-display {
+    height: 48px; border: 1px solid #666; border-radius: 100px; background: var(--white);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 21px;
+    font-size: 16px; color: #333; box-sizing: border-box;
+  }
+  .cal-rm-field-display img { width: 12px; height: auto; flex-shrink: 0; }
+  .cal-rm-field-row-inline { display: flex; align-items: flex-end; gap: 12px; }
+  .cal-rm-field-row-inline .lbl { font-size: 16px; color: #000; width: 40px; flex-shrink: 0; }
+  .cal-rm-field-row-inline .cal-rm-field-display { flex-shrink: 0; width: 122px; }
+  .cal-rm-field-row-inline .cal-rm-field-display.date { width: auto; flex: 1; }
+  .cal-rm-search-field {
+    flex: 1; display: flex; align-items: center; gap: 4px; height: 48px; border: 1px solid #000;
+    border-radius: 100px; padding: 6px 6px 6px 12px; box-sizing: border-box;
+  }
+  .cal-rm-search-field img { width: 24px; height: 24px; flex-shrink: 0; }
+  .cal-rm-search-field span { font-size: 16px; color: #000; }
+  .cal-rm-search-row { display: flex; align-items: center; gap: 24px; margin-bottom: 16px; }
+  .cal-rm-search-row > span { font-size: 16px; color: #000; white-space: nowrap; }
+  .cal-rm-gm-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .cal-rm-gm-row {
+    display: flex; align-items: center; border: 1px solid #CCCCCC; border-radius: 16px; min-height: 80px;
+    padding: 10px 16px; gap: 12px;
+  }
+  .cal-rm-gm-name { width: 140px; font-size: 16px; color: #000; flex-shrink: 0; }
+  .cal-rm-gm-name b { font-weight: 600; }
+  .cal-rm-gm-badge-wrap { width: 84px; display: flex; justify-content: center; flex-shrink: 0; }
+  .cal-rm-gm-dates { font-size: 13px; color: #000; line-height: 18px; white-space: nowrap; flex-shrink: 0; margin-left: auto; }
   </style>
 </head>
 <body>
@@ -4006,6 +4085,155 @@
         <div><div class="cal-rm-char-field-label">Accessible</div><div class="cal-rm-char-field-value">${r.accessible}</div></div>
       </div>`;
   }
+  // Mini room card réutilisé dans les sous-modales Lock/Switch (node Figma "Room card",
+  // ex: 15745:10410) — liseré vert + icône people + code + badge pax + check + type.
+  function renderRoomCardMini(r) {
+    return `
+      <div class="cal-rm-room-card">
+        <div class="stripe"><img src="assets-calendrier/icon-people.svg" alt="" /></div>
+        <div class="info">
+          <div class="l1">
+            <span class="code">${r.code}</span>
+            ${r.pax ? `<span class="pax">${r.pax}</span>` : ''}
+            <img class="check" src="assets-calendrier/icon-check.svg" alt="" />
+          </div>
+          <span class="type">${r.type}</span>
+        </div>
+      </div>`;
+  }
+  // Sous-modale LOCK — node Figma 15748:10611 ("Lock a EC-S-01 room").
+  function renderLockModalContent(roomIdx) {
+    const r = CAL_ROOMS[roomIdx];
+    return `
+      <div class="cal-rm-title with-back">
+        <button class="cal-rm-back-btn" id="cal-rm-back-btn"><img src="assets-calendrier/icon-back-arrow.svg" alt="" /></button>
+        <h2>Lock a <span class="hl">${r.code}</span> room</h2>
+      </div>
+      <hr class="cal-rm-divider" />
+      <div class="cal-rm-assign-block">
+        <p>You are about to assign this room for :</p>
+        ${renderRoomCardMini(r)}
+      </div>
+      <div class="cal-rm-section-label small-gap">LOCK DURATION</div>
+      <div class="cal-rm-radio-group">
+        <label class="cal-rm-radio"><input type="radio" name="lock-duration" value="departure" />Until departure</label>
+        <label class="cal-rm-radio"><input type="radio" name="lock-duration" value="24h" />24 hours</label>
+        <label class="cal-rm-radio"><input type="radio" name="lock-duration" value="1week" />1 week</label>
+      </div>
+      <div class="cal-rm-section-label small-gap">REASON FOR LOCKING</div>
+      <textarea class="cal-rm-textarea" placeholder="ex : specific guest request, connecting room, Vip guest ..."></textarea>
+      <div style="flex:1 0 0;min-height:0;"></div>
+      <hr class="cal-rm-divider" />
+      <div class="cal-rm-cta">
+        <button class="cal-rm-btn yellow" id="cal-rm-btn-activate-lock">Activate lock</button>
+      </div>`;
+  }
+  // Sous-modale SWITCH — node Figma 15753:12764 ("Switch room").
+  function renderSwitchModalContent(roomIdx, booking) {
+    const r = CAL_ROOMS[roomIdx];
+    const fullName = `${booking.travelers[0].familyName.toUpperCase()} ${booking.travelers[0].firstName}`;
+    return `
+      <div class="cal-rm-title with-back">
+        <button class="cal-rm-back-btn" id="cal-rm-back-btn"><img src="assets-calendrier/icon-compare-arrows.svg" alt="" /></button>
+        <h2>Switch room</h2>
+      </div>
+      <hr class="cal-rm-divider" />
+      <p class="cal-rm-swap-label">The room switch will take place for this reservation:</p>
+      <div class="cal-rm-stay-condensed">
+        <div class="cal-rm-stay-name">${fullName}</div>
+        <div class="cal-rm-stay-columns">
+          <div class="cal-rm-stay-col">
+            <div class="cal-rm-stay-field-label"><img src="assets-calendrier/icon-transport-arrival.svg" alt="" />Arrival</div>
+            <div class="cal-rm-stay-field-value">${formatModalDate(booking.arrival)}</div>
+            <div class="cal-rm-stay-field-label">Guest</div>
+            <div class="cal-rm-stay-field-value">${booking.guestCount} pax</div>
+          </div>
+          <div class="cal-rm-stay-col">
+            <div class="cal-rm-stay-field-label"><img src="assets-calendrier/icon-transport-departure.svg" alt="" />Departure</div>
+            <div class="cal-rm-stay-field-value">${formatModalDate(booking.departure)}</div>
+            <div class="cal-rm-stay-field-label">Type</div>
+            ${booking.tag ? `<span class="cal-rm-loyalty-badge">${booking.tag}</span>` : '<div class="cal-rm-stay-field-value">—</div>'}
+          </div>
+        </div>
+      </div>
+      <p class="cal-rm-swap-label">Swap the assignments of these two rooms :</p>
+      ${renderRoomCardMini(r)}
+      <div class="cal-rm-swap-arrow"><img src="assets-calendrier/icon-swap-down.svg" alt="" /></div>
+      <div class="cal-rm-swap-form">
+        <div class="cal-rm-field-row">
+          <div class="cal-rm-field">
+            <label>Category</label>
+            <div class="cal-rm-field-display">Select<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+          </div>
+          <div class="cal-rm-field">
+            <label>Occupation</label>
+            <div class="cal-rm-field-display">Select<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+          </div>
+        </div>
+        <div class="cal-rm-field">
+          <label>Room</label>
+          <div class="cal-rm-field-display">Select room<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+        </div>
+        <div class="cal-rm-field-row-inline">
+          <span class="lbl">From</span>
+          <div class="cal-rm-field-display date">JJ / MM / AA</div>
+          <div class="cal-rm-field-display">Hour<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+          <div class="cal-rm-field-display">am<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+        </div>
+        <div class="cal-rm-field-row-inline">
+          <span class="lbl">To</span>
+          <div class="cal-rm-field-display date">JJ / MM / AA</div>
+          <div class="cal-rm-field-display">Hour<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+          <div class="cal-rm-field-display">am<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+        </div>
+      </div>
+      <div style="flex:1 0 0;min-height:0;"></div>
+      <div class="cal-rm-cta">
+        <button class="cal-rm-btn lock" id="cal-rm-btn-switch-back">Back</button>
+        <button class="cal-rm-btn yellow" id="cal-rm-btn-activate-switch">Activate lock</button>
+      </div>`;
+  }
+  // Liste de GM candidats pour la sous-modale ASSIGN — même pattern de données
+  // (nom/prénom/tag loyalty/dates) que CAL_BOOKINGS, réutilisé à l'identique.
+  const CAL_ASSIGN_CANDIDATES = [
+    { familyName:'MC DOE', firstName:'John',  tag:'Platinum', dates:'From 03/03/2024\nTo 13/03/2024' },
+    { familyName:'MC DOE', firstName:'Jim',   tag:'Platinum', dates:'From 03/03/2024\nTo 13/03/2024' },
+    { familyName:'MC DOE', firstName:'Jane',  tag:'Gold',     dates:'From 01/04/2024\nTo 10/04/2024' },
+    { familyName:'MC DOE', firstName:'Emily', tag:'Gold',     dates:'From 15/05/2024\nTo 25/05/2024' }
+  ];
+  // Sous-modale ASSIGN — node Figma 15744:8216 ("Assign EC-S-01 to a GM").
+  function renderAssignModalContent(roomIdx) {
+    const r = CAL_ROOMS[roomIdx];
+    return `
+      <div class="cal-rm-title with-back">
+        <button class="cal-rm-back-btn" id="cal-rm-back-btn"><img src="assets-calendrier/icon-assign-back-arrow.svg" alt="" /></button>
+        <h2>Assign <span class="hl">${r.code}</span> to a GM</h2>
+      </div>
+      <hr class="cal-rm-divider" />
+      <div class="cal-rm-assign-block">
+        <p>You are about to assign this room for :</p>
+        ${renderRoomCardMini(r)}
+      </div>
+      <div class="cal-rm-search-row">
+        <span>Search a GM</span>
+        <div class="cal-rm-search-field"><img src="assets-calendrier/icon-search.svg" alt="" /><span>MC DOE</span></div>
+      </div>
+      <div class="cal-rm-gm-list">
+        ${CAL_ASSIGN_CANDIDATES.map((g, i) => `
+          <label class="cal-rm-gm-row">
+            <input type="radio" name="assign-gm" value="${i}" style="width:20px;height:20px;accent-color:#000;flex-shrink:0;margin-right:4px;" />
+            <span class="cal-rm-gm-name"><b>${g.familyName}</b><br>${g.firstName}</span>
+            <span class="cal-rm-gm-badge-wrap">${g.tag ? `<span class="cal-rm-loyalty-badge" style="background:${g.tag === 'Platinum' ? '#1e2643' : '#c8914f'};">${g.tag}</span>` : ''}</span>
+            <span class="cal-rm-gm-dates">${g.dates.split('\n').map(l => `<div>${l}</div>`).join('')}</span>
+          </label>`).join('')}
+      </div>
+      <div style="flex:1 0 0;min-height:0;"></div>
+      <hr class="cal-rm-divider" />
+      <div class="cal-rm-cta">
+        <button class="cal-rm-btn lock" id="cal-rm-btn-assign-cancel">Cancel</button>
+        <button class="cal-rm-btn yellow" id="cal-rm-btn-confirm-assign">Assign</button>
+      </div>`;
+  }
   function renderRoomModalContent(roomIdx, booking) {
     const r = CAL_ROOMS[roomIdx];
     const titleHtml = `
@@ -4079,10 +4307,31 @@
     if (booking && booking.red) booking = undefined;
     document.getElementById('cal-room-modal').innerHTML = renderRoomModalContent(roomIdx, booking);
     document.getElementById('cal-room-modal-overlay').classList.add('open');
-    // Actions différées — câblage métier à venir (Lock/Assign/Switch hors scope V1 modale).
-    document.getElementById('cal-rm-btn-lock')?.addEventListener('click', () => alert('Action à câbler — Lock'));
-    document.getElementById('cal-rm-btn-switch')?.addEventListener('click', () => alert('Action à câbler — Switch'));
-    document.getElementById('cal-rm-btn-assign')?.addEventListener('click', () => alert('Action à câbler — Assign'));
+
+    // Les CTA Lock/Switch/Assign ouvrent la sous-modale correspondante (nœuds Figma
+    // 15748:10611 / 15753:12764 / 15744:8216) ; le bouton retour de chaque sous-modale
+    // revient à la modale principale chambre — câblage métier (persistance réelle des
+    // actions) explicitement différé, comme demandé.
+    document.getElementById('cal-rm-btn-lock')?.addEventListener('click', () => {
+      document.getElementById('cal-room-modal').innerHTML = renderLockModalContent(roomIdx);
+      wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
+      document.getElementById('cal-rm-btn-activate-lock')?.addEventListener('click', () => alert('Action à câbler — Activate lock'));
+    });
+    document.getElementById('cal-rm-btn-switch')?.addEventListener('click', () => {
+      document.getElementById('cal-room-modal').innerHTML = renderSwitchModalContent(roomIdx, booking);
+      wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
+      document.getElementById('cal-rm-btn-switch-back')?.addEventListener('click', () => openRoomModal(roomIdx, bookingIdx));
+      document.getElementById('cal-rm-btn-activate-switch')?.addEventListener('click', () => alert('Action à câbler — Activate lock (switch)'));
+    });
+    document.getElementById('cal-rm-btn-assign')?.addEventListener('click', () => {
+      document.getElementById('cal-room-modal').innerHTML = renderAssignModalContent(roomIdx);
+      wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
+      document.getElementById('cal-rm-btn-assign-cancel')?.addEventListener('click', () => openRoomModal(roomIdx, bookingIdx));
+      document.getElementById('cal-rm-btn-confirm-assign')?.addEventListener('click', () => alert('Action à câbler — Assign'));
+    });
+  }
+  function wireBackButton(onBack) {
+    document.getElementById('cal-rm-back-btn')?.addEventListener('click', onBack);
   }
   function closeRoomModal() {
     document.getElementById('cal-room-modal-overlay').classList.remove('open');
