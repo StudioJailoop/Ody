@@ -719,9 +719,66 @@
   .cal-select {
     height: 48px; border: 1px solid #666; border-radius: 100px;
     background: var(--white); display: flex; align-items: center; justify-content: space-between;
-    padding: 0 21px; font-size: 16px; color: #333; cursor: pointer;
+    padding: 0 21px; font-size: 16px; color: #333; cursor: pointer; position: relative;
   }
-  .cal-select svg { width: 24px; height: 24px; stroke: #333; flex-shrink: 0; }
+  .cal-select svg { width: 24px; height: 24px; stroke: #333; flex-shrink: 0; transition: transform .15s; }
+  .cal-select.open svg { transform: rotate(180deg); }
+  .cal-field { position: relative; }
+
+  /* ── Filtre Room/States — CheckboxSelect (structure Trident UI : trigger + panel groupé) ── */
+  .cal-filter-panel {
+    display: none; position: absolute; top: calc(100% + 6px); left: 0; min-width: 260px;
+    background: var(--white); border: 1px solid var(--grey-bd); border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12); z-index: 50; padding: 8px 0; max-height: 340px; overflow-y: auto;
+  }
+  .cal-filter-panel.open { display: block; }
+  .cal-filter-group-label {
+    font-size: 11px; font-weight: 700; color: var(--grey-txt); text-transform: uppercase;
+    letter-spacing: .4px; padding: 8px 16px 4px;
+  }
+  .cal-filter-option {
+    display: flex; align-items: center; gap: 10px; padding: 7px 16px; cursor: pointer; font-size: 14px; color: var(--navy);
+  }
+  .cal-filter-option:hover { background: var(--grey-bg); }
+  .cal-filter-option input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--navy); cursor: pointer; flex-shrink: 0; }
+  .cal-filter-option .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .cal-filter-option .count { margin-left: auto; color: var(--grey-txt); font-size: 13px; }
+  .cal-filter-divider { height: 1px; background: var(--grey-bd); margin: 6px 0; }
+
+  /* ── Datepicker popover (clic sur la zone de dates) ── */
+  .cal-datepicker-pop {
+    display: none; position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+    background: var(--white); border: 1px solid var(--grey-bd); border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(0,0,0,.16); z-index: 60; padding: 16px; width: 280px;
+  }
+  .cal-datepicker-pop.open { display: block; }
+  .cal-dp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .cal-dp-header span { font-size: 14px; font-weight: 700; color: var(--navy); }
+  .cal-dp-nav { background: none; border: none; font-size: 18px; color: var(--navy); cursor: pointer; width: 28px; height: 28px; border-radius: 50%; }
+  .cal-dp-nav:hover { background: var(--grey-bg); }
+  .cal-dp-dow { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 4px; }
+  .cal-dp-dow span { text-align: center; font-size: 11px; color: var(--grey-txt); }
+  .cal-dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-dp-day {
+    height: 32px; display: flex; align-items: center; justify-content: center; font-size: 13px;
+    color: var(--navy); border-radius: 8px; cursor: pointer;
+  }
+  .cal-dp-day:hover { background: var(--grey-bg); }
+  .cal-dp-day.selected { background: #000; color: var(--white); font-weight: 700; }
+  .cal-dp-day.today:not(.selected) { background: #FFE699; font-weight: 600; }
+  .cal-dp-day.other-month { color: #CCC; }
+
+  /* ── Plein écran : masque header/sidebar/barre filtres pour maximiser la grille,
+     reste dans le canevas fixe 1440x1024 (convention Loopcraft) ── */
+  body.cal-fullscreen .header { display: none; }
+  body.cal-fullscreen .layout { top: 0; height: 1024px; }
+  body.cal-fullscreen .sidebar { display: none; }
+  body.cal-fullscreen #toggle-btn { display: none; }
+  body.cal-fullscreen #back-dashboard-btn,
+  body.cal-fullscreen #briefs-nav-btn { display: none !important; }
+  body.cal-fullscreen .main { border-top-left-radius: 0; }
+  body.cal-fullscreen #cal-btn-expand { display: none; }
+  body.cal-fullscreen #cal-btn-compact { display: flex !important; }
   .cal-download-btn {
     height: 48px; border: none; border-radius: 100px; background: var(--yellow);
     color: #000; font-size: 16px; font-weight: 600; padding: 0 20px;
@@ -730,7 +787,8 @@
   .cal-download-btn svg { width: 18px; height: 18px; }
 
   .cal-nav-row { display: flex; align-items: center; justify-content: space-between; height: 72px; }
-  .cal-month-nav { display: flex; align-items: center; gap: 20px; }
+  .cal-month-nav { display: flex; align-items: center; gap: 20px; position: relative; }
+  .cal-month-label { cursor: pointer; }
   .cal-nav-arrow {
     width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--navy);
     background: var(--white); display: flex; align-items: center; justify-content: center;
@@ -755,7 +813,10 @@
   .cal-header-row {
     display: grid; grid-template-columns: 212px repeat(14, 1fr);
     margin-bottom: 8px;
+    position: sticky; top: 0; z-index: 20; background: var(--grey-bg);
+    transition: box-shadow .15s;
   }
+  .cal-header-row.is-stuck { box-shadow: 0 2px 8px rgba(0,0,0,.08); padding-top: 8px; margin-top: -8px; }
   .cal-header-cell { text-align: center; }
   .cal-header-cell .dow { font-size: 12px; color: #000; line-height: 14px; border-radius: 4px; }
   .cal-header-cell .dnum { font-size: 14px; color: #000; margin-top: 2px; line-height: 20px; border-radius: 4px; }
@@ -1080,17 +1141,19 @@
         <div class="cal-filters-row">
           <div class="cal-field">
             <label>Room</label>
-            <div class="cal-select">
-              <span>Select</span>
+            <div class="cal-select" data-kind="type">
+              <span>All (100)</span>
               <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
             </div>
+            <div class="cal-filter-panel" id="cal-room-panel"></div>
           </div>
           <div class="cal-field">
             <label>States</label>
-            <div class="cal-select">
-              <span>Select</span>
+            <div class="cal-select" data-kind="status">
+              <span>All (100)</span>
               <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
             </div>
+            <div class="cal-filter-panel" id="cal-states-panel"></div>
           </div>
           <button class="cal-download-btn">
             Download
@@ -1101,22 +1164,33 @@
         <!-- Navigation calendrier -->
         <div class="cal-nav-row">
           <div class="cal-month-nav">
-            <div class="cal-nav-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></div>
-            <div class="cal-month-label">
+            <div class="cal-nav-arrow" id="cal-nav-prev"><svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></div>
+            <div class="cal-month-label" id="cal-month-label" role="button" tabindex="0" title="Choisir une date de début">
               <span class="m1">September 2025</span>
               <span class="m2">Mon 15 - Sun 28</span>
             </div>
-            <div class="cal-nav-arrow next"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
+            <div class="cal-nav-arrow next" id="cal-nav-next"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
+
+            <!-- Popover datepicker -->
+            <div class="cal-datepicker-pop" id="cal-datepicker-pop">
+              <div class="cal-dp-header">
+                <button class="cal-dp-nav" id="cal-dp-prev">‹</button>
+                <span id="cal-dp-month-label"></span>
+                <button class="cal-dp-nav" id="cal-dp-next">›</button>
+              </div>
+              <div class="cal-dp-dow" id="cal-dp-dow"></div>
+              <div class="cal-dp-grid" id="cal-dp-grid"></div>
+            </div>
           </div>
-          <div class="cal-view-tabs">
-            <button class="cal-view-tab active">2 week</button>
-            <button class="cal-view-tab">Week</button>
-            <button class="cal-view-tab">Month</button>
-            <button class="cal-view-tab">Day</button>
+          <div class="cal-view-tabs" id="cal-view-tabs">
+            <button class="cal-view-tab active" data-view="14">2 week</button>
+            <button class="cal-view-tab" data-view="7">Week</button>
+            <button class="cal-view-tab" data-view="30">Month</button>
+            <button class="cal-view-tab" data-view="1">Day</button>
           </div>
           <div class="cal-nav-actions">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v18M15 3v18"/></svg>
+            <img id="cal-btn-expand" src="assets-calendrier/icon-expand.svg" width="30" height="30" alt="Plein écran" style="cursor:pointer;" />
+            <img id="cal-btn-compact" src="assets-calendrier/icon-reduce.svg" width="30" height="30" alt="Réduire" style="cursor:pointer;display:none;" />
           </div>
         </div>
       </div>
@@ -3532,11 +3606,40 @@
   const scrollRoot = document.querySelector('.content');
 
   // ══ CALENDRIER — génération de la grille planning ══════════════
-  const CAL_DAYS = [
-    {dow:'Lun', d:15}, {dow:'Mar', d:16}, {dow:'Mer', d:17}, {dow:'Jeu', d:18}, {dow:'Ven', d:19},
-    {dow:'Sam', d:20, today:true}, {dow:'Dim', d:21},
-    {dow:'Lun', d:22}, {dow:'Mar', d:23}, {dow:'Mer', d:24}, {dow:'Jeu', d:25}, {dow:'Ven', d:26}, {dow:'Sam', d:27}, {dow:'Dim', d:28}
-  ];
+  // Fenêtre glissante sur un jeu de données fixe : CAL_ANCHOR = date de début
+  // affichée, CAL_VIEW_DAYS = nb de jours visibles selon l'onglet (2 week/Week/Month).
+  // Les réservations (CAL_BOOKINGS) ont de vraies dates ISO fixes sur toute la
+  // période couverte (sept-oct 2025) — naviguer ne régénère jamais les données,
+  // seule la fenêtre visible glisse dessus (cf. décision validée 2026-10-01).
+  const DOW_FR = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  // Formatage en LOCAL (pas toISOString, qui convertit en UTC et peut décaler d'un jour
+  // selon le fuseau horaire du navigateur).
+  function isoDate(d) {
+    const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  function sameDay(a, b) { return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+  function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate()+n); return r; }
+
+  // CAL_DATA_ORIGIN = jour 0 des offsets dayStart/dayEnd de CAL_BOOKINGS (jeu de données
+  // fixe, jamais régénéré). CAL_ANCHOR = date de début de la fenêtre VISIBLE, pilotée par
+  // la navigation/le datepicker — son décalage par rapport à l'origine détermine quelle
+  // tranche du jeu de données fixe apparaît et comment les réservations se découpent.
+  const CAL_DATA_ORIGIN = new Date(2025, 8, 15);
+  let CAL_ANCHOR = new Date(2025, 8, 15); // 15 sept 2025 — point de départ du wireframe
+  let CAL_VIEW_DAYS = 14;
+  const CAL_TODAY = new Date(2025, 8, 20); // "aujourd'hui" simulé pour ce proto, cohérent avec le Figma (Sam 20)
+  function windowOffsetDays() { return Math.round((CAL_ANCHOR - CAL_DATA_ORIGIN) / 86400000); }
+
+  function buildCalDays() {
+    const days = [];
+    for (let i = 0; i < CAL_VIEW_DAYS; i++) {
+      const d = addDays(CAL_ANCHOR, i);
+      days.push({ date: d, dow: DOW_FR[d.getDay()], d: d.getDate(), today: sameDay(d, CAL_TODAY) });
+    }
+    return days;
+  }
+  let CAL_DAYS = buildCalDays();
   const CAL_ROOMS = [
     { code:'A1-101',  type:'DX-A1',  pax:'2 pax', status:'occupied' },
     { code:'A1-102',  type:'EC S+',  pax:null,    status:'maintenance' },
@@ -3647,10 +3750,37 @@
     }
   })(100);
 
+  // Filtres actifs — null/vide = pas de filtre (tout affiché). Alimentés par les
+  // dropdowns Room/States ; recalculés par updateCalFilterCounts() au chargement.
+  let CAL_STATUS_FILTER = new Set(); // sous-ensemble de statuts cochés, vide = tous
+  let CAL_TYPE_FILTER = new Set();   // sous-ensemble de familles de type cochées, vide = tous
+
+  function roomTypeFamily(type) {
+    // DX-A1 -> DX, SUP-B -> SUP, EC S+ / EC S / EC K restent tels quels (déjà des familles).
+    if (type.startsWith('DX')) return 'DX';
+    if (type.startsWith('SUP')) return 'SUP';
+    return type;
+  }
+  function roomPasses(r) {
+    if (CAL_STATUS_FILTER.size && !CAL_STATUS_FILTER.has(r.status)) return false;
+    if (CAL_TYPE_FILTER.size && !CAL_TYPE_FILTER.has(roomTypeFamily(r.type))) return false;
+    return true;
+  }
+
   function renderCalendar() {
     const header = document.getElementById('cal-header-row');
     const body = document.getElementById('cal-body');
     if (!header || !body) return;
+
+    CAL_DAYS = buildCalDays();
+    const monthLabel1 = document.querySelector('.cal-month-label .m1');
+    const monthLabel2 = document.querySelector('.cal-month-label .m2');
+    if (monthLabel1 && monthLabel2) {
+      const last = CAL_DAYS[CAL_DAYS.length - 1].date;
+      const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      monthLabel1.textContent = `${MONTHS_EN[CAL_ANCHOR.getMonth()]} ${CAL_ANCHOR.getFullYear()}`;
+      monthLabel2.textContent = `${CAL_DAYS[0].dow} ${CAL_DAYS[0].d} - ${CAL_DAYS[CAL_DAYS.length-1].dow} ${last.getDate()}`;
+    }
 
     header.innerHTML = '<div></div>' + CAL_DAYS.map(d =>
       `<div class="cal-header-cell${d.today ? ' today' : ''}"><div class="dow">${d.dow}</div><div class="dnum">${d.d}</div></div>`
@@ -3659,7 +3789,14 @@
     // Icônes = assets SVG réels téléchargés depuis Figma, jamais redessinées à la main.
     const IMG_CHECK_GREEN = '<img src="assets-calendrier/icon-check.svg" width="20" height="20" alt="" />';
     const IMG_SEPARATED = '<img src="assets-calendrier/icon-separated-room.svg" width="12" height="12" alt="" />';
-    const roomsHtml = CAL_ROOMS.map(r => {
+
+    // visibleRoomIndex[i] = position (ligne) de la chambre i dans la liste filtrée,
+    // ou -1 si masquée par les filtres — sert à repositionner les réservations.
+    const visibleRoomIndex = new Array(CAL_ROOMS.length).fill(-1);
+    let visibleRow = 0;
+    const roomsHtml = CAL_ROOMS.map((r, i) => {
+      if (!roomPasses(r)) return '';
+      visibleRoomIndex[i] = visibleRow++;
       const statusColor = CAL_STATUS_COLOR[r.status];
       const statusIcon = CAL_STATUS_ICON[r.status] || '';
       return `<div class="cal-room-row">
@@ -3684,10 +3821,22 @@
 
     const rowH = 54;
     const dayW = 100 / CAL_DAYS.length;
+    // Décalage entre la fenêtre visible et l'origine fixe des données : les bookings
+    // dont [dayStart,dayEnd] (absolus, origine CAL_DATA_ORIGIN) tombent hors de la
+    // fenêtre visible [offset, offset+CAL_VIEW_DAYS) sont exclus ou découpés (clip).
+    const offset = windowOffsetDays();
     const bookingsHtml = CAL_BOOKINGS.map(b => {
-      const daySpan = b.dayEnd - b.dayStart + 1;
-      const top = b.room * rowH + 4;
-      const left = `calc(${b.dayStart * dayW}% + 2px)`;
+      const row = visibleRoomIndex[b.room];
+      if (row === -1) return ''; // chambre masquée par un filtre
+      const absStart = b.dayStart, absEnd = b.dayEnd;
+      const visStart = absStart - offset, visEnd = absEnd - offset;
+      // Hors fenêtre visible entièrement → ne pas rendre.
+      if (visEnd < 0 || visStart > CAL_VIEW_DAYS - 1) return '';
+      const clippedStart = Math.max(0, visStart);
+      const clippedEnd = Math.min(CAL_VIEW_DAYS - 1, visEnd);
+      const daySpan = clippedEnd - clippedStart + 1;
+      const top = row * rowH + 4;
+      const left = `calc(${clippedStart * dayW}% + 2px)`;
       const width = `calc(${daySpan * dayW}% - 4px)`;
       const bg = b.red ? '#bf2f17' : (b.color || '#1e2643');
       const color = b.dark ? '#000' : '#fff';
@@ -3710,10 +3859,192 @@
     // donc son top:0 correspond exactement au haut de la 1ère ligne chambre.
     body.innerHTML = roomsHtml + `<div class="cal-bookings-layer" id="cal-bookings-layer">${bookingsHtml}</div>`;
 
-    const bodyH = CAL_ROOMS.length * rowH;
-    body.style.height = bodyH + 'px';
+    body.style.height = (visibleRow * rowH) + 'px';
   }
   renderCalendar();
+
+  // ══ Barre de filtres Room/States — dropdowns CheckboxSelect (structure Trident UI) ══
+  function buildFilterOptions() {
+    const statusCounts = {}, typeCounts = {};
+    CAL_ROOMS.forEach(r => {
+      statusCounts[r.status] = (statusCounts[r.status] || 0) + 1;
+      const fam = roomTypeFamily(r.type);
+      typeCounts[fam] = (typeCounts[fam] || 0) + 1;
+    });
+    const STATUS_LABELS = { occupied:'Occupied', presence:'GM presence', free:'Free', locked:'Locked', maintenance:'Maintenance', calendar:'Reservation reminder' };
+    const statesPanel = document.getElementById('cal-states-panel');
+    const roomPanel = document.getElementById('cal-room-panel');
+    if (statesPanel) {
+      statesPanel.innerHTML = `<div class="cal-filter-group-label">STATUS</div>` +
+        Object.keys(statusCounts).sort().map(st => `
+          <label class="cal-filter-option">
+            <input type="checkbox" data-filter="status" value="${st}">
+            <span class="dot" style="background:${CAL_STATUS_COLOR[st] || '#CCC'};"></span>
+            ${STATUS_LABELS[st] || st}
+            <span class="count">${statusCounts[st]}</span>
+          </label>`).join('');
+    }
+    if (roomPanel) {
+      roomPanel.innerHTML = `<div class="cal-filter-group-label">ROOM TYPE</div>` +
+        Object.keys(typeCounts).sort().map(t => `
+          <label class="cal-filter-option">
+            <input type="checkbox" data-filter="type" value="${t}">
+            ${t}
+            <span class="count">${typeCounts[t]}</span>
+          </label>`).join('');
+    }
+  }
+  buildFilterOptions();
+
+  function updateFilterTriggerLabel(kind) {
+    const trigger = document.querySelector(`.cal-select[data-kind="${kind}"] span`);
+    const set = kind === 'status' ? CAL_STATUS_FILTER : CAL_TYPE_FILTER;
+    const total = CAL_ROOMS.length;
+    if (!set.size) { trigger.textContent = `All (${total})`; return; }
+    trigger.textContent = `${set.size} selected`;
+  }
+  updateFilterTriggerLabel('status');
+  updateFilterTriggerLabel('type');
+
+  function toggleFilterPanel(kind, forceClose) {
+    const panelId = kind === 'status' ? 'cal-states-panel' : 'cal-room-panel';
+    const panel = document.getElementById(panelId);
+    const trigger = document.querySelector(`.cal-select[data-kind="${kind}"]`);
+    const isOpen = panel.classList.contains('open');
+    // Fermer l'autre panel pour n'en garder qu'un ouvert à la fois.
+    ['cal-states-panel','cal-room-panel'].forEach(id => {
+      if (id !== panelId) {
+        document.getElementById(id).classList.remove('open');
+        document.querySelectorAll('.cal-select').forEach(s => s.classList.remove('open'));
+      }
+    });
+    const open = forceClose ? false : !isOpen;
+    panel.classList.toggle('open', open);
+    trigger.classList.toggle('open', open);
+  }
+  document.querySelectorAll('.cal-select').forEach(trigger => {
+    trigger.addEventListener('click', e => {
+      e.stopPropagation();
+      toggleFilterPanel(trigger.dataset.kind);
+    });
+  });
+  document.querySelectorAll('.cal-filter-panel').forEach(panel => {
+    panel.addEventListener('click', e => e.stopPropagation());
+    panel.addEventListener('change', e => {
+      const input = e.target;
+      if (input.tagName !== 'INPUT') return;
+      const kind = input.dataset.filter;
+      const set = kind === 'status' ? CAL_STATUS_FILTER : CAL_TYPE_FILTER;
+      if (input.checked) set.add(input.value); else set.delete(input.value);
+      updateFilterTriggerLabel(kind);
+      renderCalendar();
+    });
+  });
+
+  // ══ Navigation calendrier : flèches prev/next + tabs de vue ══════════════
+  document.getElementById('cal-nav-prev').addEventListener('click', () => {
+    CAL_ANCHOR = addDays(CAL_ANCHOR, -CAL_VIEW_DAYS);
+    renderCalendar();
+  });
+  document.getElementById('cal-nav-next').addEventListener('click', () => {
+    CAL_ANCHOR = addDays(CAL_ANCHOR, CAL_VIEW_DAYS);
+    renderCalendar();
+  });
+  document.querySelectorAll('.cal-view-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.cal-view-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      CAL_VIEW_DAYS = parseInt(tab.dataset.view, 10);
+      renderCalendar();
+    });
+  });
+
+  // ══ Datepicker popover — choisir la date de début de la fenêtre visible ══════
+  let dpViewMonth = new Date(CAL_ANCHOR.getFullYear(), CAL_ANCHOR.getMonth(), 1);
+  const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  function renderDatepicker() {
+    const label = document.getElementById('cal-dp-month-label');
+    const dowRow = document.getElementById('cal-dp-dow');
+    const grid = document.getElementById('cal-dp-grid');
+    label.textContent = `${MONTHS_EN[dpViewMonth.getMonth()]} ${dpViewMonth.getFullYear()}`;
+    dowRow.innerHTML = ['S','M','T','W','T','F','S'].map(d => `<span>${d}</span>`).join('');
+    const firstOfMonth = new Date(dpViewMonth.getFullYear(), dpViewMonth.getMonth(), 1);
+    const startOffset = firstOfMonth.getDay();
+    const gridStart = addDays(firstOfMonth, -startOffset);
+    let html = '';
+    for (let i = 0; i < 42; i++) {
+      const d = addDays(gridStart, i);
+      const inMonth = d.getMonth() === dpViewMonth.getMonth();
+      const isSelected = sameDay(d, CAL_ANCHOR);
+      const isToday = sameDay(d, CAL_TODAY);
+      html += `<div class="cal-dp-day${inMonth ? '' : ' other-month'}${isSelected ? ' selected' : ''}${isToday ? ' today' : ''}" data-date="${isoDate(d)}">${d.getDate()}</div>`;
+    }
+    grid.innerHTML = html;
+  }
+  document.getElementById('cal-dp-prev').addEventListener('click', e => {
+    e.stopPropagation();
+    dpViewMonth = new Date(dpViewMonth.getFullYear(), dpViewMonth.getMonth() - 1, 1);
+    renderDatepicker();
+  });
+  document.getElementById('cal-dp-next').addEventListener('click', e => {
+    e.stopPropagation();
+    dpViewMonth = new Date(dpViewMonth.getFullYear(), dpViewMonth.getMonth() + 1, 1);
+    renderDatepicker();
+  });
+  document.getElementById('cal-dp-grid').addEventListener('click', e => {
+    const cell = e.target.closest('.cal-dp-day');
+    if (!cell) return;
+    const [y,m,dd] = cell.dataset.date.split('-').map(Number);
+    CAL_ANCHOR = new Date(y, m - 1, dd);
+    dpViewMonth = new Date(CAL_ANCHOR.getFullYear(), CAL_ANCHOR.getMonth(), 1);
+    document.getElementById('cal-datepicker-pop').classList.remove('open');
+    renderCalendar();
+  });
+  document.getElementById('cal-datepicker-pop').addEventListener('click', e => e.stopPropagation());
+  const calMonthLabelEl = document.getElementById('cal-month-label');
+  calMonthLabelEl.addEventListener('click', e => {
+    e.stopPropagation();
+    const pop = document.getElementById('cal-datepicker-pop');
+    const opening = !pop.classList.contains('open');
+    if (opening) { dpViewMonth = new Date(CAL_ANCHOR.getFullYear(), CAL_ANCHOR.getMonth(), 1); renderDatepicker(); }
+    pop.classList.toggle('open', opening);
+  });
+
+  // Fermeture globale des popovers calendrier (filtres + datepicker) au clic dehors / Escape.
+  document.addEventListener('click', () => {
+    document.getElementById('cal-states-panel')?.classList.remove('open');
+    document.getElementById('cal-room-panel')?.classList.remove('open');
+    document.getElementById('cal-datepicker-pop')?.classList.remove('open');
+    document.querySelectorAll('.cal-select').forEach(s => s.classList.remove('open'));
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    document.getElementById('cal-states-panel')?.classList.remove('open');
+    document.getElementById('cal-room-panel')?.classList.remove('open');
+    document.getElementById('cal-datepicker-pop')?.classList.remove('open');
+  });
+
+  // ══ Plein écran ══════════════════════════════════════════════════════
+  document.getElementById('cal-btn-expand').addEventListener('click', () => {
+    document.body.classList.add('cal-fullscreen');
+  });
+  document.getElementById('cal-btn-compact').addEventListener('click', () => {
+    document.body.classList.remove('cal-fullscreen');
+  });
+
+  // ══ Sticky header au scroll (même mécanisme que tpe-tabs-bar historique) ══════
+  (function setupCalStickyHeader() {
+    const root = document.querySelector('.content');
+    function updateCalSticky() {
+      const headerRow = document.getElementById('cal-header-row');
+      const wrap = document.getElementById('cal-grid-wrap');
+      if (!headerRow || !wrap) return;
+      const wrapRect = wrap.getBoundingClientRect();
+      const rootRect = root.getBoundingClientRect();
+      headerRow.classList.toggle('is-stuck', wrapRect.top < rootRect.top);
+    }
+    root.addEventListener('scroll', updateCalSticky, { passive: true });
+  })();
 
   // ══ Système de versions / propositions ══════════════════════════════
   // État persisté dans localStorage :
