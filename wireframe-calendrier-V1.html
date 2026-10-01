@@ -757,10 +757,10 @@
     margin-bottom: 8px;
   }
   .cal-header-cell { text-align: center; }
-  .cal-header-cell .dow { font-size: 12px; color: #000; }
-  .cal-header-cell .dnum { font-size: 14px; color: #000; margin-top: 2px; }
+  .cal-header-cell .dow { font-size: 12px; color: #000; line-height: 14px; border-radius: 4px; }
+  .cal-header-cell .dnum { font-size: 14px; color: #000; margin-top: 2px; line-height: 20px; border-radius: 4px; }
   .cal-header-cell.today .dow,
-  .cal-header-cell.today .dnum { font-weight: 600; background: #FFE699; border-radius: 4px; display: inline-block; padding: 0 4px; }
+  .cal-header-cell.today .dnum { font-weight: 600; background: #FFE699; }
 
   .cal-body { position: relative; }
   .cal-room-row {
@@ -777,7 +777,7 @@
     border-top-left-radius: 16px; border-bottom-left-radius: 16px;
     display: flex; align-items: center; justify-content: center;
   }
-  .cal-room-status svg { width: 16px; height: 16px; }
+  .cal-room-status img { width: 16px; height: 16px; }
   .cal-room-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
   .cal-room-line1 { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; overflow: hidden; }
   .cal-room-code { font-size: 14px; font-weight: 600; color: var(--navy); white-space: nowrap; margin-right: 8px; }
@@ -790,12 +790,11 @@
     font-size: 12px; font-weight: 600; color: #1e2643; background: var(--white);
     border: 1px solid #1e2643; border-radius: 16px; padding: 0 4px; line-height: 14px;
   }
-  .cal-room-check { width: 20px; height: 20px; flex-shrink: 0; }
   .cal-room-separated {
     display: flex; align-items: center; gap: 2px; font-size: 12px; color: #999;
     background: var(--white); border: 1px solid #1e2643; border-radius: 16px; padding: 0 4px; line-height: 14px;
   }
-  .cal-room-separated svg { width: 12px; height: 12px; flex-shrink: 0; }
+  .cal-room-separated img { width: 12px; height: 12px; flex-shrink: 0; }
   .cal-room-line2 { display: flex; align-items: center; gap: 12px; }
   .cal-day-cell { border: 1px solid #CCCCCC; border-left: none; background: var(--white); }
   .cal-day-cell.today { background: #FFE699; }
@@ -3564,12 +3563,14 @@
     calendar:'#fdbe00',    // Surface/Brand
     free:null
   };
+  // Icônes = assets SVG réels téléchargés depuis Figma (node Calendrier, 2026-10-01),
+  // JAMAIS redessinées à la main — voir assets-calendrier/ à côté de ce fichier.
   const CAL_STATUS_ICON = {
-    occupied:'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
-    maintenance:'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
-    presence:'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/></svg>',
-    locked:'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
-    calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>'
+    occupied:'<img src="assets-calendrier/icon-minus.svg" width="16" height="16" alt="" />',
+    maintenance:'<img src="assets-calendrier/icon-cross.svg" width="16" height="16" alt="" />',
+    presence:'<img src="assets-calendrier/icon-people.svg" width="16" height="16" alt="" />',
+    locked:'<img src="assets-calendrier/icon-padlock.svg" width="16" height="16" alt="" />',
+    calendar:'<img src="assets-calendrier/icon-calendars.svg" width="16" height="16" alt="" />'
   };
   const CAL_BOOKINGS = [
     { room:0, dayStart:0,  dayEnd:13, name:'MARTINS Sofia', dates:'12/09 - 30/09', tag:'Platinum', corpo:true,  pax:'+1', color:'#1e2643' },
@@ -3597,8 +3598,9 @@
       `<div class="cal-header-cell${d.today ? ' today' : ''}"><div class="dow">${d.dow}</div><div class="dnum">${d.d}</div></div>`
     ).join('');
 
-    const SVG_CHECK_GREEN = '<svg viewBox="0 0 24 24" fill="none" stroke="#088A20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/></svg>';
-    const SVG_SEPARATED = '<svg viewBox="0 0 24 24" fill="none" stroke="#1e2643" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="8" height="10" rx="1"/><rect x="13" y="7" width="8" height="10" rx="1"/></svg>';
+    // Icônes = assets SVG réels téléchargés depuis Figma, jamais redessinées à la main.
+    const IMG_CHECK_GREEN = '<img src="assets-calendrier/icon-check.svg" width="20" height="20" alt="" />';
+    const IMG_SEPARATED = '<img src="assets-calendrier/icon-separated-room.svg" width="12" height="12" alt="" />';
     const roomsHtml = CAL_ROOMS.map(r => {
       const statusColor = CAL_STATUS_COLOR[r.status];
       const statusIcon = CAL_STATUS_ICON[r.status] || '';
@@ -3610,11 +3612,11 @@
               <span class="cal-room-code">${r.code}</span>
               ${r.go ? `<span class="cal-room-go">GO</span>` : ''}
               ${r.pax ? `<span class="cal-room-pax">${r.pax}</span>` : ''}
-              ${r.checkPax ? `<svg class="cal-room-check">${SVG_CHECK_GREEN}</svg>` : ''}
+              ${r.checkPax ? IMG_CHECK_GREEN : ''}
             </div>
             <div class="cal-room-line2">
               <span class="cal-room-type">${r.type}</span>
-              ${r.separated ? `<span class="cal-room-separated">${SVG_SEPARATED}${r.separated}</span>` : ''}
+              ${r.separated ? `<span class="cal-room-separated">${IMG_SEPARATED}${r.separated}</span>` : ''}
             </div>
           </div>
         </div>
