@@ -1099,9 +1099,9 @@
   }
   .cal-rm-popup-body { background: #F8F8F8; padding: 24px 54px; overflow-y: auto; flex: 1; min-height: 0; }
   .cal-rm-popup-lead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 20px; color: #000; }
-  .cal-rm-popup-list { margin: 16px 0; padding-left: 22px; }
-  .cal-rm-popup-list li { font-size: 20px; color: #000; margin-bottom: 12px; }
-  .cal-rm-popup-list li b { font-weight: 600; }
+  /* Lignes voyageurs du pop-up : même composant que « TRAVELERS ON THIS BOOKING »
+     dans la modale chambre, le GM maître porte le picto et le rôle. */
+  .cal-rm-popup-list { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
   .cal-rm-popup-q { font-size: 20px; color: #000; margin: 0; }
   .cal-rm-popup-cta { display: flex; gap: 12px; justify-content: center; padding: 24px; flex-shrink: 0; }
   .cal-rm-popup-cta .cal-rm-btn { flex: 0 0 auto; min-width: 118px; padding: 0 32px; }
@@ -4019,32 +4019,37 @@
       r.accessible = i % 7 === 0 ? 'Yes' : 'No';
     });
   })();
-  (function enrichBookingDetails() {
-    const EXTRA_FIRST = ['Iker','Léa','Laura','Noah','Chloé','Hugo'];
-    CAL_BOOKINGS.forEach((b, i) => {
-      if (b.red) return; // Maintenance / Blocage propriétaire — pas un vrai séjour GM
-      b.arrival = addDays(CAL_DATA_ORIGIN, b.dayStart);
-      b.departure = addDays(CAL_DATA_ORIGIN, b.dayEnd + 1);
-      // b.name = "SURNAME Firstname" — on sépare pour reconstruire "SURNAME Prénom" par
-      // voyageur (même nom de famille pour tous, fidèle au node Figma 15733:7949).
-      const spaceIdx = b.name.lastIndexOf(' ');
-      const familyName = spaceIdx > -1 ? b.name.slice(0, spaceIdx) : b.name;
-      const firstName = spaceIdx > -1 ? b.name.slice(spaceIdx + 1) : '';
-      b.memberNumber = `${900000 + i * 37 % 99999}`;
-      b.fileNumber = `${400000 + i * 53 % 99999}`;
-      b.statusLabel = 'Confirmed';
-      b.statusNote = 'Nothing to report for this stay.';
-      const extraCount = b.pax ? parseInt(b.pax.replace('+', ''), 10) || 0 : 0;
-      b.guestCount = 1 + extraCount;
-      b.travelers = [{ familyName, firstName, role: 'Primary guest', primary: true }];
-      for (let k = 0; k < extraCount; k++) {
-        b.travelers.push({
-          familyName, firstName: EXTRA_FIRST[(i + k) % EXTRA_FIRST.length],
-          role: k === 0 ? 'Adult' : 'Child', primary: false
-        });
-      }
-    });
-  })();
+  const BOOKING_EXTRA_FIRST = ['Iker','Léa','Laura','Noah','Chloé','Hugo'];
+  // Complète une réservation avec les champs attendus par la modale chambre.
+  // Sortie de son IIFE d'origine pour servir aussi aux réservations créées en
+  // session (assignation), qui doivent être cliquables comme les autres.
+  function enrichBookingDetails(b, i) {
+    if (b.red) return; // Maintenance / Blocage propriétaire — pas un vrai séjour GM
+    b.arrival = addDays(CAL_DATA_ORIGIN, b.dayStart);
+    b.departure = addDays(CAL_DATA_ORIGIN, b.dayEnd + 1);
+    // b.name = "SURNAME Firstname" — on sépare pour reconstruire "SURNAME Prénom" par
+    // voyageur (même nom de famille pour tous, fidèle au node Figma 15733:7949).
+    const spaceIdx = b.name.lastIndexOf(' ');
+    const familyName = spaceIdx > -1 ? b.name.slice(0, spaceIdx) : b.name;
+    const firstName = spaceIdx > -1 ? b.name.slice(spaceIdx + 1) : '';
+    b.memberNumber = `${900000 + i * 37 % 99999}`;
+    b.fileNumber = `${400000 + i * 53 % 99999}`;
+    b.statusLabel = 'Confirmed';
+    b.statusNote = 'Nothing to report for this stay.';
+    const extraCount = b.pax ? parseInt(b.pax.replace('+', ''), 10) || 0 : 0;
+    b.guestCount = 1 + extraCount;
+    // Une assignation arrive avec sa liste nominative de GM : on ne l'écrase pas
+    // par des accompagnants générés.
+    if (b.travelers) return;
+    b.travelers = [{ familyName, firstName, role: 'Primary guest', primary: true }];
+    for (let k = 0; k < extraCount; k++) {
+      b.travelers.push({
+        familyName, firstName: BOOKING_EXTRA_FIRST[(i + k) % BOOKING_EXTRA_FIRST.length],
+        role: k === 0 ? 'Adult' : 'Child', primary: false
+      });
+    }
+  }
+  CAL_BOOKINGS.forEach(enrichBookingDetails);
 
   // Filtres actifs — null/vide = pas de filtre (tout affiché). Alimentés par les
   // dropdowns Room/States ; recalculés par updateCalFilterCounts() au chargement.
@@ -4341,21 +4346,33 @@
   // n'est saisie (node 15918:48476). `assigned` = GM déjà placé : jamais proposé,
   // conformément au Commentaire 9 Figma (« n'avoir dans la liste que des GM non
   // assignés pour éviter une liste trop grande qui ralentirait la navigation »).
+  // dayStart/dayEnd sont des offsets sur CAL_DATA_ORIGIN, exactement comme
+  // CAL_BOOKINGS : la bande créée à l'assignation tombe donc forcément dans la
+  // fenêtre visible, et la liste affiche les mêmes dates que la grille. Les
+  // dates du Figma (2024/2026) étaient des valeurs bouchon, hors fenêtre.
+  // `role` sert aux lignes voyageurs du pop-up de confirmation.
   const CAL_ASSIGN_CANDIDATES = [
-    { familyName:'MARTIN',  firstName:'Emma',  tag:'Platinum', from:'01/10/2026', to:'08/10/2026', recent:true },
-    { familyName:'BERNARD', firstName:'Lucas', tag:'Gold',     from:'03/10/2026', to:'12/10/2026', recent:true },
-    { familyName:'DUBOIS',  firstName:'Chloé', tag:'Silver',   from:'05/10/2026', to:'15/10/2026', recent:true },
-    { familyName:'MOREAU',  firstName:'Hugo',  tag:'Gold',     from:'08/10/2026', to:'18/10/2026', recent:true },
-    { familyName:'PETIT',   firstName:'Léa',   tag:'Platinum', from:'10/10/2026', to:'20/10/2026', recent:true },
-    { familyName:'ROBERT',  firstName:'Adam',  tag:'Platinum', from:'12/10/2026', to:'25/10/2026', recent:true },
-    { familyName:'MC DOE',  firstName:'John',  tag:'Platinum', from:'03/03/2024', to:'13/03/2024' },
-    { familyName:'MC DOE',  firstName:'Jim',   tag:'Platinum', from:'03/03/2024', to:'13/03/2024' },
-    { familyName:'MC DOE',  firstName:'Jane',  tag:'Gold',     from:'01/04/2024', to:'10/04/2024' },
-    { familyName:'MC DOE',  firstName:'Emily', tag:'Gold',     from:'15/05/2024', to:'25/05/2024' },
-    { familyName:'DUPONT',  firstName:'Marie', tag:'Platinum', from:'03/03/2024', to:'13/03/2024' },
-    { familyName:'MARTINS', firstName:'Sofia', tag:'Platinum', from:'12/09/2026', to:'30/09/2026', assigned:true },
-    { familyName:'COSTA',   firstName:'João',  tag:'Gold',     from:'15/09/2026', to:'20/09/2026', assigned:true }
+    { familyName:'MARTIN',  firstName:'Emma',  tag:'Platinum', dayStart:1, dayEnd:6,  role:'Adult', recent:true },
+    { familyName:'BERNARD', firstName:'Lucas', tag:'Gold',     dayStart:3, dayEnd:9,  role:'Adult', recent:true },
+    { familyName:'DUBOIS',  firstName:'Chloé', tag:'Silver',   dayStart:0, dayEnd:5,  role:'Child', recent:true },
+    { familyName:'MOREAU',  firstName:'Hugo',  tag:'Gold',     dayStart:5, dayEnd:11, role:'Adult', recent:true },
+    { familyName:'PETIT',   firstName:'Léa',   tag:'Platinum', dayStart:2, dayEnd:8,  role:'Child', recent:true },
+    { familyName:'ROBERT',  firstName:'Adam',  tag:'Platinum', dayStart:7, dayEnd:13, role:'Adult', recent:true },
+    { familyName:'MC DOE',  firstName:'John',  tag:'Platinum', dayStart:1, dayEnd:7,  role:'Adult' },
+    { familyName:'MC DOE',  firstName:'Jim',   tag:'Platinum', dayStart:1, dayEnd:7,  role:'Child' },
+    { familyName:'MC DOE',  firstName:'Jane',  tag:'Gold',     dayStart:4, dayEnd:10, role:'Child' },
+    { familyName:'MC DOE',  firstName:'Emily', tag:'Gold',     dayStart:6, dayEnd:12, role:'Adult' },
+    { familyName:'DUPONT',  firstName:'Marie', tag:'Platinum', dayStart:0, dayEnd:6,  role:'Adult' },
+    { familyName:'MARTINS', firstName:'Sofia', tag:'Platinum', dayStart:0, dayEnd:13, role:'Adult', assigned:true },
+    { familyName:'COSTA',   firstName:'João',  tag:'Gold',     dayStart:0, dayEnd:5,  role:'Adult', assigned:true }
   ];
+  // dd/mm (bandes du calendrier) ou dd/mm/yyyy (listes de GM).
+  function calDayLabel(offset, withYear) {
+    const d = addDays(CAL_DATA_ORIGIN, offset);
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    return withYear ? `${dd}/${mm}/${d.getFullYear()}` : `${dd}/${mm}`;
+  }
   const CAL_LOYALTY_COLOR = { Platinum:'#1e2643', Gold:'#c8914f', Silver:'#b3b3b3', NGM:'#088a20' };
   function renderLoyaltyBadge(tag) {
     if (!tag) return '';
@@ -4383,7 +4400,7 @@
         <input type="checkbox" class="cal-rm-gm-check" data-gm-idx="${idx}" ${chosen ? 'checked' : ''} />
         <span class="cal-rm-gm-name"><b>${g.familyName}</b><br>${g.firstName}</span>
         <span class="cal-rm-gm-badge-wrap">${renderLoyaltyBadge(g.tag)}</span>
-        <span class="cal-rm-gm-dates"><div>From ${g.from}</div><div>To ${g.to}</div></span>
+        <span class="cal-rm-gm-dates"><div>From ${calDayLabel(g.dayStart, true)}</div><div>To ${calDayLabel(g.dayEnd, true)}</div></span>
       </label>`;
   }
   // Colonne de gauche = candidats restants, donc jamais cochés : une ligne cochée
@@ -4665,9 +4682,14 @@
           ${renderRoomCardMini(r)}
           <span>for ${gms.length} GM :</span>
         </div>
-        <ul class="cal-rm-popup-list">
-          ${gms.map(g => `<li><b>${g.familyName}</b> ${g.firstName}</li>`).join('')}
-        </ul>
+        <div class="cal-rm-popup-list">
+          ${gms.map((g, k) => `
+            <div class="cal-rm-traveler-row${k === 0 ? ' primary' : ''}">
+              ${k === 0 ? '<img src="assets-calendrier/icon-guest-primary.svg" alt="" />' : ''}
+              <span class="cal-rm-traveler-name"><b>${g.familyName}</b> ${g.firstName}</span>
+              <span class="cal-rm-traveler-role">${k === 0 ? 'Primary guest' : (g.role || 'Adult')}</span>
+            </div>`).join('')}
+        </div>
         <p class="cal-rm-popup-q">Do you want to confirm this room assignment?</p>
       </div>
       <div class="cal-rm-popup-cta">
@@ -4677,8 +4699,34 @@
     document.getElementById('cal-rm-popup-overlay').classList.add('open');
     document.getElementById('cal-rm-popup-back').addEventListener('click', closeAssignConfirmPopup);
     document.getElementById('cal-rm-popup-confirm').addEventListener('click', () => {
+      const master = gms[0];
+      const others = gms.length - 1;
+      // La bande porte le GM maître et couvre son séjour ; les accompagnants
+      // comptent dans le +N, comme sur les réservations existantes.
+      const booking = {
+        room: roomIdx,
+        dayStart: master.dayStart,
+        dayEnd: master.dayEnd,
+        name: `${master.familyName} ${master.firstName}`,
+        dates: `${calDayLabel(master.dayStart)} - ${calDayLabel(master.dayEnd)}`,
+        tag: master.tag,
+        pax: others ? `+${others}` : null,
+        color: '#1e2643',
+        // Liste nominative réelle : la modale de la chambre rouvrira sur ces GM,
+        // pas sur des accompagnants générés.
+        travelers: gms.map((g, k) => ({
+          familyName: g.familyName,
+          firstName: g.firstName,
+          role: k === 0 ? 'Primary guest' : (g.role || 'Adult'),
+          primary: k === 0
+        }))
+      };
+      CAL_BOOKINGS.push(booking);
+      enrichBookingDetails(booking, CAL_BOOKINGS.length - 1);
       // Les GM retenus sortent du vivier : ils ne seront plus proposés (Commentaire 9).
       calAssignSelected.forEach(i => { CAL_ASSIGN_CANDIDATES[i].assigned = true; });
+      calAssignSelected = [];
+      renderCalendar();
       closeAssignConfirmPopup();
       closeRoomModal();
     });
