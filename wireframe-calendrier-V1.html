@@ -1106,13 +1106,18 @@
   .cal-rm-popup-cta { display: flex; gap: 12px; justify-content: center; padding: 24px; flex-shrink: 0; }
   .cal-rm-popup-cta .cal-rm-btn { flex: 0 0 auto; min-width: 118px; padding: 0 32px; }
 
-  /* ══ Marqueur de switch sur la bande calendrier — demandé au Commentaire 10
+  /* ══ Marqueurs d'état sur la bande calendrier — cadenas pour une chambre
+     verrouillée, flèches pour une réservation switchée. Demandé au Commentaire 10
      (« si switch il y a l'indiquer dans la ligne de calendrier »). ══ */
-  .cal-booking .b-switch {
+  .cal-booking .b-flag {
     display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
     width: 18px; height: 18px; border-radius: 100px; background: rgba(255,255,255,.9);
   }
-  .cal-booking .b-switch img { width: 12px; height: 12px; }
+  .cal-booking .b-flag img { width: 12px; height: 12px; }
+  /* L'asset cadenas du DS est blanc (il vit sur le liseré navy de la carte
+     chambre) : sur la pastille blanche de la bande, il faut l'inverser pour
+     qu'il reste lisible. L'asset flèches, lui, est déjà noir. */
+  .cal-booking .b-flag.lock img { filter: brightness(0); }
   </style>
 </head>
 <body>
@@ -4066,6 +4071,14 @@
   const calLockedRooms = new Map();      // roomIdx → motif du verrou posé en session
   const calUnlockedRooms = new Set();    // roomIdx relâchés (y compris ceux verrouillés d'origine)
   const calSwitchedBookings = new Set(); // index dans CAL_BOOKINGS
+  // Statut affiché par la ligne : l'action de l'utilisateur l'emporte sur la
+  // donnée de référence, qui n'est jamais réécrite. calRoomLockInfo est une
+  // déclaration de fonction (hoistée), donc utilisable dès le premier rendu.
+  function calEffectiveRoomStatus(r, i) {
+    if (calRoomLockInfo(i)) return 'locked';
+    if (r.status === 'locked') return 'free'; // verrou d'origine relâché en session
+    return r.status;
+  }
   function renderCalendar() {
     const header = document.getElementById('cal-header-row');
     const body = document.getElementById('cal-body');
@@ -4096,8 +4109,11 @@
     const roomsHtml = CAL_ROOMS.map((r, i) => {
       if (!roomPasses(r)) return '';
       visibleRoomIndex[i] = visibleRow++;
-      const statusColor = CAL_STATUS_COLOR[r.status];
-      const statusIcon = CAL_STATUS_ICON[r.status] || '';
+      // Le verrou posé (ou relâché) en session prime sur le statut d'origine :
+      // sans ça la grille contredirait la modale qu'on vient de valider.
+      const effStatus = calEffectiveRoomStatus(r, i);
+      const statusColor = CAL_STATUS_COLOR[effStatus];
+      const statusIcon = CAL_STATUS_ICON[effStatus] || '';
       return `<div class="cal-room-row">
         <div class="cal-room-card" data-room-idx="${i}">
           ${statusColor ? `<div class="cal-room-status" style="background:${statusColor};">${statusIcon}</div>` : '<div class="cal-room-status"></div>'}
@@ -4147,12 +4163,17 @@
       // La pastille passe avant les badges optionnels pour rester visible même
       // sur les séjours courts où les badges sont masqués.
       const switched = calSwitchedBookings.has(bi);
-      return `<div class="cal-booking" data-booking-idx="${bi}" data-room-idx="${b.room}" style="top:${top}px; left:${left}; width:${width}; background:${bg}; color:${color}; pointer-events:auto;" title="${b.name}${b.dates ? ' — ' + b.dates : ''}${b.tag ? ' — ' + b.tag : ''}${b.corpo ? ' — Excellence corpo' : ''}${switched ? ' — Switched room' : ''}">
+      // Cadenas : soit la réservation est verrouillée dans la donnée de référence
+      // (b.locked, déjà présent dans la maquette), soit la chambre a été
+      // verrouillée en session depuis la modale.
+      const locked = !!b.locked || !!calRoomLockInfo(b.room);
+      return `<div class="cal-booking" data-booking-idx="${bi}" data-room-idx="${b.room}" style="top:${top}px; left:${left}; width:${width}; background:${bg}; color:${color}; pointer-events:auto;" title="${b.name}${b.dates ? ' — ' + b.dates : ''}${b.tag ? ' — ' + b.tag : ''}${b.corpo ? ' — Excellence corpo' : ''}${locked ? ' — Locked room' : ''}${switched ? ' — Switched room' : ''}">
         <div style="display:flex;flex-direction:column;min-width:0;overflow:hidden;">
           <span class="b-name">${b.name}</span>
           ${b.dates ? `<span class="b-date">${b.dates}</span>` : ''}
         </div>
-        ${switched ? `<span class="b-switch"><img src="assets-calendrier/icon-compare-arrows.svg" alt="Switched room" /></span>` : ''}
+        ${locked ? `<span class="b-flag lock"><img src="assets-calendrier/icon-padlock.svg" alt="Locked room" /></span>` : ''}
+        ${switched ? `<span class="b-flag"><img src="assets-calendrier/icon-compare-arrows.svg" alt="Switched room" /></span>` : ''}
         ${showBadges && b.tag ? `<span class="b-tag" style="${b.locked ? 'background:#fff;color:#088a20;' : ''}">${b.tag}</span>` : ''}
         ${showBadges && b.corpo ? `<span class="b-corpo">Excellence corpo</span>` : ''}
         ${showBadges && b.pax ? `<span class="b-pax">${b.pax}</span>` : ''}
@@ -4563,6 +4584,7 @@
         // La chambre est verrouillée : le CTA vaut Unlock, on relâche sur place.
         calLockedRooms.delete(roomIdx);
         calUnlockedRooms.add(roomIdx);
+        renderCalendar(); // le cadenas doit disparaître de la ligne, pas seulement de la modale
         openRoomModal(roomIdx, bookingIdx);
         return;
       }
@@ -4579,6 +4601,7 @@
       const reason = document.getElementById('cal-rm-lock-reason')?.value;
       calLockedRooms.set(roomIdx, reason || 'Room locked against automatic reassignment.');
       calUnlockedRooms.delete(roomIdx);
+      renderCalendar(); // cadenas sur la carte chambre et sur la bande
       openRoomModal(roomIdx, bookingIdx); // retour chambre, bandeau orange posé
     });
   }
