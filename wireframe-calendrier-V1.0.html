@@ -1030,89 +1030,6 @@
   .cal-rm-gm-name b { font-weight: 600; }
   .cal-rm-gm-badge-wrap { width: 84px; display: flex; justify-content: center; flex-shrink: 0; }
   .cal-rm-gm-dates { font-size: 13px; color: #000; line-height: 18px; white-space: nowrap; flex-shrink: 0; margin-left: auto; }
-
-  /* ══ Assign multi-GM — nœuds Figma 15918:48476 (recherche vide) et 15918:46925
-     (résultats + sélection). Le drawer s'élargit le temps de l'assignation :
-     candidats à gauche, panneau « GM selectionné » beige à droite. ══ */
-  .cal-room-modal.wide { width: 1148px; }
-  /* Dans le drawer large, la carte chambre reste collée à sa phrase : le
-     space-between du drawer étroit la rejetterait à 1100px de son libellé. */
-  .cal-room-modal.wide .cal-rm-assign-block { justify-content: flex-start; gap: 32px; }
-  .cal-rm-assign2 { display: flex; gap: 21px; flex: 1 0 0; min-height: 0; margin-top: 4px; }
-  .cal-rm-assign2-left { display: flex; flex-direction: column; width: 520px; flex-shrink: 0; min-height: 0; }
-  .cal-rm-assign2-sep { width: 1px; background: #CCCCCC; opacity: .5; flex-shrink: 0; }
-  .cal-rm-assign2-right {
-    flex: 1; min-width: 0; background: #F6EFE7; border-radius: 16px;
-    padding: 20px 12px; box-sizing: border-box; overflow-y: auto;
-  }
-  .cal-rm-assign2-right h3 { font-size: 24px; font-weight: 700; color: var(--navy); margin: 0 0 12px; padding: 0 12px; }
-  .cal-rm-assign2-empty { font-size: 16px; color: #333; padding: 0 12px; }
-  .cal-rm-assign2-hint { font-size: 16px; font-weight: 600; color: #000; margin: 0 0 12px; }
-  .cal-rm-assign2-left .cal-rm-gm-list { overflow-y: auto; min-height: 0; flex: 1; margin-bottom: 0; padding-right: 4px; }
-  .cal-rm-gm-row.pick { cursor: pointer; background: var(--white); }
-  .cal-rm-gm-row.chosen { border-color: transparent; background: transparent; min-height: 70px; padding: 6px 12px; }
-  .cal-rm-gm-check { width: 20px; height: 20px; accent-color: #000; flex-shrink: 0; cursor: pointer; }
-  .cal-rm-cta.center { justify-content: center; }
-  .cal-rm-cta.center .cal-rm-btn { flex: 0 0 auto; min-width: 150px; padding: 0 32px; }
-  .cal-rm-btn[disabled] { background: #F8F8F8; color: #999999; border: none; cursor: not-allowed; }
-  /* Le champ de recherche GM est un vrai input : le wireframe filtre réellement
-     la liste des candidats, contrairement aux champs de démonstration figés. */
-  .cal-rm-search-field input {
-    flex: 1; min-width: 0; border: none; outline: none; background: transparent;
-    font-size: 16px; color: #000; font-family: inherit;
-  }
-  /* Motif de verrouillage : seul champ dont la valeur ressort (elle alimente le
-     bandeau de la chambre verrouillée), donc un vrai select habillé comme le DS. */
-  .cal-rm-field-select {
-    height: 48px; border: 1px solid #666; border-radius: 100px; background: var(--white);
-    padding: 0 21px; font-size: 16px; color: #333; font-family: inherit; width: 100%;
-    box-sizing: border-box; cursor: pointer; appearance: none;
-    background-image: url("assets-calendrier/icon-chevron-down.svg");
-    background-repeat: no-repeat; background-position: right 21px center; background-size: 12px;
-  }
-
-  /* ══ Bandeau chambre verrouillée — nœud Figma 15743:8400. Rappelle le motif du
-     lock en tête de modale ; le CTA Lock devient Unlock. ══ */
-  .cal-rm-lock-banner {
-    display: flex; align-items: flex-start; gap: 12px; background: #C75300; color: var(--white);
-    border-radius: 16px; padding: 16px 20px; margin: 16px 0 0; font-size: 14px; line-height: 20px;
-    width: 100%; box-sizing: border-box;
-  }
-  .cal-rm-lock-banner img { width: 24px; height: 24px; flex-shrink: 0; filter: brightness(0) invert(1); }
-
-  /* ══ Pop-up de confirmation d'assignation — nœud Figma 15929:44073. Récapitule
-     la chambre et les GM retenus avant validation. ══ */
-  /* z-index au-dessus du drawer chambre (1500) : le pop-up le recouvre, il ne
-     glisse pas derrière. */
-  .cal-rm-popup-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1600;
-    display: none; align-items: center; justify-content: center; padding: 24px;
-  }
-  .cal-rm-popup-overlay.open { display: flex; }
-  .cal-rm-popup {
-    width: 908px; max-width: 100%; max-height: 100%; background: var(--white);
-    border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
-  }
-  .cal-rm-popup-head {
-    background: var(--navy); color: var(--white); font-size: 20px; font-weight: 600;
-    padding: 24px 32px; flex-shrink: 0;
-  }
-  .cal-rm-popup-body { background: #F8F8F8; padding: 24px 54px; overflow-y: auto; flex: 1; min-height: 0; }
-  .cal-rm-popup-lead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 20px; color: #000; }
-  .cal-rm-popup-list { margin: 16px 0; padding-left: 22px; }
-  .cal-rm-popup-list li { font-size: 20px; color: #000; margin-bottom: 12px; }
-  .cal-rm-popup-list li b { font-weight: 600; }
-  .cal-rm-popup-q { font-size: 20px; color: #000; margin: 0; }
-  .cal-rm-popup-cta { display: flex; gap: 12px; justify-content: center; padding: 24px; flex-shrink: 0; }
-  .cal-rm-popup-cta .cal-rm-btn { flex: 0 0 auto; min-width: 118px; padding: 0 32px; }
-
-  /* ══ Marqueur de switch sur la bande calendrier — demandé au Commentaire 10
-     (« si switch il y a l'indiquer dans la ligne de calendrier »). ══ */
-  .cal-booking .b-switch {
-    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
-    width: 18px; height: 18px; border-radius: 100px; background: rgba(255,255,255,.9);
-  }
-  .cal-booking .b-switch img { width: 12px; height: 12px; }
   </style>
 </head>
 <body>
@@ -1453,11 +1370,6 @@
      panel Loopcraft (z-index:999). -->
 <div class="cal-room-modal-overlay" id="cal-room-modal-overlay">
   <div class="cal-room-modal" id="cal-room-modal"></div>
-</div>
-
-<!-- Pop-up de confirmation d'assignation — node Figma 15929:44073 -->
-<div class="cal-rm-popup-overlay" id="cal-rm-popup-overlay">
-  <div class="cal-rm-popup" id="cal-rm-popup"></div>
 </div>
 
 <!-- Panel wireframe -->
@@ -4058,14 +3970,6 @@
     return true;
   }
 
-  // Verrous et switches posés pendant la session. Mémorisés ici (et non dans
-  // CAL_ROOMS/CAL_BOOKINGS) pour que le jeu de données de référence reste celui
-  // vérifié contre Figma — l'état utilisateur se superpose, il ne l'écrase pas.
-  // Déclarés avant renderCalendar() : la bande lit calSwitchedBookings dès le
-  // premier rendu, une déclaration plus bas les laisserait en zone morte.
-  const calLockedRooms = new Map();      // roomIdx → motif du verrou posé en session
-  const calUnlockedRooms = new Set();    // roomIdx relâchés (y compris ceux verrouillés d'origine)
-  const calSwitchedBookings = new Set(); // index dans CAL_BOOKINGS
   function renderCalendar() {
     const header = document.getElementById('cal-header-row');
     const body = document.getElementById('cal-body');
@@ -4143,16 +4047,11 @@
       // que nom + dates, comme dans la maquette Figma (les badges y apparaissent
       // dans une infobulle au survol, hors scope de ce wireframe V1).
       const showBadges = daySpan >= 4;
-      // Commentaire 10 Figma : une réservation switchée se signale sur sa bande.
-      // La pastille passe avant les badges optionnels pour rester visible même
-      // sur les séjours courts où les badges sont masqués.
-      const switched = calSwitchedBookings.has(bi);
-      return `<div class="cal-booking" data-booking-idx="${bi}" data-room-idx="${b.room}" style="top:${top}px; left:${left}; width:${width}; background:${bg}; color:${color}; pointer-events:auto;" title="${b.name}${b.dates ? ' — ' + b.dates : ''}${b.tag ? ' — ' + b.tag : ''}${b.corpo ? ' — Excellence corpo' : ''}${switched ? ' — Switched room' : ''}">
+      return `<div class="cal-booking" data-booking-idx="${bi}" data-room-idx="${b.room}" style="top:${top}px; left:${left}; width:${width}; background:${bg}; color:${color}; pointer-events:auto;" title="${b.name}${b.dates ? ' — ' + b.dates : ''}${b.tag ? ' — ' + b.tag : ''}${b.corpo ? ' — Excellence corpo' : ''}">
         <div style="display:flex;flex-direction:column;min-width:0;overflow:hidden;">
           <span class="b-name">${b.name}</span>
           ${b.dates ? `<span class="b-date">${b.dates}</span>` : ''}
         </div>
-        ${switched ? `<span class="b-switch"><img src="assets-calendrier/icon-compare-arrows.svg" alt="Switched room" /></span>` : ''}
         ${showBadges && b.tag ? `<span class="b-tag" style="${b.locked ? 'background:#fff;color:#088a20;' : ''}">${b.tag}</span>` : ''}
         ${showBadges && b.corpo ? `<span class="b-corpo">Excellence corpo</span>` : ''}
         ${showBadges && b.pax ? `<span class="b-pax">${b.pax}</span>` : ''}
@@ -4206,29 +4105,7 @@
         </div>
       </div>`;
   }
-  // Motifs de verrouillage — le champ libre du premier jet est devenu un select
-  // fermé côté Figma (15753:10847), pour que le motif remonte en donnée exploitable.
-  const CAL_LOCK_REASONS = [
-    'Specific guest request',
-    'Connecting room',
-    'VIP guest',
-    'Family with young children',
-    'Technical issue',
-    'Other'
-  ];
-  // Paire date + heure + am/pm réutilisée à l'identique par Lock, Switch et Reserve
-  // (même trio de champs dans les trois nœuds Figma) — un seul rendu, trois appels.
-  function renderDateTimeRow(label, withTime) {
-    return `
-      <div class="cal-rm-field-row-inline">
-        <span class="lbl">${label}</span>
-        <div class="cal-rm-field-display date">JJ / MM / AA</div>
-        ${withTime ? `
-          <div class="cal-rm-field-display">Hour<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
-          <div class="cal-rm-field-display">am<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>` : ''}
-      </div>`;
-  }
-  // Sous-modale LOCK — node Figma 15753:10847 ("Lock a EC-S-01 room").
+  // Sous-modale LOCK — node Figma 15748:10611 ("Lock a EC-S-01 room").
   function renderLockModalContent(roomIdx) {
     const r = CAL_ROOMS[roomIdx];
     return `
@@ -4241,18 +4118,14 @@
         <p>You are about to assign this room for :</p>
         ${renderRoomCardMini(r)}
       </div>
-      <div class="cal-rm-section-label small-gap" style="margin-top:24px;">LOCK DURATION</div>
-      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
-        ${renderDateTimeRow('From', true)}
-        ${renderDateTimeRow('To', true)}
+      <div class="cal-rm-section-label small-gap">LOCK DURATION</div>
+      <div class="cal-rm-radio-group">
+        <label class="cal-rm-radio"><input type="radio" name="lock-duration" value="departure" />Until departure</label>
+        <label class="cal-rm-radio"><input type="radio" name="lock-duration" value="24h" />24 hours</label>
+        <label class="cal-rm-radio"><input type="radio" name="lock-duration" value="1week" />1 week</label>
       </div>
       <div class="cal-rm-section-label small-gap">REASON FOR LOCKING</div>
-      <div class="cal-rm-field">
-        <select class="cal-rm-field-select" id="cal-rm-lock-reason">
-          <option value="">Select reason</option>
-          ${CAL_LOCK_REASONS.map(x => `<option value="${x}">${x}</option>`).join('')}
-        </select>
-      </div>
+      <textarea class="cal-rm-textarea" placeholder="ex : specific guest request, connecting room, Vip guest ..."></textarea>
       <div style="flex:1 0 0;min-height:0;"></div>
       <hr class="cal-rm-divider" />
       <div class="cal-rm-cta">
@@ -4305,98 +4178,36 @@
           <label>Room</label>
           <div class="cal-rm-field-display">Select room<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
         </div>
-        ${renderDateTimeRow('From', true)}
-        ${renderDateTimeRow('To', true)}
+        <div class="cal-rm-field-row-inline">
+          <span class="lbl">From</span>
+          <div class="cal-rm-field-display date">JJ / MM / AA</div>
+          <div class="cal-rm-field-display">Hour<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+          <div class="cal-rm-field-display">am<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+        </div>
+        <div class="cal-rm-field-row-inline">
+          <span class="lbl">To</span>
+          <div class="cal-rm-field-display date">JJ / MM / AA</div>
+          <div class="cal-rm-field-display">Hour<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+          <div class="cal-rm-field-display">am<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+        </div>
       </div>
       <div style="flex:1 0 0;min-height:0;"></div>
       <div class="cal-rm-cta">
         <button class="cal-rm-btn lock" id="cal-rm-btn-switch-back">Back</button>
-        <button class="cal-rm-btn yellow" id="cal-rm-btn-activate-switch">Switch room</button>
+        <button class="cal-rm-btn yellow" id="cal-rm-btn-activate-switch">Activate lock</button>
       </div>`;
   }
   // Liste de GM candidats pour la sous-modale ASSIGN — même pattern de données
   // (nom/prénom/tag loyalty/dates) que CAL_BOOKINGS, réutilisé à l'identique.
-  // `recent` = les 6 derniers clients consultés, affichés tant qu'aucune recherche
-  // n'est saisie (node 15918:48476). `assigned` = GM déjà placé : jamais proposé,
-  // conformément au Commentaire 9 Figma (« n'avoir dans la liste que des GM non
-  // assignés pour éviter une liste trop grande qui ralentirait la navigation »).
   const CAL_ASSIGN_CANDIDATES = [
-    { familyName:'MARTIN',  firstName:'Emma',  tag:'Platinum', from:'01/10/2026', to:'08/10/2026', recent:true },
-    { familyName:'BERNARD', firstName:'Lucas', tag:'Gold',     from:'03/10/2026', to:'12/10/2026', recent:true },
-    { familyName:'DUBOIS',  firstName:'Chloé', tag:'Silver',   from:'05/10/2026', to:'15/10/2026', recent:true },
-    { familyName:'MOREAU',  firstName:'Hugo',  tag:'Gold',     from:'08/10/2026', to:'18/10/2026', recent:true },
-    { familyName:'PETIT',   firstName:'Léa',   tag:'Platinum', from:'10/10/2026', to:'20/10/2026', recent:true },
-    { familyName:'ROBERT',  firstName:'Adam',  tag:'Platinum', from:'12/10/2026', to:'25/10/2026', recent:true },
-    { familyName:'MC DOE',  firstName:'John',  tag:'Platinum', from:'03/03/2024', to:'13/03/2024' },
-    { familyName:'MC DOE',  firstName:'Jim',   tag:'Platinum', from:'03/03/2024', to:'13/03/2024' },
-    { familyName:'MC DOE',  firstName:'Jane',  tag:'Gold',     from:'01/04/2024', to:'10/04/2024' },
-    { familyName:'MC DOE',  firstName:'Emily', tag:'Gold',     from:'15/05/2024', to:'25/05/2024' },
-    { familyName:'DUPONT',  firstName:'Marie', tag:'Platinum', from:'03/03/2024', to:'13/03/2024' },
-    { familyName:'MARTINS', firstName:'Sofia', tag:'Platinum', from:'12/09/2026', to:'30/09/2026', assigned:true },
-    { familyName:'COSTA',   firstName:'João',  tag:'Gold',     from:'15/09/2026', to:'20/09/2026', assigned:true }
+    { familyName:'MC DOE', firstName:'John',  tag:'Platinum', dates:'From 03/03/2024\nTo 13/03/2024' },
+    { familyName:'MC DOE', firstName:'Jim',   tag:'Platinum', dates:'From 03/03/2024\nTo 13/03/2024' },
+    { familyName:'MC DOE', firstName:'Jane',  tag:'Gold',     dates:'From 01/04/2024\nTo 10/04/2024' },
+    { familyName:'MC DOE', firstName:'Emily', tag:'Gold',     dates:'From 15/05/2024\nTo 25/05/2024' }
   ];
-  const CAL_LOYALTY_COLOR = { Platinum:'#1e2643', Gold:'#c8914f', Silver:'#b3b3b3', NGM:'#088a20' };
-  function renderLoyaltyBadge(tag) {
-    if (!tag) return '';
-    const bg = CAL_LOYALTY_COLOR[tag] || '#1e2643';
-    return `<span class="cal-rm-loyalty-badge" style="background:${bg};color:${tag === 'Silver' ? '#000' : '#fff'};">${tag}</span>`;
-  }
-  // État de la sous-modale ASSIGN. Multi-sélection : une chambre peut accueillir
-  // plusieurs GM, le panneau de droite récapitule la sélection en cours.
-  let calAssignSelected = [];
-  let calAssignQuery = '';
-  function calAssignVisibleCandidates() {
-    const q = calAssignQuery.trim().toLowerCase();
-    // Un GM déjà assigné ne doit jamais apparaître, recherche ou pas.
-    const pool = CAL_ASSIGN_CANDIDATES.map((g, i) => ({ g, i })).filter(({ g }) => !g.assigned);
-    if (!q) return pool.filter(({ g }) => g.recent);
-    return pool.filter(({ g }) => `${g.familyName} ${g.firstName}`.toLowerCase().includes(q));
-  }
-  function renderGmRow(g, idx, chosen) {
-    return `
-      <label class="cal-rm-gm-row ${chosen ? 'chosen' : 'pick'}">
-        <input type="checkbox" class="cal-rm-gm-check" data-gm-idx="${idx}" ${chosen ? 'checked' : ''} />
-        <span class="cal-rm-gm-name"><b>${g.familyName}</b><br>${g.firstName}</span>
-        <span class="cal-rm-gm-badge-wrap">${renderLoyaltyBadge(g.tag)}</span>
-        <span class="cal-rm-gm-dates"><div>From ${g.from}</div><div>To ${g.to}</div></span>
-      </label>`;
-  }
-  function renderAssignList(visible) {
-    return visible.length
-      ? visible.map(({ g, i }) => renderGmRow(g, i, calAssignSelected.includes(i))).join('')
-      : '<p class="cal-rm-assign2-empty" style="padding:0;">No GM matches this search</p>';
-  }
-  function renderAssignChosen() {
-    return calAssignSelected.length
-      ? calAssignSelected.map(i => renderGmRow(CAL_ASSIGN_CANDIDATES[i], i, true)).join('')
-      : '<p class="cal-rm-assign2-empty">No GM selected at the moment</p>';
-  }
-  // Deux rafraîchissements distincts, jamais le drawer entier : réécrire tout le
-  // panneau ferait perdre le focus du champ de recherche à chaque frappe.
-  // Cocher un GM ne touche QUE la colonne de droite et le CTA — réécrire aussi la
-  // liste de gauche remplacerait la case que l'utilisateur vient de cliquer.
-  function refreshAssignSelection() {
-    const chosen = document.getElementById('cal-rm-assign-chosen');
-    if (chosen) chosen.innerHTML = renderAssignChosen();
-    const btn = document.getElementById('cal-rm-btn-confirm-assign');
-    if (btn) btn.disabled = calAssignSelected.length === 0;
-  }
-  // La recherche, elle, rebâtit la liste de gauche (et le libellé des 6 derniers
-  // consultés, qui ne vaut que pour la recherche vide).
-  function refreshAssignSearch() {
-    const hint = document.getElementById('cal-rm-assign-hint');
-    if (hint) hint.style.display = calAssignQuery.trim() ? 'none' : '';
-    const list = document.getElementById('cal-rm-assign-list');
-    if (list) list.innerHTML = renderAssignList(calAssignVisibleCandidates());
-    refreshAssignSelection();
-  }
-  // Sous-modale ASSIGN — nodes Figma 15918:48476 (recherche vide) et 15918:46925
-  // (résultats + sélection). Le drawer s'élargit : candidats à gauche, panneau
-  // « GM selectionné » à droite.
+  // Sous-modale ASSIGN — node Figma 15744:8216 ("Assign EC-S-01 to a GM").
   function renderAssignModalContent(roomIdx) {
     const r = CAL_ROOMS[roomIdx];
-    const visible = calAssignVisibleCandidates();
-    const hasQuery = calAssignQuery.trim().length > 0;
     return `
       <div class="cal-rm-title with-back">
         <button class="cal-rm-back-btn" id="cal-rm-back-btn"><img src="assets-calendrier/icon-assign-back-arrow.svg" alt="" /></button>
@@ -4407,85 +4218,34 @@
         <p>You are about to assign this room for :</p>
         ${renderRoomCardMini(r)}
       </div>
-      <div class="cal-rm-assign2">
-        <div class="cal-rm-assign2-left">
-          <div class="cal-rm-search-row">
-            <span>Search a GM</span>
-            <div class="cal-rm-search-field">
-              <img src="assets-calendrier/icon-search.svg" alt="" />
-              <input type="text" id="cal-rm-assign-search" placeholder="" value="${calAssignQuery}" />
-            </div>
-          </div>
-          <p class="cal-rm-assign2-hint" id="cal-rm-assign-hint" ${hasQuery ? 'style="display:none;"' : ''}>The last 6 consulted clients will appear here:</p>
-          <div class="cal-rm-gm-list" id="cal-rm-assign-list">${renderAssignList(visible)}</div>
-        </div>
-        <div class="cal-rm-assign2-sep"></div>
-        <div class="cal-rm-assign2-right">
-          <h3>GM selectionné</h3>
-          <div id="cal-rm-assign-chosen">${renderAssignChosen()}</div>
-        </div>
+      <div class="cal-rm-search-row">
+        <span>Search a GM</span>
+        <div class="cal-rm-search-field"><img src="assets-calendrier/icon-search.svg" alt="" /><span>MC DOE</span></div>
       </div>
-      <hr class="cal-rm-divider" />
-      <div class="cal-rm-cta center">
-        <button class="cal-rm-btn lock" id="cal-rm-btn-assign-cancel">Cancel</button>
-        <button class="cal-rm-btn yellow" id="cal-rm-btn-confirm-assign" ${calAssignSelected.length ? '' : 'disabled'}>Assign</button>
-      </div>`;
-  }
-  // Sous-modale RESERVE — node Figma 15899:20985 ("Reserve a EC-S-01 room"),
-  // 3e CTA de la modale chambre libre, à côté de Lock et Assign.
-  function renderReserveModalContent(roomIdx) {
-    const r = CAL_ROOMS[roomIdx];
-    return `
-      <div class="cal-rm-title with-back">
-        <button class="cal-rm-back-btn" id="cal-rm-back-btn"><img src="assets-calendrier/icon-back-arrow.svg" alt="" /></button>
-        <h2>Reserve a <span class="hl">${r.code}</span> room</h2>
+      <div class="cal-rm-gm-list">
+        ${CAL_ASSIGN_CANDIDATES.map((g, i) => `
+          <label class="cal-rm-gm-row">
+            <input type="radio" name="assign-gm" value="${i}" style="width:20px;height:20px;accent-color:#000;flex-shrink:0;margin-right:4px;" />
+            <span class="cal-rm-gm-name"><b>${g.familyName}</b><br>${g.firstName}</span>
+            <span class="cal-rm-gm-badge-wrap">${g.tag ? `<span class="cal-rm-loyalty-badge" style="background:${g.tag === 'Platinum' ? '#1e2643' : '#c8914f'};">${g.tag}</span>` : ''}</span>
+            <span class="cal-rm-gm-dates">${g.dates.split('\n').map(l => `<div>${l}</div>`).join('')}</span>
+          </label>`).join('')}
       </div>
-      <hr class="cal-rm-divider" />
-      <div class="cal-rm-assign-block">
-        <p>You are about to assign this room for :</p>
-        ${renderRoomCardMini(r)}
-      </div>
-      <div class="cal-rm-section-label small-gap" style="margin-top:24px;">RESERVATION DATE</div>
-      <div class="cal-rm-field-row-inline" style="margin-bottom:24px;">
-        <span class="lbl">From</span>
-        <div class="cal-rm-field-display date">JJ / MM / AA</div>
-        <span class="lbl" style="width:auto;">To</span>
-        <div class="cal-rm-field-display date">JJ / MM / AA</div>
-      </div>
-      <div class="cal-rm-section-label small-gap">REASON FOR RESERVATION</div>
-      <textarea class="cal-rm-textarea" placeholder="ex : specific guest request, connecting room, Vip guest ..."></textarea>
       <div style="flex:1 0 0;min-height:0;"></div>
-      <div class="cal-rm-cta" style="justify-content:flex-end;">
-        <button class="cal-rm-btn yellow" id="cal-rm-btn-confirm-reserve" style="flex:0 0 auto;min-width:150px;">Reserve</button>
-      </div>`;
-  }
-  function calRoomLockInfo(roomIdx) {
-    if (calUnlockedRooms.has(roomIdx)) return null;
-    if (calLockedRooms.has(roomIdx)) return calLockedRooms.get(roomIdx);
-    // I9-901 arrive déjà verrouillée dans le jeu de données Figma — on lui donne
-    // le motif de la maquette 15743:8400.
-    if (CAL_ROOMS[roomIdx].status === 'locked') {
-      return 'Family with young children - connected rooms locked against automatic reassignment.';
-    }
-    return null;
-  }
-  function renderLockBanner(reason) {
-    return `
-      <div class="cal-rm-lock-banner">
-        <img src="assets-calendrier/icon-padlock.svg" alt="" />
-        <span>${reason}</span>
+      <hr class="cal-rm-divider" />
+      <div class="cal-rm-cta">
+        <button class="cal-rm-btn lock" id="cal-rm-btn-assign-cancel">Cancel</button>
+        <button class="cal-rm-btn yellow" id="cal-rm-btn-confirm-assign">Assign</button>
       </div>`;
   }
   function renderRoomModalContent(roomIdx, booking) {
     const r = CAL_ROOMS[roomIdx];
-    const lockReason = calRoomLockInfo(roomIdx);
     const titleHtml = `
       <div class="cal-rm-title">
         <img src="assets-calendrier/icon-room-bedroom.svg" alt="" />
         <h2>Room ${r.code}</h2>
       </div>
-      <div class="cal-rm-subtitle">${r.type}</div>
-      ${lockReason ? renderLockBanner(lockReason) : ''}`;
+      <div class="cal-rm-subtitle">${r.type}</div>`;
     if (booking) {
       const fullName = `${booking.travelers[0].familyName.toUpperCase()} ${booking.travelers[0].firstName}`;
       return `
@@ -4529,7 +4289,7 @@
         ${renderRoomCharacteristics(r)}
         <hr class="cal-rm-divider" />
         <div class="cal-rm-cta">
-          <button class="cal-rm-btn lock" id="cal-rm-btn-lock">${lockReason ? 'Unlock' : 'Lock'}</button>
+          <button class="cal-rm-btn lock" id="cal-rm-btn-lock">Lock</button>
           <button class="cal-rm-btn solid" id="cal-rm-btn-switch">Switch</button>
         </div>`;
     }
@@ -4540,8 +4300,7 @@
       ${renderRoomCharacteristics(r)}
       <hr class="cal-rm-divider" />
       <div class="cal-rm-cta">
-        <button class="cal-rm-btn lock" id="cal-rm-btn-lock">${lockReason ? 'Unlock' : 'Lock'}</button>
-        <button class="cal-rm-btn lock" id="cal-rm-btn-reserve">Reserve</button>
+        <button class="cal-rm-btn lock" id="cal-rm-btn-lock">Lock</button>
         <button class="cal-rm-btn solid" id="cal-rm-btn-assign">Assign</button>
       </div>`;
   }
@@ -4550,118 +4309,30 @@
     // elle route vers l'état non assigné, jamais vers CURRENT STAY avec des champs absents.
     let booking = bookingIdx != null ? CAL_BOOKINGS[bookingIdx] : findActiveBookingForRoom(roomIdx);
     if (booking && booking.red) booking = undefined;
-    const modal = document.getElementById('cal-room-modal');
-    modal.classList.remove('wide'); // la largeur étendue n'appartient qu'à la sous-modale Assign
-    modal.innerHTML = renderRoomModalContent(roomIdx, booking);
+    document.getElementById('cal-room-modal').innerHTML = renderRoomModalContent(roomIdx, booking);
     document.getElementById('cal-room-modal-overlay').classList.add('open');
 
-    // Les CTA ouvrent la sous-modale correspondante (nœuds Figma 15753:10847 Lock,
-    // 15753:12764 Switch, 15918:48476 Assign, 15899:20985 Reserve) ; le bouton
-    // retour de chaque sous-modale revient à la modale principale chambre.
+    // Les CTA Lock/Switch/Assign ouvrent la sous-modale correspondante (nœuds Figma
+    // 15748:10611 / 15753:12764 / 15744:8216) ; le bouton retour de chaque sous-modale
+    // revient à la modale principale chambre — câblage métier (persistance réelle des
+    // actions) explicitement différé, comme demandé.
     document.getElementById('cal-rm-btn-lock')?.addEventListener('click', () => {
-      if (calRoomLockInfo(roomIdx)) {
-        // La chambre est verrouillée : le CTA vaut Unlock, on relâche sur place.
-        calLockedRooms.delete(roomIdx);
-        calUnlockedRooms.add(roomIdx);
-        openRoomModal(roomIdx, bookingIdx);
-        return;
-      }
-      openLockSubModal(roomIdx, bookingIdx);
+      document.getElementById('cal-room-modal').innerHTML = renderLockModalContent(roomIdx);
+      wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
+      document.getElementById('cal-rm-btn-activate-lock')?.addEventListener('click', () => alert('Action à câbler — Activate lock'));
     });
-    document.getElementById('cal-rm-btn-switch')?.addEventListener('click', () => openSwitchSubModal(roomIdx, bookingIdx, booking));
-    document.getElementById('cal-rm-btn-assign')?.addEventListener('click', () => openAssignSubModal(roomIdx, bookingIdx));
-    document.getElementById('cal-rm-btn-reserve')?.addEventListener('click', () => openReserveSubModal(roomIdx, bookingIdx));
-  }
-  function openLockSubModal(roomIdx, bookingIdx) {
-    document.getElementById('cal-room-modal').innerHTML = renderLockModalContent(roomIdx);
-    wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
-    document.getElementById('cal-rm-btn-activate-lock')?.addEventListener('click', () => {
-      const reason = document.getElementById('cal-rm-lock-reason')?.value;
-      calLockedRooms.set(roomIdx, reason || 'Room locked against automatic reassignment.');
-      calUnlockedRooms.delete(roomIdx);
-      openRoomModal(roomIdx, bookingIdx); // retour chambre, bandeau orange posé
+    document.getElementById('cal-rm-btn-switch')?.addEventListener('click', () => {
+      document.getElementById('cal-room-modal').innerHTML = renderSwitchModalContent(roomIdx, booking);
+      wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
+      document.getElementById('cal-rm-btn-switch-back')?.addEventListener('click', () => openRoomModal(roomIdx, bookingIdx));
+      document.getElementById('cal-rm-btn-activate-switch')?.addEventListener('click', () => alert('Action à câbler — Activate lock (switch)'));
     });
-  }
-  function openSwitchSubModal(roomIdx, bookingIdx, booking) {
-    document.getElementById('cal-room-modal').innerHTML = renderSwitchModalContent(roomIdx, booking);
-    wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
-    document.getElementById('cal-rm-btn-switch-back')?.addEventListener('click', () => openRoomModal(roomIdx, bookingIdx));
-    document.getElementById('cal-rm-btn-activate-switch')?.addEventListener('click', () => {
-      // Commentaire 10 Figma : « si switch il y a l'indiquer dans la ligne de calendrier ».
-      const bi = bookingIdx != null ? bookingIdx : CAL_BOOKINGS.indexOf(booking);
-      if (bi >= 0) calSwitchedBookings.add(bi);
-      renderCalendar();
-      closeRoomModal();
+    document.getElementById('cal-rm-btn-assign')?.addEventListener('click', () => {
+      document.getElementById('cal-room-modal').innerHTML = renderAssignModalContent(roomIdx);
+      wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
+      document.getElementById('cal-rm-btn-assign-cancel')?.addEventListener('click', () => openRoomModal(roomIdx, bookingIdx));
+      document.getElementById('cal-rm-btn-confirm-assign')?.addEventListener('click', () => alert('Action à câbler — Assign'));
     });
-  }
-  function openReserveSubModal(roomIdx, bookingIdx) {
-    document.getElementById('cal-room-modal').innerHTML = renderReserveModalContent(roomIdx);
-    wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
-    document.getElementById('cal-rm-btn-confirm-reserve')?.addEventListener('click', () => closeRoomModal());
-  }
-  function openAssignSubModal(roomIdx, bookingIdx) {
-    calAssignSelected = [];
-    calAssignQuery = '';
-    const modal = document.getElementById('cal-room-modal');
-    modal.classList.add('wide');
-    modal.innerHTML = renderAssignModalContent(roomIdx);
-    wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
-    document.getElementById('cal-rm-assign-search')?.addEventListener('input', e => {
-      calAssignQuery = e.target.value;
-      refreshAssignSearch();
-    });
-    // Délégation : les lignes sont réécrites à chaque frappe, un écouteur posé
-    // sur chaque case ne survivrait pas au re-rendu.
-    modal.addEventListener('change', e => {
-      const cb = e.target.closest('.cal-rm-gm-check');
-      if (!cb) return;
-      const idx = parseInt(cb.dataset.gmIdx, 10);
-      if (cb.checked) {
-        if (!calAssignSelected.includes(idx)) calAssignSelected.push(idx);
-      } else {
-        calAssignSelected = calAssignSelected.filter(i => i !== idx);
-      }
-      // Décocher depuis le panneau de droite doit aussi décocher la ligne
-      // correspondante à gauche — sinon les deux colonnes se contredisent.
-      if (cb.closest('#cal-rm-assign-chosen')) refreshAssignSearch();
-      else refreshAssignSelection();
-    });
-    document.getElementById('cal-rm-btn-assign-cancel')?.addEventListener('click', () => openRoomModal(roomIdx, bookingIdx));
-    document.getElementById('cal-rm-btn-confirm-assign')?.addEventListener('click', () => openAssignConfirmPopup(roomIdx));
-  }
-  // Pop-up de confirmation — node Figma 15929:44073. Récapitule la chambre et les
-  // GM retenus ; c'est le dernier écran avant validation de l'assignation.
-  function openAssignConfirmPopup(roomIdx) {
-    const r = CAL_ROOMS[roomIdx];
-    const gms = calAssignSelected.map(i => CAL_ASSIGN_CANDIDATES[i]);
-    document.getElementById('cal-rm-popup').innerHTML = `
-      <div class="cal-rm-popup-head">Assign ${r.code} to a GM</div>
-      <div class="cal-rm-popup-body">
-        <div class="cal-rm-popup-lead">
-          <span>You are about to assign room</span>
-          ${renderRoomCardMini(r)}
-          <span>for ${gms.length} GM :</span>
-        </div>
-        <ul class="cal-rm-popup-list">
-          ${gms.map(g => `<li><b>${g.familyName}</b> ${g.firstName}</li>`).join('')}
-        </ul>
-        <p class="cal-rm-popup-q">Do you want to confirm this room assignment?</p>
-      </div>
-      <div class="cal-rm-popup-cta">
-        <button class="cal-rm-btn lock" id="cal-rm-popup-back">Back</button>
-        <button class="cal-rm-btn yellow" id="cal-rm-popup-confirm">Assign</button>
-      </div>`;
-    document.getElementById('cal-rm-popup-overlay').classList.add('open');
-    document.getElementById('cal-rm-popup-back').addEventListener('click', closeAssignConfirmPopup);
-    document.getElementById('cal-rm-popup-confirm').addEventListener('click', () => {
-      // Les GM retenus sortent du vivier : ils ne seront plus proposés (Commentaire 9).
-      calAssignSelected.forEach(i => { CAL_ASSIGN_CANDIDATES[i].assigned = true; });
-      closeAssignConfirmPopup();
-      closeRoomModal();
-    });
-  }
-  function closeAssignConfirmPopup() {
-    document.getElementById('cal-rm-popup-overlay').classList.remove('open');
   }
   function wireBackButton(onBack) {
     document.getElementById('cal-rm-back-btn')?.addEventListener('click', onBack);
@@ -4672,18 +4343,8 @@
   document.getElementById('cal-room-modal-overlay').addEventListener('click', e => {
     if (e.target.id === 'cal-room-modal-overlay') closeRoomModal();
   });
-  document.getElementById('cal-rm-popup-overlay').addEventListener('click', e => {
-    if (e.target.id === 'cal-rm-popup-overlay') closeAssignConfirmPopup();
-  });
   document.addEventListener('keydown', e => {
-    if (e.key !== 'Escape') return;
-    // Le pop-up est au-dessus du drawer : il se referme en premier, sinon on
-    // perdrait la sélection de GM en cours derrière lui.
-    if (document.getElementById('cal-rm-popup-overlay').classList.contains('open')) {
-      closeAssignConfirmPopup();
-      return;
-    }
-    closeRoomModal();
+    if (e.key === 'Escape') closeRoomModal();
   });
   document.getElementById('cal-body').addEventListener('click', e => {
     const bookingEl = e.target.closest('.cal-booking');
