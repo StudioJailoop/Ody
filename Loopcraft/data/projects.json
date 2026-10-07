@@ -30,8 +30,8 @@
           "status": "in_progress",
           "wireframe": "../wireframe-calendrier-V1.html",
           "version": "V1",
-          "updated": "2026-09-30",
-          "label": "Vue calendrier — filtres + planning (scope V1)"
+          "updated": "2026-10-07",
+          "label": "Vue calendrier — assign multi-GM, lock, switch, reserve"
         }
       ]
     }
