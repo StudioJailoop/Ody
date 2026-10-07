@@ -4368,8 +4368,12 @@
   let calAssignQuery = '';
   function calAssignVisibleCandidates() {
     const q = calAssignQuery.trim().toLowerCase();
-    // Un GM déjà assigné ne doit jamais apparaître, recherche ou pas.
-    const pool = CAL_ASSIGN_CANDIDATES.map((g, i) => ({ g, i })).filter(({ g }) => !g.assigned);
+    // Un GM déjà assigné ne doit jamais apparaître, recherche ou pas. Un GM
+    // retenu non plus : il a quitté la colonne de gauche pour celle de droite,
+    // il n'est jamais présent des deux côtés à la fois.
+    const pool = CAL_ASSIGN_CANDIDATES
+      .map((g, i) => ({ g, i }))
+      .filter(({ g, i }) => !g.assigned && !calAssignSelected.includes(i));
     if (!q) return pool.filter(({ g }) => g.recent);
     return pool.filter(({ g }) => `${g.familyName} ${g.firstName}`.toLowerCase().includes(q));
   }
@@ -4382,34 +4386,33 @@
         <span class="cal-rm-gm-dates"><div>From ${g.from}</div><div>To ${g.to}</div></span>
       </label>`;
   }
+  // Colonne de gauche = candidats restants, donc jamais cochés : une ligne cochée
+  // est par définition passée à droite.
   function renderAssignList(visible) {
-    return visible.length
-      ? visible.map(({ g, i }) => renderGmRow(g, i, calAssignSelected.includes(i))).join('')
-      : '<p class="cal-rm-assign2-empty" style="padding:0;">No GM matches this search</p>';
+    if (visible.length) return visible.map(({ g, i }) => renderGmRow(g, i, false)).join('');
+    const msg = calAssignQuery.trim()
+      ? 'No GM matches this search'
+      : 'All recent clients are selected';
+    return `<p class="cal-rm-assign2-empty" style="padding:0;">${msg}</p>`;
   }
   function renderAssignChosen() {
     return calAssignSelected.length
       ? calAssignSelected.map(i => renderGmRow(CAL_ASSIGN_CANDIDATES[i], i, true)).join('')
       : '<p class="cal-rm-assign2-empty">No GM selected at the moment</p>';
   }
-  // Deux rafraîchissements distincts, jamais le drawer entier : réécrire tout le
-  // panneau ferait perdre le focus du champ de recherche à chaque frappe.
-  // Cocher un GM ne touche QUE la colonne de droite et le CTA — réécrire aussi la
-  // liste de gauche remplacerait la case que l'utilisateur vient de cliquer.
-  function refreshAssignSelection() {
-    const chosen = document.getElementById('cal-rm-assign-chosen');
-    if (chosen) chosen.innerHTML = renderAssignChosen();
-    const btn = document.getElementById('cal-rm-btn-confirm-assign');
-    if (btn) btn.disabled = calAssignSelected.length === 0;
-  }
-  // La recherche, elle, rebâtit la liste de gauche (et le libellé des 6 derniers
-  // consultés, qui ne vaut que pour la recherche vide).
-  function refreshAssignSearch() {
+  // Les deux colonnes se redessinent toujours ensemble : cocher déplace la ligne
+  // de gauche à droite, décocher la ramène — l'une ne peut pas bouger sans
+  // l'autre. On ne réécrit jamais le drawer entier, sinon le champ de recherche
+  // perdrait le focus à chaque frappe.
+  function refreshAssignPanels() {
     const hint = document.getElementById('cal-rm-assign-hint');
     if (hint) hint.style.display = calAssignQuery.trim() ? 'none' : '';
     const list = document.getElementById('cal-rm-assign-list');
     if (list) list.innerHTML = renderAssignList(calAssignVisibleCandidates());
-    refreshAssignSelection();
+    const chosen = document.getElementById('cal-rm-assign-chosen');
+    if (chosen) chosen.innerHTML = renderAssignChosen();
+    const btn = document.getElementById('cal-rm-btn-confirm-assign');
+    if (btn) btn.disabled = calAssignSelected.length === 0;
   }
   // Sous-modale ASSIGN — nodes Figma 15918:48476 (recherche vide) et 15918:46925
   // (résultats + sélection). Le drawer s'élargit : candidats à gauche, panneau
@@ -4631,7 +4634,7 @@
     wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
     document.getElementById('cal-rm-assign-search')?.addEventListener('input', e => {
       calAssignQuery = e.target.value;
-      refreshAssignSearch();
+      refreshAssignPanels();
     });
     // Délégation : les lignes sont réécrites à chaque frappe, un écouteur posé
     // sur chaque case ne survivrait pas au re-rendu.
@@ -4644,10 +4647,7 @@
       } else {
         calAssignSelected = calAssignSelected.filter(i => i !== idx);
       }
-      // Décocher depuis le panneau de droite doit aussi décocher la ligne
-      // correspondante à gauche — sinon les deux colonnes se contredisent.
-      if (cb.closest('#cal-rm-assign-chosen')) refreshAssignSearch();
-      else refreshAssignSelection();
+      refreshAssignPanels();
     });
     document.getElementById('cal-rm-btn-assign-cancel')?.addEventListener('click', () => openRoomModal(roomIdx, bookingIdx));
     document.getElementById('cal-rm-btn-confirm-assign')?.addEventListener('click', () => openAssignConfirmPopup(roomIdx));
