@@ -1016,20 +1016,6 @@
   }
   .cal-rm-textarea::placeholder { color: #333; }
   .cal-rm-stay-condensed { background: #F6EFE7; border-radius: 16px; padding: 16px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
-  /* Variante compacte du rappel de réservation (sous-modale Switch) : les mêmes
-     4 informations qu'en deux colonnes, mais sur deux lignes. La hauteur libérée
-     sert à l'étiquette de la chambre retenue et aux dates, sans scroll. */
-  .cal-rm-stay-inline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .cal-rm-stay-inline .cal-rm-stay-name { margin-bottom: 0; }
-  .cal-rm-stay-facts {
-    display: flex; align-items: center; gap: 8px; margin-top: 8px;
-    font-size: 14px; color: #333; flex-wrap: wrap;
-  }
-  .cal-rm-stay-facts img { width: 18px; height: 18px; }
-  .cal-rm-stay-facts .sep { color: #999; }
-  /* Étiquette de la chambre retenue : même carte que la chambre d'origine,
-     soulignée pour qu'on voie d'un coup d'œil que la cible est choisie. */
-  .cal-rm-swap-roomwrap.picked { background: #FFF; border: 1.5px solid var(--navy); }
   .cal-rm-swap-label { font-size: 16px; color: #000; margin: 0 0 12px; }
   .cal-rm-swap-arrow { display: flex; justify-content: center; margin: 4px 0; }
   .cal-rm-swap-arrow img { width: 30px; height: 30px; }
@@ -1055,11 +1041,6 @@
   .cal-rm-field-row-inline .lbl { font-size: 16px; color: #000; width: 40px; flex-shrink: 0; }
   .cal-rm-field-row-inline .cal-rm-field-display { flex-shrink: 0; width: 122px; }
   .cal-rm-field-row-inline .cal-rm-field-display.date { width: auto; flex: 1; }
-  /* Champ date saisissable (sous-modale Switch) : un <input> porte une largeur
-     intrinsèque qui l'empêche de se comprimer en flex — sans min-width:0 la
-     ligne déborde du tiroir de 22 px et le sélecteur am/pm est rogné. */
-  .cal-rm-field-row-inline input.cal-rm-field-display { min-width: 0; outline: none; }
-  .cal-rm-field-row-inline input.cal-rm-field-display:focus { border-color: var(--navy); }
   .cal-rm-search-field {
     flex: 1; display: flex; align-items: center; gap: 4px; height: 48px; border: 1px solid #000;
     border-radius: 100px; padding: 6px 6px 6px 12px; box-sizing: border-box;
@@ -1162,20 +1143,6 @@
      dans la modale chambre, le GM maître porte le picto et le rôle. */
   .cal-rm-popup-list { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
   .cal-rm-popup-q { font-size: 20px; color: #000; margin: 0; }
-  /* Confirmation du SWITCH : les deux chambres encadrent le picto d'échange.
-     Même carte que partout ailleurs (.cal-rm-room-card), seul l'agencement
-     est propre à cet écran. */
-  .cal-rm-switch-pair {
-    display: flex; align-items: center; justify-content: center; gap: 20px;
-    flex-wrap: wrap; margin-bottom: 16px;
-  }
-  .cal-rm-switch-pair .swapicon { width: 32px; height: 32px; flex-shrink: 0; }
-  .cal-rm-popup-dates {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    font-size: 16px; color: #333; margin-bottom: 20px; flex-wrap: wrap;
-  }
-  .cal-rm-popup-dates img { width: 18px; height: 18px; }
-  .cal-rm-popup-dates .sep { color: #999; }
   .cal-rm-popup-cta { display: flex; gap: 12px; justify-content: center; padding: 24px; flex-shrink: 0; }
   .cal-rm-popup-cta .cal-rm-btn { flex: 0 0 auto; min-width: 118px; padding: 0 32px; }
 
@@ -4367,72 +4334,6 @@
         <button class="cal-rm-btn yellow" id="cal-rm-btn-activate-lock">Activate lock</button>
       </div>`;
   }
-  // ── Sous-modale SWITCH : état du formulaire ──────────────────────────────
-  // Catégorie et occupation sont DÉDUITES de CAL_ROOMS, jamais écrites en dur :
-  // une chambre ajoutée demain apparaît toute seule dans les deux filtres.
-  let calSwitchCat = '', calSwitchOcc = '', calSwitchRoom = null;
-  let calSwitchFrom = '', calSwitchTo = '';
-  let calSwitchBooking = null, calSwitchBookingIdx = null;   // séjour en cours de switch
-
-  const calRoomCategory = r => (r.type || '').split(/[-\s]/)[0];  // 'DX-C3'→'DX', 'EC S+'→'EC'
-  const calRoomPax      = r => (r.pax ? parseInt(r.pax, 10) : null);
-
-  function calSwitchCategories() {
-    return [...new Set(CAL_ROOMS.map(calRoomCategory).filter(Boolean))].sort();
-  }
-  function calSwitchOccupations() {
-    return [...new Set(CAL_ROOMS.map(calRoomPax).filter(n => n != null))].sort((a, b) => a - b);
-  }
-  const calOverlap = (x, y) => x.dayStart <= y.dayEnd && y.dayStart <= x.dayEnd;
-  // Une chambre déjà occupée sur la période du séjour n'est pas proposable : on
-  // ne déplace quelqu'un que vers une chambre réellement libre à ces dates,
-  // sinon on empilerait deux séjours sur la même ligne du planning.
-  function calRoomFreeForStay(roomIdx) {
-    if (!calSwitchBooking) return true;
-    return !CAL_BOOKINGS.some((bk, i) =>
-      i !== calSwitchBookingIdx && bk.room === roomIdx && calOverlap(bk, calSwitchBooking));
-  }
-  // Chambres proposables : jamais celle d'origine, jamais une chambre bloquée ou
-  // en maintenance, jamais une chambre occupée sur la période, et conformes aux
-  // deux filtres quand ils sont renseignés.
-  function calSwitchCandidates(sourceIdx) {
-    return CAL_ROOMS
-      .map((r, i) => ({ r, i }))
-      .filter(({ r, i }) =>
-        i !== sourceIdx &&
-        r.status !== 'maintenance' && r.status !== 'locked' &&
-        calRoomFreeForStay(i) &&
-        (!calSwitchCat || calRoomCategory(r) === calSwitchCat) &&
-        (!calSwitchOcc || String(calRoomPax(r)) === calSwitchOcc));
-  }
-  // Zone re-rendue seule à chaque changement de filtre : le select des chambres
-  // et, dessous, l'étiquette de celle retenue — même composant que la chambre
-  // d'origine affichée plus haut (renderRoomCardMini).
-  function renderSwitchRoomZone(sourceIdx) {
-    const cands = calSwitchCandidates(sourceIdx);
-    const pick  = calSwitchRoom != null ? CAL_ROOMS[calSwitchRoom] : null;
-    return `
-      <div class="cal-rm-field">
-        <label>Room</label>
-        <select class="cal-rm-field-select" id="cal-sw-room"${cands.length ? '' : ' disabled'}>
-          <option value="">${cands.length ? 'Select room' : 'No room matches these filters'}</option>
-          ${cands.map(({ r, i }) =>
-            `<option value="${i}"${calSwitchRoom === i ? ' selected' : ''}>${r.code} — ${r.type}${r.pax ? ' · ' + r.pax : ''}</option>`).join('')}
-        </select>
-      </div>
-      ${pick ? `<div class="cal-rm-swap-roomwrap picked">${renderRoomCardMini(pick)}</div>` : ''}`;
-  }
-  // Même trio date/heure que renderDateTimeRow, mais saisissable : ici les dates
-  // sont une donnée du switch, pas une maquette. Pré-remplies avec le séjour.
-  function renderSwitchDateRow(label, id, value) {
-    return `
-      <div class="cal-rm-field-row-inline">
-        <span class="lbl">${label}</span>
-        <input class="cal-rm-field-display date" id="${id}" value="${value || ''}" placeholder="JJ / MM / AA" />
-        <div class="cal-rm-field-display">Hour<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
-        <div class="cal-rm-field-display">am<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
-      </div>`;
-  }
   // Sous-modale SWITCH — node Figma 15753:12764 ("Switch room").
   function renderSwitchModalContent(roomIdx, booking) {
     const r = CAL_ROOMS[roomIdx];
@@ -4445,18 +4346,20 @@
       <hr class="cal-rm-divider" />
       <p class="cal-rm-swap-label">The room switch will take place for this reservation:</p>
       <div class="cal-rm-stay-condensed">
-        <div class="cal-rm-stay-inline">
-          <span class="cal-rm-stay-name">${fullName}</span>
-          ${booking.tag ? renderLoyaltyBadge(booking.tag) : ''}
-        </div>
-        <div class="cal-rm-stay-facts">
-          <img src="assets-calendrier/icon-transport-arrival.svg" alt="Arrival" />
-          <span>${formatModalDate(booking.arrival)}</span>
-          <span class="sep">→</span>
-          <img src="assets-calendrier/icon-transport-departure.svg" alt="Departure" />
-          <span>${formatModalDate(booking.departure)}</span>
-          <span class="sep">·</span>
-          <span>${booking.guestCount} pax</span>
+        <div class="cal-rm-stay-name">${fullName}</div>
+        <div class="cal-rm-stay-columns">
+          <div class="cal-rm-stay-col">
+            <div class="cal-rm-stay-field-label"><img src="assets-calendrier/icon-transport-arrival.svg" alt="" />Arrival</div>
+            <div class="cal-rm-stay-field-value">${formatModalDate(booking.arrival)}</div>
+            <div class="cal-rm-stay-field-label">Guest</div>
+            <div class="cal-rm-stay-field-value">${booking.guestCount} pax</div>
+          </div>
+          <div class="cal-rm-stay-col">
+            <div class="cal-rm-stay-field-label"><img src="assets-calendrier/icon-transport-departure.svg" alt="" />Departure</div>
+            <div class="cal-rm-stay-field-value">${formatModalDate(booking.departure)}</div>
+            <div class="cal-rm-stay-field-label">Type</div>
+            ${booking.tag ? `<span class="cal-rm-loyalty-badge">${booking.tag}</span>` : '<div class="cal-rm-stay-field-value">—</div>'}
+          </div>
         </div>
       </div>
       <p class="cal-rm-swap-label">Swap the assignments of these two rooms :</p>
@@ -4466,27 +4369,24 @@
         <div class="cal-rm-field-row">
           <div class="cal-rm-field">
             <label>Category</label>
-            <select class="cal-rm-field-select" id="cal-sw-cat">
-              <option value="">Select</option>
-              ${calSwitchCategories().map(c => `<option value="${c}"${calSwitchCat === c ? ' selected' : ''}>${c}</option>`).join('')}
-            </select>
+            <div class="cal-rm-field-display">Select<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
           </div>
           <div class="cal-rm-field">
             <label>Occupation</label>
-            <select class="cal-rm-field-select" id="cal-sw-occ">
-              <option value="">Select</option>
-              ${calSwitchOccupations().map(o => `<option value="${o}"${calSwitchOcc === String(o) ? ' selected' : ''}>${o} pax</option>`).join('')}
-            </select>
+            <div class="cal-rm-field-display">Select<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
           </div>
         </div>
-        <div id="cal-sw-roomzone">${renderSwitchRoomZone(roomIdx)}</div>
-        ${renderSwitchDateRow('From', 'cal-sw-from', calSwitchFrom)}
-        ${renderSwitchDateRow('To',   'cal-sw-to',   calSwitchTo)}
+        <div class="cal-rm-field">
+          <label>Room</label>
+          <div class="cal-rm-field-display">Select room<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+        </div>
+        ${renderDateTimeRow('From', true)}
+        ${renderDateTimeRow('To', true)}
       </div>
       <div style="flex:1 0 0;min-height:0;"></div>
       <div class="cal-rm-cta">
         <button class="cal-rm-btn lock" id="cal-rm-btn-switch-back">Back</button>
-        <button class="cal-rm-btn yellow" id="cal-rm-btn-activate-switch"${calSwitchRoom == null ? ' disabled' : ''}>Switch room</button>
+        <button class="cal-rm-btn yellow" id="cal-rm-btn-activate-switch">Switch room</button>
       </div>`;
   }
   // Liste de GM candidats pour la sous-modale ASSIGN — même pattern de données
@@ -4775,95 +4675,14 @@
     });
   }
   function openSwitchSubModal(roomIdx, bookingIdx, booking) {
-    // Formulaire remis à zéro à chaque ouverture : les filtres d'un switch
-    // abandonné ne doivent pas réapparaître sur la réservation suivante.
-    calSwitchCat = ''; calSwitchOcc = ''; calSwitchRoom = null;
-    calSwitchFrom = formatModalDate(booking.arrival);
-    calSwitchTo   = formatModalDate(booking.departure);
-    calSwitchBooking    = booking;
-    calSwitchBookingIdx = bookingIdx != null ? bookingIdx : CAL_BOOKINGS.indexOf(booking);
-
     document.getElementById('cal-room-modal').innerHTML = renderSwitchModalContent(roomIdx, booking);
     wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
     document.getElementById('cal-rm-btn-switch-back')?.addEventListener('click', () => openRoomModal(roomIdx, bookingIdx));
-
-    const onRoomChange = e => {
-      calSwitchRoom = e.target.value === '' ? null : parseInt(e.target.value, 10);
-      refreshZone();
-    };
-    // Re-rendu chirurgical : seule la zone chambre est réécrite quand un filtre
-    // bouge. Les dates déjà saisies et la position de scroll sont préservées.
-    function refreshZone() {
-      document.getElementById('cal-sw-roomzone').innerHTML = renderSwitchRoomZone(roomIdx);
-      document.getElementById('cal-sw-room')?.addEventListener('change', onRoomChange);
-      document.getElementById('cal-rm-btn-activate-switch').disabled = (calSwitchRoom == null);
-    }
-    const onFilter = () => {
-      calSwitchCat = document.getElementById('cal-sw-cat').value;
-      calSwitchOcc = document.getElementById('cal-sw-occ').value;
-      // Une chambre retenue puis exclue par un filtre est oubliée : sinon on
-      // garderait affichée une étiquette que la liste ne propose plus.
-      if (calSwitchRoom != null && !calSwitchCandidates(roomIdx).some(c => c.i === calSwitchRoom)) {
-        calSwitchRoom = null;
-      }
-      refreshZone();
-    };
-    document.getElementById('cal-sw-cat')?.addEventListener('change', onFilter);
-    document.getElementById('cal-sw-occ')?.addEventListener('change', onFilter);
-    document.getElementById('cal-sw-room')?.addEventListener('change', onRoomChange);
-    document.getElementById('cal-sw-from')?.addEventListener('input', e => { calSwitchFrom = e.target.value; });
-    document.getElementById('cal-sw-to')?.addEventListener('input',   e => { calSwitchTo   = e.target.value; });
     document.getElementById('cal-rm-btn-activate-switch')?.addEventListener('click', () => {
-      if (calSwitchRoom == null) return;   // garde-fou : le bouton est déjà désactivé
-      openSwitchConfirmPopup(roomIdx, calSwitchRoom, bookingIdx, booking);
-    });
-  }
-  // Pop-up de confirmation du SWITCH — MÊME composant que la confirmation
-  // d'assignation (node 15929:44073) : réutilisé, pas redessiné. Les deux
-  // chambres encadrent le picto d'échange, les dates du switch sont rappelées.
-  function openSwitchConfirmPopup(sourceIdx, targetIdx, bookingIdx, booking) {
-    const a = CAL_ROOMS[sourceIdx], b = CAL_ROOMS[targetIdx];
-    document.getElementById('cal-rm-popup').innerHTML = `
-      <div class="cal-rm-popup-head">Switch room</div>
-      <div class="cal-rm-popup-body">
-        <p class="cal-rm-popup-q" style="margin-bottom:16px;">You are about to switch these two rooms :</p>
-        <div class="cal-rm-switch-pair">
-          ${renderRoomCardMini(a)}
-          <img class="swapicon" src="assets-calendrier/icon-compare-arrows.svg" alt="switch" />
-          ${renderRoomCardMini(b)}
-        </div>
-        <div class="cal-rm-popup-dates">
-          <img src="assets-calendrier/icon-transport-arrival.svg" alt="" /><span>${calSwitchFrom || '—'}</span>
-          <span class="sep">→</span>
-          <img src="assets-calendrier/icon-transport-departure.svg" alt="" /><span>${calSwitchTo || '—'}</span>
-        </div>
-        <p class="cal-rm-popup-q">Do you want to confirm this room switch?</p>
-      </div>
-      <div class="cal-rm-popup-cta">
-        <button class="cal-rm-btn lock" id="cal-rm-popup-back">Back</button>
-        <button class="cal-rm-btn yellow" id="cal-rm-popup-confirm">Switch room</button>
-      </div>`;
-    document.getElementById('cal-rm-popup-overlay').classList.add('open');
-    document.getElementById('cal-rm-popup-back').addEventListener('click', closeAssignConfirmPopup);
-    document.getElementById('cal-rm-popup-confirm').addEventListener('click', () => {
+      // Commentaire 10 Figma : « si switch il y a l'indiquer dans la ligne de calendrier ».
       const bi = bookingIdx != null ? bookingIdx : CAL_BOOKINGS.indexOf(booking);
-      if (bi >= 0) {
-        // La liste ne propose que des chambres libres sur la période, donc ce
-        // cas ne devrait pas se présenter. Filet de sécurité : si un séjour
-        // occupe quand même la cible, il prend la chambre d'origine en échange
-        // plutôt que de se faire recouvrir silencieusement.
-        const occupant = CAL_BOOKINGS.findIndex((bk, i) =>
-          i !== bi && bk.room === targetIdx && calOverlap(bk, CAL_BOOKINGS[bi]));
-        if (occupant >= 0) {
-          CAL_BOOKINGS[occupant].room = sourceIdx;
-          calSwitchedBookings.add(occupant);
-        }
-        CAL_BOOKINGS[bi].room = targetIdx;
-        // Commentaire 10 Figma : « si switch il y a l'indiquer dans la ligne ».
-        calSwitchedBookings.add(bi);
-      }
+      if (bi >= 0) calSwitchedBookings.add(bi);
       renderCalendar();
-      closeAssignConfirmPopup();
       closeRoomModal();
     });
   }
