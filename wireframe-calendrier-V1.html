@@ -2220,7 +2220,7 @@
       pin.qualifiedType = newType;
       pin.requalified = true;
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments)); fbSave();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments)); fbSaveOne(pin);
     // Enregistrer le brief créé de façon atomique
     const newBrief = briefs.find(b => b.sourceKey === key);
     if (newBrief) { saveBriefs(); fbSaveBriefOne(newBrief); } else { saveBriefs(); }
@@ -2454,16 +2454,22 @@
   function deleteTeamComment(pinId, replyIdx) {
     const idx = comments.findIndex(c => c.id === pinId);
     if (idx === -1) return;
+    // Supprimer un commentaire = DELETE sur son ID. Supprimer une réponse =
+    // réécrire le commentaire porteur. Dans les deux cas on ne touche qu'à lui.
+    let fbOp;
     if (replyIdx === null) {
       // Supprimer le commentaire principal (et son pin)
+      const removed = comments[idx];
       comments.splice(idx, 1);
       const pin = document.getElementById('pin-' + pinId);
       if (pin) pin.remove();
+      fbOp = () => fbDeleteOne(removed.id);
     } else {
       // Supprimer uniquement la réponse
       comments[idx].replies.splice(replyIdx, 1);
+      fbOp = () => fbSaveOne(comments[idx]);
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments)); fbSave();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments)); fbOp();
     loadTeamComments();
     refreshPins();
   }
@@ -5063,27 +5069,77 @@
   // CURRENT_USER déjà déclaré en haut du script via la résolution du rôle
 
   // ── Firebase sync ──
-  // Écriture atomique : chaque commentaire écrit individuellement par son ID
-  async function fbSaveOne(comment) {
-    try {
-      await fetch(FB_URL + '/' + comment.id + '.json', {
-        method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...comment, project: 'club-med'})
-      });
-    } catch(e) {}
+  // Un commentaire PO est irremplaçable. Deux pièges corrigés ici :
+  //
+  // 1. fetch() ne LÈVE PAS sur un 401/403 : il résout avec ok=false. L'ancien
+  //    code ne testait jamais res.ok et enveloppait tout dans catch(e){} — un
+  //    refus Firebase passait donc pour un succès et le commentaire était
+  //    perdu sans aucun signal.
+  // 2. Toute écriture passait par un PUT global sur la collection entière, ce
+  //    qui écrase les commentaires écrits par un autre PO depuis le dernier
+  //    chargement. Tout est désormais atomique, par identifiant.
+  //
+  // Ce qui n'a pas pu partir est mis en file d'attente, rejoué à chaque poll,
+  // et signalé visiblement tant qu'il reste quelque chose de non transmis.
+  const PENDING_KEY = 'wf_comments_calendrier_pending';
+  let fbPending = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
+
+  function fbPersistPending() {
+    localStorage.setItem(PENDING_KEY, JSON.stringify(fbPending));
+    updateSyncBadge();
   }
-  // Mise à jour d'un commentaire existant (réponses, requalification, suppression)
-  async function fbSave() {
+  function fbEnqueue(op) {
+    // Une seule opération en attente par commentaire : la plus récente gagne.
+    fbPending = fbPending.filter(p => p.id !== op.id);
+    fbPending.push(op);
+    fbPersistPending();
+  }
+  async function fbWrite(op) {
     try {
-      const obj = {};
-      comments.forEach(c => { obj[c.id] = {...c, project: 'club-med'}; });
-      await fetch(FB_URL + '.json', {
-        method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(obj)
-      });
-    } catch(e) {}
+      const res = await fetch(FB_URL + '/' + op.id + '.json',
+        op.method === 'DELETE'
+          ? { method: 'DELETE' }
+          : { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(op.body) });
+      if (!res.ok) { fbEnqueue(op); return false; }   // 401/403/500 → on garde et on rejouera
+      fbPending = fbPending.filter(p => p.id !== op.id);
+      fbPersistPending();
+      return true;
+    } catch (e) {
+      fbEnqueue(op);                                   // hors ligne → idem
+      return false;
+    }
+  }
+  // Écriture atomique : un commentaire, par son ID, sans toucher aux autres.
+  function fbSaveOne(comment) {
+    return fbWrite({ id: comment.id, method: 'PUT', body: {...comment, project: 'club-med'} });
+  }
+  function fbDeleteOne(id) {
+    return fbWrite({ id, method: 'DELETE' });
+  }
+  // Conservé comme filet : réécrit chaque commentaire atomiquement au lieu de
+  // remplacer la collection. Les suppressions passent par fbDeleteOne.
+  async function fbSave() {
+    for (const c of comments) await fbSaveOne(c);
+  }
+  // Rejoue les écritures en souffrance : au chargement, puis à chaque poll.
+  async function fbFlush() {
+    if (!fbPending.length) return;
+    for (const op of [...fbPending]) await fbWrite(op);
+  }
+  // Bandeau d'alerte — la PO doit savoir que son retour n'est pas parti.
+  function updateSyncBadge() {
+    let el = document.getElementById('wf-sync-badge');
+    if (!fbPending.length) { if (el) el.remove(); return; }
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'wf-sync-badge';
+      el.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:3000;'
+        + 'background:#C75300;color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border-radius:100px;'
+        + 'box-shadow:0 2px 12px rgba(0,0,0,.28);font-family:inherit;max-width:420px;text-align:center;';
+      document.body.appendChild(el);
+    }
+    const n = fbPending.length;
+    el.textContent = `⚠ ${n} commentaire${n > 1 ? 's' : ''} non transmis — gardez cet onglet ouvert`;
   }
 
   async function fbLoad() {
@@ -5106,10 +5162,13 @@
     } catch(e) { /* offline — localStorage reste prioritaire */ }
   }
 
-  // Poll toutes les 5s pour voir les nouveaux commentaires
-  setInterval(fbLoad, 5000);
-  // Chargement initial depuis Firebase
-  fbLoad();
+  // Poll toutes les 5s : on rejoue d'abord ce qui n'est pas parti, puis on
+  // relit. Dans cet ordre, sinon une relecture pourrait masquer une écriture
+  // encore en souffrance.
+  setInterval(() => { fbFlush().then(fbLoad); }, 5000);
+  // Au chargement : rejouer la file héritée de la session précédente.
+  fbFlush().then(fbLoad);
+  updateSyncBadge();
   // Designer : pings activés par défaut
   // PO : pings toujours activés pour pouvoir commenter
   let commentMode = isPO ? true
@@ -5527,7 +5586,7 @@
             comments[idx].x = parseFloat(pin.style.left).toFixed(0);
             comments[idx].y = parseFloat(pin.style.top).toFixed(0);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
-            fbSave();
+            fbSaveOne(comments[idx]);
           }
         }
       };
@@ -5619,7 +5678,7 @@
     if (!c) return;
     if (!c.replies) c.replies = [];
     c.replies.push({ author, text, date: new Date().toLocaleDateString('fr-FR') });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments)); fbSave();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments)); fbSaveOne(c);
     renderThreadMessages(c);
     document.getElementById('reply-text').value = '';
     // Mettre une pastille sur le pin pour indiquer les réponses
@@ -5638,7 +5697,7 @@
     const idToDelete = currentThreadId;
     closeThread();
     comments = comments.filter(c => c.id !== idToDelete);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments)); fbSave();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments)); fbDeleteOne(idToDelete);
     updateAuthorFilter();
     refreshPins();
   }
@@ -5646,7 +5705,7 @@
   function deleteComment(e, id) {
     e.stopPropagation();
     comments = comments.filter(c => c.id !== id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments)); fbSave();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments)); fbDeleteOne(id);
     renderComments();
     updateAuthorFilter();
     refreshPins();
