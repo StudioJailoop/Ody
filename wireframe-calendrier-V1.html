@@ -1054,7 +1054,19 @@
   .cal-rm-assign2-left .cal-rm-gm-list { overflow-y: auto; min-height: 0; flex: 1; margin-bottom: 0; padding-right: 4px; }
   .cal-rm-gm-row.pick { cursor: pointer; background: var(--white); }
   .cal-rm-gm-row.chosen { border-color: transparent; background: transparent; min-height: 70px; padding: 6px 12px; }
-  .cal-rm-gm-check { width: 20px; height: 20px; accent-color: #000; flex-shrink: 0; cursor: pointer; }
+  /* Case à cocher du DS — composant Figma « List / Checkbox=Yes » (15918:39384) :
+     carré arrondi 24×24 à contour noir, fond transparent, coche noire à
+     l'intérieur. La case native du navigateur se remplit en noir plein à l'état
+     coché : ce n'est pas le même objet. La coche est l'asset Figma, pas un
+     tracé CSS. */
+  .cal-rm-gm-check {
+    appearance: none; -webkit-appearance: none; margin: 0;
+    width: 24px; height: 24px; flex-shrink: 0; cursor: pointer;
+    border: 1.5px solid #000; border-radius: 6px; background: transparent;
+    background-repeat: no-repeat; background-position: center;
+    background-size: 12.8px 9.08px;
+  }
+  .cal-rm-gm-check:checked { background-image: url("assets-calendrier/icon-checkbox-check.svg"); }
   .cal-rm-cta.center { justify-content: center; }
   .cal-rm-cta.center .cal-rm-btn { flex: 0 0 auto; min-width: 150px; padding: 0 32px; }
   .cal-rm-btn[disabled] { background: #F8F8F8; color: #999999; border: none; cursor: not-allowed; }
