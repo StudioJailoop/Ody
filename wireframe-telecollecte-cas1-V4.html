@@ -2,6 +2,31 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
+  <script>
+  /* ═══ LOOPCRAFT — ISOLATION DU SOUS-PROJET ═══════════════════════════════
+     Chaque sous-projet a son propre espace de stockage. Ces 6 clés étaient
+     communes à plusieurs sous-projets : la documentation ou les règles de
+     gestion de l'un pouvaient écraser celles d'un autre. On les préfixe ici,
+     de façon transparente — aucune autre ligne du wireframe n'est modifiée.
+     Reprise de l'existant : on copie, on n'efface jamais l'ancienne clé.   */
+  (function () {
+    var NS = 'telecollecte';
+    var ISOLEES = ['wf_documentation', 'wf_documentation_date', 'wf_pins_visible',
+                   'wf_rg_blocks', 'wf_rg_selection', 'wf_rg_version'];
+    var ls  = window.localStorage;
+    var get = ls.getItem.bind(ls), set = ls.setItem.bind(ls), del = ls.removeItem.bind(ls);
+    function map(k) {
+      return ISOLEES.indexOf(k) !== -1 ? 'wf_' + NS + '_' + k.slice(3) : k;
+    }
+    ISOLEES.forEach(function (k) {
+      var n = map(k);
+      if (get(n) === null && get(k) !== null) set(n, get(k));
+    });
+    ls.getItem    = function (k)    { return get(map(k)); };
+    ls.setItem    = function (k, v) { return set(map(k), v); };
+    ls.removeItem = function (k)    { return del(map(k)); };
+  })();
+  </script>
   <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
   <title>Wireframe — Télécollecte Cas 1 : Saisie Jour J</title>
   <style>
