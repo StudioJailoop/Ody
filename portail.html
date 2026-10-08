@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Odyssey — Wireframes</title>
+  <title>Espace Odyssey — Club Med</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     :root {
@@ -237,13 +237,19 @@
     </div>
   </header>
   <div class="portal-content">
-    <div class="portal-title">Wireframes — Télécollecte</div>
-    <div class="portal-sub">Saisie des télécollectes TPE · Club Med Odyssey</div>
+    <div class="portal-title">Espace Odyssey</div>
+    <div class="portal-sub">Vos wireframes Club Med · commentez directement dans l'écran</div>
     <div class="cards-grid">
-      <a class="wf-card" id="wf-link" href="#" target="_blank" onclick="openWireframe(event)">
-        <div class="card-tag">V4.21 — En cours</div>
-        <div class="card-title">Saisie des télécollectes</div>
-        <div class="card-desc">Télécollecte · Date antérieure · Régularisation — Commentaires & Règles de gestion disponibles</div>
+      <a class="wf-card" href="#" target="_blank" onclick="openWireframe(event, 'wireframe-telecollecte-cas1-V4.html')">
+        <div class="card-tag">V4 — En cours</div>
+        <div class="card-title">Télécollecte</div>
+        <div class="card-desc">Saisie des télécollectes TPE · Date antérieure · Régularisation — commentaires et règles de gestion disponibles</div>
+        <div class="card-arrow">→</div>
+      </a>
+      <a class="wf-card" href="#" target="_blank" onclick="openWireframe(event, 'wireframe-calendrier-V1.html')">
+        <div class="card-tag">V1 — En cours</div>
+        <div class="card-title">Calendrier planning</div>
+        <div class="card-desc">Planning des chambres · assignation, verrouillage, échange — commentaires et règles de gestion disponibles</div>
         <div class="card-arrow">→</div>
       </a>
     </div>
@@ -291,11 +297,15 @@
     document.body.style.alignItems = 'flex-start';
   }
 
-  function openWireframe(e) {
+  function openWireframe(e, fichier) {
     e.preventDefault();
     const user = JSON.parse(sessionStorage.getItem('wf_user') || '{}');
     const name = encodeURIComponent(user.name || '');
-    window.location.href = `wireframe-telecollecte-cas1-V4.html?role=po&user=${name}`;
+    // role=po est INDISPENSABLE : sans lui le wireframe ne reconnaît ni
+    // designer ni PO, le mode commentaire reste éteint et la PO ne peut pas
+    // annoter. L'ancien lien n'envoyait que ?user=, d'où des retours impossibles
+    // à déposer. Forme imposée par la Constitution Loopcraft.
+    window.open(`${fichier}?role=po&user=${name}`, '_blank');
   }
 
   function doLogout() {
