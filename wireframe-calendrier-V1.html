@@ -3936,8 +3936,11 @@
   // Icônes = assets SVG réels téléchargés depuis Figma (node Calendrier, 2026-10-01),
   // JAMAIS redessinées à la main — voir assets-calendrier/ à côté de ce fichier.
   const CAL_STATUS_ICON = {
-    occupied:'<img src="assets-calendrier/icon-minus.svg" width="16" height="16" alt="" />',
-    maintenance:'<img src="assets-calendrier/icon-cross.svg" width="16" height="16" alt="" />',
+    // Composant Figma « Room card » (15690:7437) : l'état Assigned porte un check
+    // cerclé blanc, pas un moins ; Blocked porte le picto maintenance, pas une
+    // croix. icon-maintenance.svg dormait inutilisé dans assets-calendrier.
+    occupied:'<img src="assets-calendrier/icon-check-white.svg" width="16" height="16" alt="" />',
+    maintenance:'<img src="assets-calendrier/icon-maintenance.svg" width="16" height="16" alt="" />',
     presence:'<img src="assets-calendrier/icon-people.svg" width="16" height="16" alt="" />',
     locked:'<img src="assets-calendrier/icon-padlock.svg" width="16" height="16" alt="" />',
     calendar:'<img src="assets-calendrier/icon-calendars.svg" width="16" height="16" alt="" />'
