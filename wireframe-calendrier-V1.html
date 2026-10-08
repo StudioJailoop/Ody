@@ -1027,9 +1027,9 @@
   }
   .cal-rm-stay-facts img { width: 18px; height: 18px; }
   .cal-rm-stay-facts .sep { color: #999; }
-  /* Étiquette de la chambre retenue : même carte que la chambre d'origine,
-     soulignée pour qu'on voie d'un coup d'œil que la cible est choisie. */
-  .cal-rm-swap-roomwrap.picked { background: #FFF; border: 1.5px solid var(--navy); }
+  /* Étiquette de la chambre retenue : elle suit directement le champ, sans
+     cadre ni fond — c'est la continuation de la sélection, pas un bloc à part. */
+  .cal-sw-picked { margin-top: 12px; display: flex; }
   .cal-rm-swap-label { font-size: 16px; color: #000; margin: 0 0 12px; }
   .cal-rm-swap-arrow { display: flex; justify-content: center; margin: 4px 0; }
   .cal-rm-swap-arrow img { width: 30px; height: 30px; }
@@ -4420,7 +4420,7 @@
             `<option value="${i}"${calSwitchRoom === i ? ' selected' : ''}>${r.code} — ${r.type}${r.pax ? ' · ' + r.pax : ''}</option>`).join('')}
         </select>
       </div>
-      ${pick ? `<div class="cal-rm-swap-roomwrap picked">${renderRoomCardMini(pick)}</div>` : ''}`;
+      ${pick ? `<div class="cal-sw-picked">${renderRoomCardMini(pick)}</div>` : ''}`;
   }
   // Même trio date/heure que renderDateTimeRow, mais saisissable : ici les dates
   // sont une donnée du switch, pas une maquette. Pré-remplies avec le séjour.
