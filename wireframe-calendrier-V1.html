@@ -44,8 +44,13 @@
     }
 
     html, body {
+      /* Le canevas de référence reste 1440x1024 (maquette Figma), mais la
+         HAUTEUR suit la fenêtre : sur un écran plus court que 1024px le bas
+         était coupé sans aucun moyen de défiler. La grille du planning gère
+         son propre défilement interne, donc rien ne se perd. */
       width: 1440px;
-      height: 1024px;
+      height: 100vh;
+      min-height: 560px;
       overflow: hidden;
       background: var(--navy);
       font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
@@ -131,7 +136,8 @@
       position: fixed;
       top: 72px; left: 0;
       width: 1440px;
-      height: calc(1024px - 72px);
+      height: calc(100vh - 72px);
+      min-height: calc(560px - 72px);
       display: flex;
     }
 
@@ -796,7 +802,7 @@
   /* ── Plein écran : masque header/sidebar/barre filtres pour maximiser la grille,
      reste dans le canevas fixe 1440x1024 (convention Loopcraft) ── */
   body.cal-fullscreen .header { display: none; }
-  body.cal-fullscreen .layout { top: 0; height: 1024px; }
+  body.cal-fullscreen .layout { top: 0; height: 100vh; }
   body.cal-fullscreen .sidebar { display: none; }
   body.cal-fullscreen #toggle-btn { display: none; }
   body.cal-fullscreen #back-dashboard-btn,
