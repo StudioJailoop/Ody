@@ -1027,9 +1027,13 @@
   }
   .cal-rm-stay-facts img { width: 18px; height: 18px; }
   .cal-rm-stay-facts .sep { color: #999; }
-  /* Étiquette de la chambre retenue : elle suit directement le champ, sans
-     cadre ni fond — c'est la continuation de la sélection, pas un bloc à part. */
-  .cal-sw-picked { margin-top: 12px; display: flex; justify-content: center; }
+  /* Chambre retenue : le champ et son étiquette tiennent sur la même ligne.
+     L'étiquette est la continuation directe de la sélection — ni cadre, ni
+     fond — et s'aligne sur le bas du champ, sous le libellé. */
+  .cal-sw-roomrow { display: flex; align-items: flex-end; gap: 20px; }
+  .cal-sw-roomrow .cal-rm-field { flex: 1 1 0; }
+  .cal-sw-picked { flex: 1 1 0; display: flex; align-items: center; min-height: 48px; }
+  .cal-sw-picked .cal-rm-room-card { width: 100%; }
   .cal-rm-swap-label { font-size: 16px; color: #000; margin: 0 0 12px; }
   .cal-rm-swap-arrow { display: flex; justify-content: center; margin: 4px 0; }
   .cal-rm-swap-arrow img { width: 30px; height: 30px; }
@@ -1085,6 +1089,13 @@
      (résultats + sélection). Le drawer s'élargit le temps de l'assignation :
      candidats à gauche, panneau « GM selectionné » beige à droite. ══ */
   .cal-room-modal.wide { width: 1148px; }
+  /* Largeur intermédiaire pour la sous-modale Switch : à 560px la ligne de
+     dates (date + heure + am/pm) était comprimée et l'étiquette ne pouvait pas
+     tenir à côté du champ Room. 760px laisse les deux respirer sans aller
+     jusqu'aux 1148px de l'assignation multi-GM.
+     NE PAS nommer cette classe `switch` : `.switch` est déjà l'interrupteur du
+     panel (44×24px) — le tiroir héritait de sa hauteur et se réduisait à 64px. */
+  .cal-room-modal.medium { width: 760px; }
   /* Dans le drawer large, la carte chambre reste collée à sa phrase : le
      space-between du drawer étroit la rejetterait à 1100px de son libellé. */
   .cal-room-modal.wide .cal-rm-assign-block { justify-content: flex-start; gap: 32px; }
@@ -4415,15 +4426,17 @@
     const cands = calSwitchCandidates(sourceIdx);
     const pick  = calSwitchRoom != null ? CAL_ROOMS[calSwitchRoom] : null;
     return `
-      <div class="cal-rm-field">
-        <label>Room</label>
-        <select class="cal-rm-field-select" id="cal-sw-room"${cands.length ? '' : ' disabled'}>
-          <option value="">${cands.length ? 'Select room' : 'No room matches these filters'}</option>
-          ${cands.map(({ r, i }) =>
-            `<option value="${i}"${calSwitchRoom === i ? ' selected' : ''}>${r.code} — ${r.type}${r.pax ? ' · ' + r.pax : ''}</option>`).join('')}
-        </select>
-      </div>
-      ${pick ? `<div class="cal-sw-picked">${renderRoomCardMini(pick)}</div>` : ''}`;
+      <div class="cal-sw-roomrow">
+        <div class="cal-rm-field">
+          <label>Room</label>
+          <select class="cal-rm-field-select" id="cal-sw-room"${cands.length ? '' : ' disabled'}>
+            <option value="">${cands.length ? 'Select room' : 'No room matches these filters'}</option>
+            ${cands.map(({ r, i }) =>
+              `<option value="${i}"${calSwitchRoom === i ? ' selected' : ''}>${r.code} — ${r.type}${r.pax ? ' · ' + r.pax : ''}</option>`).join('')}
+          </select>
+        </div>
+        ${pick ? `<div class="cal-sw-picked">${renderRoomCardMini(pick)}</div>` : ''}
+      </div>`;
   }
   // Même trio date/heure que renderDateTimeRow, mais saisissable : ici les dates
   // sont une donnée du switch, pas une maquette. Pré-remplies avec le séjour.
@@ -4744,7 +4757,9 @@
     let booking = bookingIdx != null ? CAL_BOOKINGS[bookingIdx] : findActiveBookingForRoom(roomIdx);
     if (booking && booking.red) booking = undefined;
     const modal = document.getElementById('cal-room-modal');
-    modal.classList.remove('wide'); // la largeur étendue n'appartient qu'à la sous-modale Assign
+    // Les largeurs étendues appartiennent aux sous-modales : la fiche chambre
+    // revient toujours à sa largeur standard.
+    modal.classList.remove('wide', 'medium');
     modal.innerHTML = renderRoomModalContent(roomIdx, booking);
     document.getElementById('cal-room-modal-overlay').classList.add('open');
 
@@ -4786,7 +4801,9 @@
     calSwitchBooking    = booking;
     calSwitchBookingIdx = bookingIdx != null ? bookingIdx : CAL_BOOKINGS.indexOf(booking);
 
-    document.getElementById('cal-room-modal').innerHTML = renderSwitchModalContent(roomIdx, booking);
+    const modal = document.getElementById('cal-room-modal');
+    modal.classList.add('medium');   // largeur étendue : dates lisibles, étiquette à côté du champ
+    modal.innerHTML = renderSwitchModalContent(roomIdx, booking);
     wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
     document.getElementById('cal-rm-btn-switch-back')?.addEventListener('click', () => openRoomModal(roomIdx, bookingIdx));
 
