@@ -1015,60 +1015,12 @@ const CREDENTIALS = [
 ];
 let currentUser = null;
 const PALETTE = ['#0057A8','#7C3AED','#059669','#DC2626','#EA580C','#0891B2','#BE185D','#1E2643'];
-// ── ISOLATION PAR SOUS-PROJET (Constitution §10) ──────────────────
-// Le shell ne connaît AUCUN sous-projet. Il déduit l'espace de données de
-// chaque sous-projet déclaré dans projects.json :
-//   convention  → comments_<id> / briefs_<id>
-//   exception   → "data": { "comments": "...", "briefs": "..." } dans le JSON
-// Ajouter un sous-projet = une entrée JSON, zéro ligne de code ici.
-const FB_BASE = 'https://studio-jailoop-default-rtdb.firebaseio.com/';
-function nsOf(sp) {
-  const d = sp.data || {};
-  return {
-    comments: d.comments || ('comments_' + sp.id),
-    briefs:   d.briefs   || ('briefs_'   + sp.id)
-  };
-}
-async function fetchNode(node) {
-  try {
-    const r = await fetch(FB_BASE + node + '.json');
-    const d = await r.json();
-    return d ? Object.values(d) : [];
-  } catch(e) { return []; }
-}
-// Charge chaque sous-projet dans son propre compartiment, puis reconstitue
-// les agrégats `messages` / `fbBriefs` pour ne rien casser de l'existant.
-async function loadSubprojectData() {
-  const sps = projects.flatMap(p => (p.subprojects||[]).map(sp => ({...sp, projectId: p.id})));
-  const res = await Promise.all(sps.map(async sp => {
-    const ns = nsOf(sp);
-    const [c, b] = await Promise.all([fetchNode(ns.comments), fetchNode(ns.briefs)]);
-    const tag = x => ({ ...x, _sp: sp.id, _spName: sp.name });
-    return { sp, comments: c.map(tag), briefs: b.map(tag) };
-  }));
-  spData = {};
-  res.forEach(r => {
-    spData[r.sp.id] = { id: r.sp.id, name: r.sp.name, projectId: r.sp.projectId,
-                        comments: r.comments, briefs: r.briefs };
-  });
-  messages = res.flatMap(r => r.comments);
-  fbBriefs = res.flatMap(r => r.briefs);
-  // Filet de secours historique : si Firebase ne rend rien, on retombe sur le
-  // localStorage Télécollecte comme avant (comportement inchangé).
-  if (fbBriefs.length === 0) {
-    const legacy = JSON.parse(localStorage.getItem('wf_briefs_telecollecte') || '[]');
-    if (legacy.length && spData['telecollecte']) {
-      const tagged = legacy.map(x => ({ ...x, _sp: 'telecollecte', _spName: spData['telecollecte'].name }));
-      spData['telecollecte'].briefs = tagged;
-      fbBriefs = tagged;
-    }
-  }
-}
+const FB_URL        = 'https://studio-jailoop-default-rtdb.firebaseio.com/comments.json';
+const FB_BRIEFS_URL = 'https://studio-jailoop-default-rtdb.firebaseio.com/briefs_telecollecte.json';
 
 let projects = [];
 let messages = [];
 let fbBriefs  = [];
-let spData    = {};   // { <idSousProjet>: { name, comments[], briefs[] } }
 let activeProject = null;
 let currentView = 'dashboard';
 let modalMode = 'project';
@@ -1099,7 +1051,19 @@ async function loadData() {
       }]
     }];
   }
-  await loadSubprojectData();
+  try {
+    const r2 = await fetch(FB_URL);
+    const d2 = await r2.json();
+    if (d2) messages = Object.values(d2);
+  } catch(e) { messages = []; }
+  try {
+    const r3 = await fetch(FB_BRIEFS_URL);
+    const d3 = await r3.json();
+    fbBriefs = d3 ? Object.values(d3) : [];
+  } catch(e) {
+    // fallback localStorage si Firebase indispo
+    fbBriefs = JSON.parse(localStorage.getItem('wf_briefs_telecollecte') || '[]');
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1148,11 +1112,17 @@ if (new URLSearchParams(location.search).get('go') === 'dashboard') {
 // ═══════════════════════════════════════════════════════
 async function pollFirebase() {
   try {
-    const prevPending  = fbBriefs.filter(b => !b.done).length;
+    const [r2, r3] = await Promise.all([fetch(FB_URL), fetch(FB_BRIEFS_URL)]);
+    const d2 = await r2.json();
+    const d3 = await r3.json();
+    const newMessages = d2 ? Object.values(d2) : [];
+    const newBriefs   = d3 ? Object.values(d3) : [];
+    const prevPending = fbBriefs.filter(b => !b.done).length;
+    const newPending  = newBriefs.filter(b => !b.done).length;
     const prevMsgCount = messages.length;
-    await loadSubprojectData();          // relit chaque sous-projet, isolément
-    const newPending = fbBriefs.filter(b => !b.done).length;
-    if (newPending !== prevPending || messages.length !== prevMsgCount) {
+    messages  = newMessages;
+    fbBriefs  = newBriefs;
+    if (newPending !== prevPending || newMessages.length !== prevMsgCount) {
       renderDashboard();
       renderSidebar();
     }
@@ -1301,47 +1271,36 @@ function renderDashboard() {
 
   // ── RETOURS PO ──
   const treatEl = document.getElementById('treat-section');
+  const activeMessages = messages.filter(m => !m.archived);
   const TYPE_LABELS = { rg:'RG', retour:'Retour', question:'Question', idee:'Idée', feedback:'Retour' };
   const TYPE_ICONS  = { rg:'📋', retour:'💬', question:'❓', idee:'💡', feedback:'💬' };
-
-  // Un bloc par sous-projet — étanches. Même composant .treat-card qu'avant,
-  // simplement répété : aucune UI nouvelle, aucun CSS ajouté.
-  const spList = Object.values(spData);
-  treatEl.innerHTML = spList.length === 0
-    ? `<div class="treat-card"><div class="treat-empty">Aucun sous-projet</div></div>`
-    : spList.map(sp => {
-        const active = (sp.comments || []).filter(m => !m.archived);
-        if (active.length === 0) {
-          // Constitution §8 — la structure existe même sans contenu, mais sur une
-          // seule ligne : le header est déjà en space-between, on s'en sert.
-          return `<div class="treat-card" style="padding:14px 24px">
-        <div class="treat-header" style="margin-bottom:0">
-          <div class="treat-title">${sp.name}</div>
-          <div class="treat-empty" style="padding:0">Aucun retour en attente ✓</div>
-        </div>
-      </div>`;
-        }
-        const groups = {};
-        active.forEach(m => {
-          const t = m.qualifiedType || m.commentType || 'retour';
-          (groups[t] = groups[t] || []).push(m);
-        });
-        const items = Object.entries(groups).map(([type, msgs]) => {
-          const label = TYPE_LABELS[type] || type;
-          const icon  = TYPE_ICONS[type]  || '📌';
-          return `<div class="treat-item"><div class="treat-item-count">${msgs.length}</div><div class="treat-item-label">${icon} ${label}</div></div>`;
-        }).join('');
-        const last = active.slice().sort((a,b)=>(b.id||0)-(a.id||0))[0];
-        const lastPin    = last ? last.pinLabel : '';
-        const lastAuthor = last ? last.author   : '';
-        return `<div class="treat-card">
+  const typeGroups = {};
+  activeMessages.forEach(m => {
+    const t = m.qualifiedType || m.commentType || 'retour';
+    if (!typeGroups[t]) typeGroups[t] = [];
+    typeGroups[t].push(m);
+  });
+  const totalActive = activeMessages.length;
+  if (totalActive === 0) {
+    treatEl.innerHTML = `<div class="treat-card"><div class="treat-empty">Aucun retour en attente ✓</div></div>`;
+  } else {
+    const items = Object.entries(typeGroups).map(([type, msgs]) => {
+      const label = TYPE_LABELS[type] || type;
+      const icon  = TYPE_ICONS[type]  || '📌';
+      return `<div class="treat-item"><div class="treat-item-count">${msgs.length}</div><div class="treat-item-label">${icon} ${label}</div></div>`;
+    }).join('');
+    const lastMsg = activeMessages.sort((a,b)=>(b.id||0)-(a.id||0))[0];
+    const lastAuthor = lastMsg ? lastMsg.author : '';
+    const lastPin    = lastMsg ? lastMsg.pinLabel : '';
+    treatEl.innerHTML = `
+      <div class="treat-card">
         <div class="treat-header">
-          <div class="treat-title">${sp.name} <span class="treat-badge">${active.length}</span></div>
+          <div class="treat-title">À traiter <span class="treat-badge">${totalActive}</span></div>
           ${lastPin ? `<div style="font-size:11px;color:rgba(255,255,255,0.45)">Dernier : ${lastPin} — ${lastAuthor}</div>` : ''}
         </div>
         <div class="treat-items">${items}</div>
       </div>`;
-      }).join('');
+  }
 
   // ── REPRENDRE MON TRAVAIL — tiles compactes ──
   const strip = document.getElementById('resume-strip');
