@@ -1029,7 +1029,7 @@
   .cal-rm-stay-facts .sep { color: #999; }
   /* Étiquette de la chambre retenue : elle suit directement le champ, sans
      cadre ni fond — c'est la continuation de la sélection, pas un bloc à part. */
-  .cal-sw-picked { margin-top: 12px; display: flex; }
+  .cal-sw-picked { margin-top: 12px; display: flex; justify-content: center; }
   .cal-rm-swap-label { font-size: 16px; color: #000; margin: 0 0 12px; }
   .cal-rm-swap-arrow { display: flex; justify-content: center; margin: 4px 0; }
   .cal-rm-swap-arrow img { width: 30px; height: 30px; }
@@ -1044,7 +1044,10 @@
   .cal-rm-field-row { display: flex; gap: 20px; }
   .cal-rm-field-row.end { align-items: flex-end; }
   .cal-rm-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
-  .cal-rm-field label { font-size: 16px; font-weight: 600; color: #000; text-align: center; }
+  /* Libellé aligné sur le texte de son champ, pas centré : centré, il flottait
+     au-dessus du champ sans point d'accroche. Seule la sous-modale Switch
+     utilise ces <label> (les filtres du planning passent par .cal-field). */
+  .cal-rm-field label { font-size: 16px; font-weight: 600; color: #000; text-align: left; }
   .cal-rm-field-display {
     height: 48px; border: 1px solid #666; border-radius: 100px; background: var(--white);
     display: flex; align-items: center; justify-content: space-between; padding: 0 21px;
