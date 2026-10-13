@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Wireframe — GM debtors V1 (UXUI-536)</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  /* ═══════════════════════════════════════════════════════════
+     TOKENS — Ody Trident Ψ 2.0 (variables Figma du fichier métier)
+     Relevés via get_variable_defs sur le node GM list 15361:42543
+  ═══════════════════════════════════════════════════════════ */
+  :root {
+    --navy:      #1E2643;  /* Brand colors / Ultramarine blue       */
+    --yellow:    #FDBE00;  /* Surface / Brand                       */
+    --white:     #FFFFFF;  /* Layout colors / Cloud white           */
+    --lavender:  #9EAEF4;  /* Brand colors / Lavender blue          */
+    --pearl:     #F8F8F8;  /* Layout colors / Pearl                 */
+    --grey-bg:   #F4F4F4;
+    --grey-bd:   #CCCCCC;  /* Border / Secondary                    */
+    --grey-txt:  #666666;  /* Border / Secondary inverse            */
+    --disabled:  #999999;  /* Content / Disabled                    */
+    --content-2: #333333;  /* Content / Secondary                   */
+    --red:       #BF2F17;  /* Content / Negative                    */
+    --green:     #088A20;  /* Content / Positive                    */
+    --marigold:  #FB9100;  /* Chinese colors / Marigold             */
+    --r-m:       16px;     /* Radius / M                            */
+    --r-xl:      100px;    /* Radius / XL                           */
+  }
+
+  html, body {
+    width: 1440px;
+    height: 1024px;
+    overflow: hidden;
+    background: var(--navy);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    color: var(--navy);
+  }
+
+  /* ═══════════ HEADER — DS Odyssey ═══════════ */
+  .header {
+    background: var(--navy);
+    height: 72px;
+    display: flex; align-items: center;
+    padding: 12px 24px; gap: 24px;
+    position: fixed; top:0; left:0; right:0; z-index: 100;
+  }
+  .logo { height:32px; display:flex; align-items:center; flex-shrink:0; }
+  .logo img { height:32px; }
+  .search {
+    flex:1; max-width:698px; background:var(--white);
+    border:1px solid #000; border-radius:32px; height:40px;
+    display:flex; align-items:center; padding:6px; gap:4px;
+  }
+  .search .s-icon { width:24px;height:24px;padding:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+  .search .s-icon img { width:16px;height:16px; }
+  .search input { flex:1;border:none;outline:none;font-size:16px;color:var(--disabled);background:transparent;font-family:inherit; }
+  .search .s-btn { background:var(--yellow);border:none;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0; }
+  .search .s-btn img { width:12px;height:12px;transform:scaleX(-1); }
+  .h-btn { height:36px;border:none;border-radius:32px;padding:0 24px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit; }
+  .h-btn.yellow { background:var(--yellow);color:#000; }
+  .h-btn.white  { background:var(--white);color:#000; }
+  .avatar { margin-left:auto;width:48px;height:48px;background:var(--lavender);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px;color:#000;flex-shrink:0; }
+
+  /* ═══════════ LAYOUT ═══════════ */
+  .layout { position:fixed; top:72px; left:0; width:1440px; height:calc(1024px - 72px); display:flex; }
+
+  .sidebar {
+    background:var(--navy); width:94px; flex-shrink:0;
+    padding:24px 0; display:flex; flex-direction:column; align-items:center; gap:8px; overflow:hidden;
+  }
+  .nav-icon {
+    width:48px;height:48px;display:flex;align-items:center;justify-content:center;
+    border-radius:var(--r-xl); cursor:pointer; opacity:.5; transition:opacity .15s, background .15s;
+  }
+  .nav-icon:hover { opacity:.85; }
+  .nav-icon.active { background:var(--white); opacity:1; }
+  .nav-icon svg { width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+  .nav-icon.active svg { stroke:var(--navy); }
+  .nav-icon.bottom { margin-top:auto; }
+
+  .main {
+    flex:1; background:var(--white); border-top-left-radius:var(--r-m);
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+
+  /* ═══════════ EN-TÊTE DE PAGE ═══════════ */
+  .page-head { padding:28px 36px 0; flex-shrink:0; }
+  .breadcrumb { font-size:12px;color:var(--grey-txt);display:flex;align-items:center;gap:6px;margin-bottom:6px; }
+  .breadcrumb b { color:var(--navy);font-weight:600; }
+  .page-title-row { display:flex; align-items:flex-end; gap:16px; }
+  .page-title { font-size:28px; font-weight:600; line-height:32px; color:#000; }
+
+  /* bandeau « RG1 à arbitrer » — repère de travail, pas du DS */
+  .wip {
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11px;font-weight:600;color:var(--marigold);
+    border:1px dashed var(--marigold); border-radius:var(--r-xl);
+    padding:3px 10px; margin-bottom:10px;
+  }
+
+  .scroll { flex:1; overflow-y:auto; padding:0 36px 36px; }
+
+  /* ═══════════ RG2 — rappel nombre + date du jour ═══════════ */
+  .daybar {
+    display:flex; align-items:center; gap:28px;
+    margin:18px 0 16px;
+    padding:16px 24px;
+    background:var(--navy); color:var(--white);
+    border-radius:var(--r-m);
+  }
+  .db-kpi { display:flex; flex-direction:column; gap:2px; }
+  .db-kpi .v { font-size:28px; font-weight:600; line-height:32px; }
+  .db-kpi .v em { font-style:normal; font-size:16px; font-weight:400; opacity:.75; margin-left:4px; }
+  .db-kpi .l { font-size:12px; opacity:.7; }
+  .db-kpi .v.amount { color:var(--yellow); }
+  .db-sep { width:1px; height:40px; background:rgba(255,255,255,.2); }
+  .db-date { margin-left:auto; display:flex; align-items:center; gap:12px; }
+  .db-date .l { font-size:12px; opacity:.7; }
+  .db-date .field {
+    background:var(--white); color:#000; border-radius:var(--r-xl);
+    height:40px; padding:0 8px 0 18px; display:flex; align-items:center; gap:10px;
+    font-size:16px; font-weight:400;
+  }
+  .db-date .field .sep { color:var(--disabled); }
+  .db-date .nav {
+    width:32px;height:32px;border-radius:50%;border:1px solid #000;background:var(--white);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .db-date .nav svg { width:12px;height:12px;stroke:#000;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round; }
+
+  /* ═══════════ FILTRES — repris de GM list ═══════════ */
+  .filters-card { background:var(--grey-bg); border-radius:var(--r-m); padding:24px; }
+  .f-search-row { display:flex; align-items:center; gap:24px; }
+  .f-label { font-size:16px; font-weight:600; white-space:nowrap; }
+  .f-search {
+    flex:1; background:var(--white); border:1px solid #000; border-radius:var(--r-xl);
+    height:56px; display:flex; align-items:center; padding:6px 6px 6px 18px; gap:12px;
+  }
+  .f-search img.ico { width:18px;height:18px;flex-shrink:0; }
+  .f-search input { flex:1;border:none;outline:none;font-size:16px;color:var(--disabled);background:transparent;font-family:inherit; }
+  .f-search .go { background:var(--yellow);border:none;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0; }
+  .f-search .go img { width:16px;height:16px;transform:scaleX(-1); }
+
+  .f-filters-row { display:flex; align-items:flex-end; gap:16px; margin-top:16px; }
+  .f-field { display:flex; flex-direction:column; gap:6px; }
+  .f-field .cap { font-size:14px; font-weight:600; }
+  .f-select, .f-date {
+    background:var(--white); border:1px solid #000; border-radius:var(--r-xl);
+    height:44px; display:flex; align-items:center; padding:0 18px; gap:10px;
+    font-size:16px; color:var(--content-2); cursor:pointer; white-space:nowrap;
+  }
+  .f-select { justify-content:space-between; min-width:160px; }
+  .f-select img { width:11px;height:7px;flex-shrink:0; }
+  .f-date { gap:8px; }
+  .f-date .sep { color:var(--disabled); }
+  .f-more {
+    width:48px;height:48px;border-radius:50%;border:1px solid #000;background:var(--white);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;
+  }
+  .f-more svg { width:20px;height:20px;stroke:#000;fill:none;stroke-width:1.8;stroke-linecap:round; }
+
+  /* ═══════════ TABLEAU ═══════════ */
+  .table-intro { font-size:20px; font-weight:600; margin:28px 0 14px; }
+  .t-head {
+    background:var(--navy); color:var(--white); border-radius:var(--r-m);
+    height:64px; display:flex; align-items:center; padding:0 28px;
+    font-size:16px; font-weight:600;
+  }
+  .t-head .sortable { display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
+  .t-head .sortable svg { width:10px;height:10px;stroke:var(--yellow);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round; }
+
+  .t-row {
+    background:var(--white); border:1px solid var(--grey-bd); border-radius:var(--r-m);
+    min-height:72px; display:flex; align-items:center; padding:0 28px;
+    margin-top:8px; font-size:16px; cursor:pointer;
+    transition:border-color .12s, box-shadow .12s, background .12s;
+  }
+  .t-row:hover { border-color:var(--navy); box-shadow:0 2px 10px rgba(30,38,67,.12); background:var(--pearl); }
+  .t-row:hover .go-chevron { opacity:1; transform:translateX(0); }
+
+  /* grille de colonnes — identique head / rows */
+  .c-first  { flex:0 0 150px; }
+  .c-last   { flex:1 1 auto; min-width:220px; }
+  .c-room   { flex:0 0 100px; }
+  .c-bal    { flex:0 0 150px; text-align:right; }
+  .c-guar   { flex:0 0 190px; }
+  .c-dep    { flex:0 0 140px; }
+  .c-go     { flex:0 0 32px; text-align:right; }
+
+  .balance { font-size:18px; font-weight:600; color:var(--red); }
+
+  .guarantee { display:flex; align-items:center; gap:10px; }
+  .guarantee .trident { width:16px; height:22px; flex-shrink:0; }
+  .guarantee .lbl { font-size:14px; }
+  /* le glyphe arrive via <use> : la couleur doit être posée sur le <svg>
+     (le contenu du symbol est en shadow DOM, un sélecteur `path` ne l'atteint pas) */
+  .guarantee.ok  .trident { fill:var(--green); }
+  .guarantee.ko  .trident { fill:var(--red); }
+  .guarantee.ok  .lbl { color:var(--green); font-weight:600; }
+  .guarantee.ko  .lbl { color:var(--red);   font-weight:600; }
+  .guarantee .club {
+    font-size:10px; font-weight:600; letter-spacing:.04em;
+    border:1px solid var(--grey-bd); border-radius:var(--r-xl); padding:1px 7px; color:var(--grey-txt);
+  }
+
+  .dep-today { color:var(--red); font-weight:600; }
+  .dep-today small { display:block; font-size:11px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; }
+
+  .go-chevron {
+    opacity:0; transform:translateX(-4px); transition:opacity .12s, transform .12s;
+    display:inline-flex;
+  }
+  .go-chevron svg { width:18px;height:18px;stroke:var(--navy);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round; }
+
+  /* ═══════════ TOAST « redirection fiche client » (RG3) ═══════════ */
+  .toast {
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(16px);
+    background:var(--navy); color:var(--white); border-radius:var(--r-xl);
+    padding:14px 26px; font-size:14px; font-weight:500;
+    opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:500;
+    box-shadow:0 8px 24px rgba(0,0,0,.28);
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast b { color:var(--yellow); }
+</style>
+</head>
+<body>
+
+<!-- ══════════ HEADER DS Odyssey ══════════ -->
+<header class="header">
+  <div class="logo">
+    <img src="assets-calendrier/icon-logo-odyssey.svg" alt="odyssey" />
+  </div>
+  <div class="search">
+    <div class="s-icon"><img src="assets-calendrier/icon-search.svg" alt="" /></div>
+    <input type="text" placeholder="Search anything" />
+    <button class="s-btn"><img src="assets-calendrier/icon-search-arrow.svg" alt="" /></button>
+  </div>
+  <button class="h-btn yellow">Scan Bracelet</button>
+  <button class="h-btn white">What's new</button>
+  <div class="avatar">JD</div>
+</header>
+
+<div class="layout">
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <nav class="sidebar">
+    <div class="nav-icon" title="Home">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <div class="nav-icon active" title="Clients">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <div class="nav-icon" title="Caisses">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    </div>
+    <div class="nav-icon" title="Rooms">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </div>
+    <div class="nav-icon bottom" title="Settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+    </div>
+  </nav>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <main class="main">
+
+    <div class="page-head">
+      <div class="breadcrumb">Home <span style="opacity:.4">•</span> Clients <span style="opacity:.4">•</span> <b>GM debtors</b></div>
+      <div class="page-title-row">
+        <div class="page-title">GM debtors</div>
+      </div>
+      <div class="wip" style="margin-top:8px;">RG1 — rattachement du sous-menu à arbitrer : « Clients » ou « Caisses »</div>
+    </div>
+
+    <div class="scroll">
+
+      <!-- ══ RG2 — nombre total de GM débiteurs + date du jour ══ -->
+      <div class="daybar">
+        <div class="db-kpi">
+          <div class="v">6 <em>GM</em></div>
+          <div class="l">Debtors today</div>
+        </div>
+        <div class="db-sep"></div>
+        <div class="db-kpi">
+          <div class="v amount">1 108,40 €</div>
+          <div class="l">Total outstanding</div>
+        </div>
+        <div class="db-sep"></div>
+        <div class="db-kpi">
+          <div class="v">2 <em>GM</em></div>
+          <div class="l">Leaving today</div>
+        </div>
+
+        <div class="db-date">
+          <span class="l">Showing data for</span>
+          <div class="nav" title="Previous day">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </div>
+          <div class="field">
+            <span>13</span><span class="sep">/</span><span>10</span><span class="sep">/</span><span>26</span>
+            <div class="nav" style="margin-left:6px;" title="Calendar">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+          </div>
+          <div class="nav" title="Next day">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ FILTRES — même bloc que GM list ══ -->
+      <div class="filters-card">
+        <div class="f-search-row">
+          <div class="f-label">Search for a GM</div>
+          <div class="f-search">
+            <img class="ico" src="assets-calendrier/icon-search.svg" alt="" />
+            <input type="text" placeholder="Please search a GM" />
+            <button class="go"><img src="assets-calendrier/icon-search-arrow.svg" alt="" /></button>
+          </div>
+        </div>
+
+        <div class="f-filters-row">
+          <div class="f-label" style="height:44px;display:flex;align-items:center;">Filters</div>
+
+          <div class="f-field">
+            <div class="cap">Status</div>
+            <div class="f-select"><span>Select</span><img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+          </div>
+
+          <div class="f-field">
+            <div class="cap">Nationality</div>
+            <div class="f-select"><span>Select</span><img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+          </div>
+
+          <div class="f-field">
+            <div class="cap">Arrival</div>
+            <div class="f-date"><span style="color:var(--disabled)">JJ</span><span class="sep">/</span><span style="color:var(--disabled)">MM</span><span class="sep">/</span><span style="color:var(--disabled)">AA</span></div>
+          </div>
+
+          <div class="f-field">
+            <div class="cap">Departure</div>
+            <div class="f-date"><span style="color:var(--disabled)">JJ</span><span class="sep">/</span><span style="color:var(--disabled)">MM</span><span class="sep">/</span><span style="color:var(--disabled)">AA</span></div>
+          </div>
+
+          <div class="f-field">
+            <div class="cap">Presence</div>
+            <div class="f-select"><span>Select</span><img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>
+          </div>
+
+          <div class="f-more" title="All filters">
+            <svg viewBox="0 0 24 24"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/><circle cx="9"  cy="7"  r="2.4" fill="#fff"/><circle cx="15" cy="12" r="2.4" fill="#fff"/><circle cx="8"  cy="17" r="2.4" fill="#fff"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ TABLEAU ══ -->
+      <div class="table-intro">6 GM have an outstanding balance today:</div>
+
+      <div class="t-head">
+        <div class="c-first">First name</div>
+        <div class="c-last">Last name</div>
+        <div class="c-room">Room</div>
+        <div class="c-bal">
+          <span class="sortable">Balance
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+        <div class="c-guar">Guarantee</div>
+        <div class="c-dep">Departure</div>
+        <div class="c-go"></div>
+      </div>
+
+      <div id="rows"></div>
+
+    </div>
+  </main>
+</div>
+
+<!-- toast RG3 -->
+<div class="toast" id="toast"></div>
+
+<!-- glyphe trident réutilisable (extrait du logo Odyssey du DS) -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="trident" viewBox="0 0 23 32.008">
+    <path d="M20.1219 21.3635L17.3678 24.107L20.1139 26.8506L22.86 24.107L20.1219 21.3635ZM22.0162 1.05335C21.8053 0.270048 20.0423 1.37144 16.2376 4.79092C17.7539 6.46488 18.5061 5.50663 19.7239 5.06528C20.7029 6.91021 21.085 15.2362 14.7372 17.7372C14.9163 9.34758 14.9959 0.373427 14.9959 0.373427C14.9959 0.325714 14.9839 0.281976 14.964 0.242215C14.9441 0.202453 14.9123 0.166668 14.8765 0.138835C14.8407 0.111002 14.7969 0.0911212 14.7531 0.0871451C14.7093 0.0791928 14.6616 0.0831689 14.6178 0.0950973C12.8627 0.321737 9.75847 3.40722 7.36263 5.99172C8.68392 8.15076 10.3475 6.21836 11.6727 5.67363C11.6727 6.03546 11.3544 12.2223 11.5016 18.5205C4.95883 19.0056 6.00552 5.69351 6.38758 3.98774C6.55075 2.62392 2.16899 5.63784 0 7.65772C0.688505 8.8943 1.65162 8.63983 2.85352 8.1786C2.4237 14.1547 6.63432 19.5822 11.5335 19.4669C11.7046 25.61 12.3533 31.5941 14.1362 32.0076C14.375 32.0673 14.5661 25.7691 14.7093 18.775C26.4935 15.1209 22.0003 1.0613 22.0003 1.0613"/>
+  </symbol>
+</svg>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   DONNÉES — 6 GM débiteurs (jeu de démo)
+   Colonnes du ticket UXUI-536 / RG3 : prénom, nom, solde, statut
+   de garantie. Room + Departure sont des ajouts : sans eux la
+   liste n'est pas actionnable pour une réception qui doit aller
+   chercher le GM avant son départ.
+═══════════════════════════════════════════════════════════ */
+const TODAY = '13/10/2026';
+
+const DEBTORS = [
+  { first:'Sofia', last:'Rahi',                   room:'444', balance:486.20, guarantee:'ok', club:true,  departure:'17/10/2026' },
+  { first:'John',  last:'RONALDMACDONALDE',       room:'212', balance:312.00, guarantee:'ko', club:false, departure:'14/10/2026' },
+  { first:'Maya',  last:"O'Connor",               room:'254', balance:128.50, guarantee:'ok', club:false, departure:'14/10/2026' },
+  { first:'Luca',  last:'Rossi de la Plata Sola', room:'108', balance:94.80,  guarantee:'ko', club:false, departure:'13/10/2026' },
+  { first:'Aiden', last:'Poirrier',               room:'331', balance:62.00,  guarantee:'ok', club:true,  departure:'20/10/2026' },
+  { first:'Elena', last:'Volkanoswki',            room:'054', balance:24.90,  guarantee:'ko', club:false, departure:'13/10/2026' }
+];
+
+const euro = n => n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/, ' ') + ' €';
+
+function render() {
+  document.getElementById('rows').innerHTML = DEBTORS.map((d, i) => {
+    const leavingToday = d.departure === TODAY;
+    return `
+    <div class="t-row" data-i="${i}">
+      <div class="c-first">${d.first}</div>
+      <div class="c-last">${d.last}</div>
+      <div class="c-room">${d.room}</div>
+      <div class="c-bal"><span class="balance">${euro(d.balance)}</span></div>
+      <div class="c-guar">
+        <div class="guarantee ${d.guarantee}">
+          <svg class="trident"><use href="#trident"/></svg>
+          <span class="lbl">${d.guarantee === 'ok' ? 'Guaranteed' : 'No guarantee'}</span>
+          ${d.club ? '<span class="club">CLUB</span>' : ''}
+        </div>
+      </div>
+      <div class="c-dep">${
+        leavingToday
+          ? `<span class="dep-today">${d.departure}<small>Leaving today</small></span>`
+          : d.departure
+      }</div>
+      <div class="c-go"><span class="go-chevron">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </span></div>
+    </div>`;
+  }).join('');
+
+  // RG3 — au clic sur la ligne, redirection vers la fiche client
+  document.querySelectorAll('.t-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const d = DEBTORS[row.dataset.i];
+      showToast(`RG3 — redirection vers la fiche client de <b>${d.first} ${d.last}</b>`);
+    });
+  });
+}
+
+let toastTimer;
+function showToast(html) {
+  const t = document.getElementById('toast');
+  t.innerHTML = html;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+render();
+</script>
+
+</body>
+</html>
