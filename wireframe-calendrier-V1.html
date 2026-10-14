@@ -41,6 +41,16 @@
       --grey-bd:  #E0E0E0;
       --grey-txt: #6B7280;
       --red:      #D93025;
+
+      /* ── Tokens Trident Ψ 2.0 — valeurs relevées sur les variables du DS,
+         jamais choisies à la main. Nom du token en regard pour pouvoir
+         retrouver la source. ── */
+      --ds-orange:            #C75300; /* Layout colors/Orange */
+      --ds-light-sand:        #F6EFE7; /* Brand colors/Light sand */
+      --ds-content-primary:   #000000; /* Content/Primary → Brand colors/Black coal */
+      --ds-content-secondary: #333333; /* Content/Secondary → Layout colors/Dark grey */
+      --ds-border-secondary:  #CCCCCC; /* Border/Secondary → Layout colors/Light grey */
+      --ds-surface-primary:   #FFFFFF; /* Surface/Primary → Layout colors/Cloud white */
     }
 
     html, body {
@@ -1184,33 +1194,48 @@
      sur un fond clair : le texte long redevient lisible, la provenance du
      verrou tient dedans, et l'action de déverrouillage est posée au même
      endroit que l'information qui la justifie — plutôt qu'en bas de fiche. ══ */
+  /* Couleurs : uniquement des tokens Trident (voir :root). L'orange du DS sort à
+     3.82:1 sur Light sand — au-dessus du seuil des éléments graphiques (3:1),
+     en dessous de celui du texte (4.5:1). Il est donc réservé au liseré, au
+     cadenas et à la bordure du bouton ; la hiérarchie du titre passe par la
+     graisse, pas par la couleur. */
   .cal-rm-lock-card {
     display: flex; flex-direction: column; gap: 10px;
-    background: #FFF6F0; border: 1px solid #F0C3A3; border-left: 4px solid #C75300;
+    background: var(--ds-light-sand);
+    border: 1px solid var(--ds-border-secondary);
+    border-left: 4px solid var(--ds-orange);
     border-radius: 12px; padding: 14px 16px; margin: 16px 0 0;
     width: 100%; box-sizing: border-box;
   }
   .cal-rm-lock-head { display: flex; align-items: center; gap: 10px; }
-  .cal-rm-lock-head img { width: 20px; height: 20px; flex-shrink: 0; }
+  /* L'asset cadenas est blanc (il vit sur les fonds foncés du DS). Plutôt qu'une
+     chaîne de filtres qui n'atteindrait l'orange qu'approximativement, on s'en
+     sert comme masque et c'est le token qui peint. */
+  .cal-rm-lock-ico {
+    width: 20px; height: 20px; flex-shrink: 0; background-color: var(--ds-orange);
+    -webkit-mask: url(assets-calendrier/icon-padlock.svg) no-repeat center / contain;
+            mask: url(assets-calendrier/icon-padlock.svg) no-repeat center / contain;
+  }
   .cal-rm-lock-title {
-    flex: 1; font-size: 14px; font-weight: 700; color: #8A3A00; line-height: 20px;
+    flex: 1; font-size: 14px; font-weight: 700; color: var(--ds-content-primary); line-height: 20px;
   }
-  .cal-rm-lock-reason { font-size: 14px; line-height: 20px; color: #1F2937; }
+  .cal-rm-lock-reason { font-size: 14px; line-height: 20px; color: var(--ds-content-primary); }
   .cal-rm-lock-meta {
-    display: flex; flex-wrap: wrap; gap: 4px 18px; padding-top: 2px;
-    border-top: 1px solid #F0C3A3; margin-top: 2px; padding-top: 10px;
+    display: flex; flex-wrap: wrap; gap: 4px 18px;
+    border-top: 1px solid var(--ds-border-secondary); margin-top: 2px; padding-top: 10px;
   }
-  .cal-rm-lock-meta div { font-size: 12px; line-height: 18px; color: #4B5563; }
-  .cal-rm-lock-meta b { display: block; font-size: 11px; font-weight: 700; color: #8A3A00;
-    text-transform: uppercase; letter-spacing: .04em; }
+  .cal-rm-lock-meta div { font-size: 12px; line-height: 18px; color: var(--ds-content-secondary); }
+  .cal-rm-lock-meta b { display: block; font-size: 11px; font-weight: 700;
+    color: var(--ds-content-secondary); text-transform: uppercase; letter-spacing: .04em; }
   .cal-rm-lock-btn {
     flex-shrink: 0; min-height: 44px; padding: 0 18px;
-    border-radius: 100px; border: 1.5px solid #C75300; background: var(--white);
-    color: #8A3A00; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+    border-radius: 100px; border: 1.5px solid var(--ds-orange);
+    background: var(--ds-surface-primary); color: var(--ds-content-primary);
+    font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
     display: inline-flex; align-items: center; gap: 8px; transition: background .12s;
   }
-  .cal-rm-lock-btn:hover { background: #FDEADF; }
-  .cal-rm-lock-btn:focus-visible { outline: 2px solid #8A3A00; outline-offset: 2px; }
+  .cal-rm-lock-btn:hover { background: var(--ds-light-sand); }
+  .cal-rm-lock-btn:focus-visible { outline: 2px solid var(--ds-content-primary); outline-offset: 2px; }
 
   /* ══ Pop-up de confirmation d'assignation — nœud Figma 15929:44073. Récapitule
      la chambre et les GM retenus avant validation. ══ */
@@ -4937,14 +4962,11 @@
     // reste purement informative.
     const unlockBtn = calIsMvp() ? '' : `
         <button type="button" class="cal-rm-lock-btn" id="cal-rm-btn-unlock-inline"
-                aria-label="Déverrouiller la chambre ${CAL_ROOMS[roomIdx].code}">
-          <img src="assets-calendrier/icon-padlock.svg" alt="" width="16" height="16" />
-          Unlock
-        </button>`;
+                aria-label="Déverrouiller la chambre ${CAL_ROOMS[roomIdx].code}">Unlock</button>`;
     return `
       <div class="cal-rm-lock-card" role="group" aria-label="Chambre verrouillée">
         <div class="cal-rm-lock-head">
-          <img src="assets-calendrier/icon-padlock.svg" alt="" />
+          <span class="cal-rm-lock-ico" aria-hidden="true"></span>
           <span class="cal-rm-lock-title">Chambre verrouillée</span>
           ${unlockBtn}
         </div>
