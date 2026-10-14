@@ -1701,7 +1701,7 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       Retour
     </button>
-    <div style="color:#C4B5FD;font-size:15px;font-weight:700;">📘 Règles de gestion — Télécollecte TPE</div>
+    <div style="color:#C4B5FD;font-size:15px;font-weight:700;" id="doc-drawer-title">📘 Règles de gestion — Calendrier planning</div>
   </div>
   <!-- Body : sommaire gauche + contenu droite -->
   <div style="flex:1;display:flex;overflow:hidden;">
@@ -2921,131 +2921,131 @@
 
   // ── Init RG blocks au chargement de la page ─────────────────────────
   (function initRgBlocks() {
-    const RG_BLOCKS_KEY = 'wf_rg_blocks';
-    const RG_VERSION = 'v2.0-27rg';
-    if (localStorage.getItem('wf_rg_version') !== RG_VERSION) {
+    // Clés isolées par sous-projet : les RG du Calendrier ne doivent jamais se
+    // mélanger à celles de la Télécollecte (invariant d’étanchéité Loopcraft).
+    const RG_BLOCKS_KEY = 'wf_rg_blocks_calendrier';
+    const RG_VERSION_KEY = 'wf_rg_version_calendrier';
+    const RG_VERSION = 'cal-v1.0-18rg';
+    if (localStorage.getItem(RG_VERSION_KEY) !== RG_VERSION) {
       const existing = JSON.parse(localStorage.getItem(RG_BLOCKS_KEY) || '[]');
       const existingTitles = new Set(existing.map(r => r.titre));
+      // Le champ `mode` porte le périmètre, comme Interfacé / Non interfacé côté
+      // Télécollecte :
+      //   'MVP'         → première livraison, consultation seule
+      //   'Cible'       → périmètre visé, actions comprises
+      //   'MVP · Cible' → vrai dans les deux versions
       const RG_DATA = [
-        { tab:'Telecollection', mode:'Interfacé', titre:'Logique des montants en mode interfacé',
-          regle:'En mode interfacé, les montants remontent automatiquement depuis les TPE (colonne Expected amount). Le GO n\'a pas à les saisir. La colonne Corrected amount démarre à 0 € et n\'est renseignée que si le GO constate une différence entre le montant attendu et le montant réellement encaissé.',
-          comportement:'• Expected amount = somme des montants remontés des TPE (lecture seule)\n• Corrected amount = 0 € par défaut, éditable\n• Entered amount   = Expected amount + somme des corrections\n• Écart           = somme des montants corrigés\n• Badge vert "No discrepancy" si aucune correction\n• Badge rouge "Discrepancy detected · MDP" si au moins une correction > 0',
-          critere:'Sans correction : Entered amount = Expected amount, Écart = 0 €\nAvec correction : Écart = somme exacte des corrections\nN° de remise obligatoire pour toute ligne avec Corrected amount ≠ 0' },
-        { tab:'Telecollection', mode:'Non interfacé', titre:'Logique des montants en mode non interfacé',
-          regle:'En mode non interfacé, le village n\'est pas connecté au système central. Les TPE ne remontent aucune donnée automatiquement. Le système ne connaît pas les montants attendus — il ne peut donc pas calculer d\'écart.',
-          comportement:'• Expected amount  = masqué (information non disponible)\n• Entered amount    = somme des montants renseignés manuellement\n• Écart            = masqué (impossible à calculer sans montant attendu)\n• Badges d\'écart  = masqués\n• À l\'ouverture   : Entered amount = 0 €\n• En temps réel   : Entered amount se met à jour à chaque saisie',
-          critere:'Tout montant > 0 € doit avoir un N° remise\nMontant = 0 € → N° remise facultatif\nBouton actif uniquement si tous les montants > 0 ont leur N° remise\nKPI Expected amount et Écart masqués' },
-        { tab:'Telecollection', mode:'Interfacé · Non interfacé', titre:'Validation d\'une télécollecte',
-          regle:'La validation est l\'action par laquelle le GO confirme les montants saisis pour la journée comptable en cours. Elle déclenche un basculement vers le mode Télécollecte saisie (lecture seule). Elle peut être complétée jusqu\'à la clôture.',
-          comportement:'• Bouton actif uniquement si toutes les lignes avec montant > 0 ont un N° remise\n• Clic → modale de confirmation\n• Annuler → retour sans modification\n• Confirmer → toaster 5s, vue bascule en mode Télécollecte saisie\n• Mode Télécollecte saisie : Entered amount (lecture seule) + Complément (éditable)\n• Bouton devient "Complete" (inactif tant qu\'aucun complément)',
-          critere:'Validation bloquée si montant > 0 sans N° remise\nAprès validation, aucune modification des montants initiaux possible\nToaster confirme systématiquement le succès' },
-        { tab:'Telecollection', mode:'Interfacé · Non interfacé', titre:'Complément avant clôture comptable',
-          regle:'Après validation, le GO peut ajouter des compléments tant que la clôture du jour n\'a pas eu lieu. Un complément s\'ajoute au montant validé. Après chaque revalidation, les champs sont remis à zéro.',
-          comportement:'• Colonne "Complément" : inputs vides après validation\n• Bouton "Complete" inactif tant qu\'aucun complément\n• Entered amount (KPI) = montant validé + compléments en cours\n• Revalidation → même modale → même toaster\n• Compléments absorbés, champs remis à 0\n• Opération répétable jusqu\'à la clôture',
-          critere:'Complément peut être positif ou négatif\nAucun N° remise demandé pour un complément\nAprès revalidation : champs Complément = 0,00 €' },
-        { tab:'Telecollection', mode:'Interfacé', titre:'Gestion des écarts',
-          regle:'Un écart est la différence entre le montant attendu et le montant réellement encaissé. En mode interfacé, il est calculé automatiquement depuis les montants corrigés. En mode non interfacé, le concept d\'écart n\'existe pas.',
-          comportement:'• Écart = somme des montants corrigés (mode interfacé uniquement)\n• KPI Écart mis à jour en temps réel\n• Badge "No discrepancy" (vert) si Écart = 0\n• Badge "Discrepancy detected · MDP" (rouge) si Écart ≠ 0 — MDP en écart uniquement\n• Pill sticky synchronisée avec l\'état de l\'écart\n• Pill masquée si Écart = 0',
-          critere:'Écart = somme exacte des montants corrigés\nLe badge liste uniquement les MDP en écart réel\nExemple : Visa = -3 €, Amex = 0 € → badge affiche Visa uniquement' },
-        { tab:'Telecollection', mode:'Interfacé · Non interfacé', titre:'Gestion des numéros de remise',
-          regle:'Un N° remise est un identifiant unique obligatoire dès qu\'un montant non nul est saisi. Il garantit la traçabilité comptable. Un doublon constitue une anomalie comptable.',
-          comportement:'• Télécollecte non interfacé : N° remise obligatoire si montant > 0\n• Télécollecte interfacé : N° remise obligatoire si Corrected amount ≠ 0\n• Date antérieure : N° remise obligatoire et UNIQUE dans le système\n• Régularisation : généré automatiquement, jamais exposé à l\'utilisateur\n• Erreur inline si N° remise manquant ou doublon\n• Validation bloquée jusqu\'à correction',
-          critere:'Montant > 0 et N° remise vide → erreur inline, bouton bloqué\nN° remise doublon (Date antérieure) → erreur inline\nN° remise en Régularisation → généré automatiquement, non affiché' },
-        { tab:'Telecollection', mode:'Interfacé', titre:'Affichage des badges d\'écart',
-          regle:'Les badges d\'écart signalent l\'état de la réconciliation en temps réel. Visibles uniquement en mode interfacé.',
-          comportement:'• Badge vert "No discrepancy" : aucun montant corrigé\n• Badge rouge "Discrepancy detected · MDP" : au moins un montant corrigé\n• Badges masqués en mode non interfacé\n• Badges masqués si switch "Open tills" activé\n• Pill sticky reflète le même état\n• Pill disparaît si l\'écart revient à 0',
-          critere:'Badge rouge → au moins un MDP avec correction ≠ 0\nBadge vert → tous les MDP avec correction = 0\nListe MDP = sous-ensemble des MDP en écart réel' },
-        { tab:'Telecollection', mode:'Interfacé · Non interfacé', titre:'Cas des montants à zéro',
-          regle:'Un montant à zéro est un comportement normal. Il se produit lorsqu\'un TPE n\'a pas enregistré de transaction pour un MDP donné.',
-          comportement:'• Montant = 0 € → N° remise facultatif, aucune erreur\n• Mode interfacé : montant attendu = 0 → ligne présente, non requise\n• Clôture sans saisie : système enregistre 0 € (non interfacé) ou valeurs système (interfacé)\n• Les lignes à 0 € restent visibles',
-          critere:'Montant = 0 et N° remise vide → valide\nMontant > 0 et N° remise vide → erreur inline\nClôture sans saisie = comportement normal' },
-        { tab:'Previous Date', mode:'Interfacé · Non interfacé', titre:'Fonctionnement général',
-          regle:'L\'onglet Date antérieure permet de corriger ou compléter une télécollecte d\'un jour passé. La date doit être strictement antérieure au jour J.',
-          comportement:'• Date pré-remplie à J-1 au chargement\n• Sélecteur de date disponible\n• Date doit être < aujourd\'hui (bloquant si ≥ J)\n• Une fois validée, la date est figée dans la session\n• KPI : Corrected amount / Expected amount / Écart restant',
-          critere:'Date ≥ J → saisie bloquée\nDate < J → saisie autorisée\nLa date affichée = date sélectionnée' },
-        { tab:'Previous Date', mode:'Interfacé', titre:'Date antérieure interfacée',
-          regle:'En mode interfacé, le tableau principal affiche les montants attendus (système) en lecture seule. Le tableau de correction permet de saisir des montants corrigés par MDP.',
-          comportement:'• Tableau gauche : Date / MDP / Location / Expected amount / Ref. No. (lecture seule)\n• Tableau droit : Corrected amount / Ref. No. (éditable)\n• KPI Corrected amount = somme des corrections\n• KPI Expected amount = somme des montants attendus\n• KPI Écart restant = Expected amount − Corrected amount\n• Badge "Discrepancy detected · MDP" si correction ≠ 0\n• N° remise obligatoire si Corrected amount ≠ 0',
-          critere:'Corrected amount ≠ 0 sans N° remise → erreur inline, bouton bloqué\nN° remise doublon → erreur inline\nBouton actif uniquement si toutes les corrections ont leur N° remise' },
-        { tab:'Previous Date', mode:'Non interfacé', titre:'Date antérieure non interfacée',
-          regle:'En mode non interfacé, les montants attendus correspondent aux montants validés lors de la télécollecte initiale. Même logique que la vue interfacée.',
-          comportement:'• Expected amount = montant validé lors de la télécollecte initiale (figé)\n• Tableau droit : Corrected amount + Ref. No. (éditable)\n• Même logique de KPI qu\'en mode interfacé\n• N° remise obligatoire et unique',
-          critere:'Identique à RG-10\nMontants attendus = ceux de la télécollecte validée' },
-        { tab:'Previous Date', mode:'Interfacé · Non interfacé', titre:'Affichage des montants attendus après clôture',
-          regle:'Les montants affichés dans Expected amount sont les montants officiels de la date comptable sélectionnée. Figés et non modifiables.',
-          comportement:'• Expected amount affiché en lecture seule\n• Colonne Date = date comptable de chaque ligne\n• Aucune interaction possible sur cette colonne',
-          critere:'Expected amount = lecture seule\nLes montants ne changent pas si l\'utilisateur modifie les corrections' },
-        { tab:'Previous Date', mode:'Interfacé · Non interfacé', titre:'Calcul des écarts',
-          regle:'L\'écart en Date antérieure est calculé en temps réel : différence entre le montant attendu et la somme des montants corrigés.',
-          comportement:'• Écart restant = Expected amount − Corrected amount (temps réel)\n• KPI mis à jour à chaque frappe\n• Écart > 0 → badge rouge "Discrepancy detected · MDP"\n• Écart = 0 → badge vert "No discrepancy"',
-          critere:'Écart restant = Expected amount − Corrected amount\nLe KPI reflète l\'état réel à chaque modification' },
-        { tab:'Previous Date', mode:'Interfacé · Non interfacé', titre:'Régularisation des écarts via Date antérieure',
-          regle:'La correction via Date antérieure est distincte de l\'onglet Régularisation. Le GO saisit le montant réel encaissé pour la date passée. Ce n\'est pas une opération de régularisation — c\'est une correction de saisie.',
-          comportement:'• Saisir le montant réel dans "Corrected amount"\n• Écart restant recalculé en temps réel\n• N° remise unique obligatoire\n• Même workflow de validation que la télécollecte',
-          critere:'N° remise obligatoire pour toute correction ≠ 0\nN° remise doit être unique dans le système',
-          question:'La correction via Date antérieure déclenche-t-elle automatiquement une entrée dans l\'onglet Régularisation ? Ou sont-ce deux workflows totalement indépendants ?' },
-        { tab:'Previous Date', mode:'Interfacé · Non interfacé', titre:'Gestion des numéros de remise (Date antérieure)',
-          regle:'En Date antérieure, le N° remise est soumis à une contrainte d\'unicité stricte. Un N° déjà utilisé sur toute autre date ou opération ne peut pas être réutilisé.',
-          comportement:'• N° remise obligatoire si Corrected amount ≠ 0\n• Validation interface : champ vide bloque le bouton\n• Validation système : doublon → erreur inline "N° de remise déjà utilisé"\n• Validation bloquée jusqu\'à correction',
-          critere:'N° remise vide + montant ≠ 0 → erreur inline, bouton bloqué\nN° remise doublon → erreur inline\nN° remise valide et unique → validation autorisée' },
-        { tab:'Previous Date', mode:'Interfacé · Non interfacé', titre:'Badge d\'écart et moyens de paiement concernés',
-          regle:'Le badge en Date antérieure liste uniquement les MDP qui contribuent réellement à l\'écart.',
-          comportement:'• Badge rouge "Discrepancy detected · MDP" → MDP avec correction ≠ 0\n• MDP avec correction = 0 absent du badge\n• Badge vert "No discrepancy" → aucune correction\n• Mise à jour en temps réel',
-          critere:'Badge rouge = au moins un MDP avec Corrected amount ≠ 0\nBadge vert = tous les MDP avec Corrected amount = 0\nListe MDP = sous-ensemble des MDP en écart réel' },
-        { tab:'Previous Date', mode:'Interfacé · Non interfacé', titre:'Complément après saisie Date antérieure',
-          regle:'Le comportement post-validation en Date antérieure n\'est pas explicitement documenté dans le wireframe actuel.',
-          comportement:'Option A — Complément possible (aligné sur Télécollecte) : l\'utilisateur peut revenir et ajouter un complément tant que la purge n\'a pas eu lieu.\n\nOption B — Validation unique : une fois validée, la correction est figée.',
-          critere:'Non défini — décision métier à valider avant développement',
-          question:'La correction via Date antérieure est-elle complétable après validation (Option A) ou figée définitivement (Option B) ?' },
-        { tab:'Previous Date', mode:'Interfacé · Non interfacé', titre:'Purge comptable et fermeture définitive',
-          regle:'Une télécollecte peut être complétée via Date antérieure tant qu\'aucune purge comptable n\'a été effectuée. La purge est la fermeture définitive des données pour une période donnée. Après purge, les données sont historiques et figées.',
-          comportement:'Avant purge :\n• La date apparaît dans Date antérieure\n• Compléments et corrections possibles\n• Calculs mis à jour normalement\n\nAprès purge :\n• La date n\'est plus modifiable\n• Champs désactivés ou absents\n• Données consultables mais figées\n\nCycle : Télécollecte → Clôture comptable → Date antérieure → Purge → Données verrouillées',
-          critere:'Date purgée : aucune modification possible\nAucun complément ajouteable\nAucune validation supplémentaire autorisée',
-          question:'Les dates purgées restent-elles visibles en lecture seule dans la liste, ou disparaissent-elles totalement ? Cette décision conditionne l\'architecture de la liste de dates.' },
-        { tab:'Regularisation', mode:'Tous modes', titre:'Fonctionnement général',
-          regle:'L\'onglet Régularisation est réservé aux Financial Managers. Il permet de régulariser un écart comptable. La régularisation peut être complétée jusqu\'à la prochaine clôture comptable.',
-          comportement:'• Accès restreint au rôle Financial Manager (contrôle côté serveur)\n• Écart à régulariser affiché en rouge (non éditable, calculé par le système)\n• Tableau : uniquement les MDP concernés par l\'écart\n• Bouton "Submit regularisation" → modale → toaster → mode complétable\n• Après validation : bouton devient "Complete regularisation"',
-          critere:'Un GO (non FM) ne peut pas accéder à cet onglet\nL\'écart affiché est la valeur système, non modifiable' },
-        { tab:'Regularisation', mode:'Tous modes', titre:'Régularisation interfacée',
-          regle:'La Régularisation s\'applique à un écart calculé par le système. Le montant de référence est fourni automatiquement.',
-          comportement:'• L\'écart est fourni par le système au chargement\n• Ce montant est non éditable\n• Le FM saisit les montants régularisés par MDP',
-          critere:'L\'écart initial est fourni par le système, jamais saisi par l\'utilisateur',
-          question:'La Régularisation est-elle toujours en mode interfacé, ou un mode non interfacé est-il prévu où le FM saisirait lui-même l\'écart de référence ?' },
-        { tab:'Regularisation', mode:'Tous modes', titre:'Régularisation non interfacée',
-          regle:'Le wireframe ne documente pas de comportement spécifique en mode non interfacé pour l\'onglet Régularisation.',
-          comportement:'Non défini dans le wireframe actuel.',
-          critere:'Non défini — décision métier à valider',
-          question:'Si un mode non interfacé est prévu : qui saisit le montant de référence ? Comment le système valide-t-il la cohérence de la régularisation ?' },
-        { tab:'Regularisation', mode:'Tous modes', titre:'Répartition des écarts par moyen de paiement',
-          regle:'Le tableau affiche uniquement les MDP en écart. L\'objectif est de guider le FM sans lui donner les montants à retrouver — il doit effectuer son investigation métier.',
-          comportement:'• Tableau : Payment method / Adjusted amount (input)\n• Seuls les MDP avec écart non nul sont affichés\n• Aucune colonne "Montant à régulariser" visible\n• Le FM saisit librement le montant par MDP',
-          critere:'MDP sans écart → absent du tableau\nSomme partielle autorisée\nSomme > écart total → champs rouges, bouton bloqué' },
-        { tab:'Regularisation', mode:'Tous modes', titre:'Validation d\'une régularisation',
-          regle:'La validation suit exactement le même workflow que la Télécollecte : modale → toaster → mode complétable. Les mêmes composants sont réutilisés.',
-          comportement:'• Bouton actif si au moins un montant saisi et pas de dépassement\n• Modale : "Vous êtes sur le point de valider une régularisation. Vous pourrez la compléter avant la clôture comptable."\n• Annuler → retour sans modification\n• Confirmer → toaster "Régularisation enregistrée" (5s)\n• Tableau → Adjustment made (figée) / Complément (input)\n• Bouton → "Complete regularisation" (inactif tant qu\'aucun complément)',
-          critere:'Aucun montant saisi → bouton inactif\nDépassement → champs rouges, bouton inactif\nValidation partielle autorisée' },
-        { tab:'Regularisation', mode:'Tous modes', titre:'Complément de régularisation avant clôture',
-          regle:'Identique à la logique de complément de Télécollecte. Après une première validation, le FM peut ajouter des compléments autant de fois que nécessaire avant la clôture.',
-          comportement:'• Tableau post-validation : Adjustment made (figée) + Complément (input)\n• Bouton inactif jusqu\'à saisie\n• Total régularisé = frozen + compléments en cours (temps réel)\n• Revalidation → mêmes composants → compléments absorbés, champs remis à 0\n• Aucun N° remise visible (généré automatiquement)',
-          critere:'Total régularisé ne peut pas dépasser l\'écart initial\nAprès revalidation : champs Complément = 0,00 €\nAucun N° remise exposé à l\'utilisateur' },
-        { tab:'Regularisation', mode:'Tous modes', titre:'Mise à jour des KPI (Écart / Total / Solde)',
-          regle:'Les trois KPI forment un système cohérent recalculé ensemble depuis une source de vérité unique. L\'Écart à régulariser est le KPI principal.',
-          comportement:'• Écart_initial = valeur système au chargement (non modifiable)\n• Écart à régulariser = Écart_initial − Total régularisé (décroît)\n• Total régularisé = somme validée + compléments en cours\n• Solde restant = miroir de l\'Écart à régulariser\n• Écart à régulariser : rouge si > 0, vert si = 0\n• Mise à jour en temps réel',
-          critere:'Écart à régulariser + Total régularisé = Écart_initial (invariant)\nÉcart = 0 → tous les KPI en état résolu' },
-        { tab:'Regularisation', mode:'Tous modes', titre:'Affichage des moyens de paiement concernés',
-          regle:'Seuls les MDP avec un écart non nul apparaissent dans le tableau. Ce filtre est statique.',
-          comportement:'• MDP avec écart ≠ 0 → ligne présente\n• MDP avec écart = 0 → ligne absente\n• Exemple : Visa + Amex en écart → WeChat absent\n• Le filtre ne change pas pendant la saisie',
-          critere:'Nombre de lignes = nombre de MDP avec écart ≠ 0\nAucune ligne pour un MDP en équilibre' },
-        { tab:'Regularisation', mode:'Tous modes', titre:'Cas d\'une régularisation complète',
-          regle:'Régularisation complète = Total régularisé atteint l\'Écart initial. Cela n\'entraîne pas de verrouillage automatique. Le FM peut redistribuer les montants entre MDP jusqu\'à la clôture. La clôture est le seul verrou définitif.',
-          comportement:'• Écart à régulariser = 0 → couleur rouge → vert\n• Solde restant = 0, Total régularisé = Écart_initial\n• Le bouton reste disponible : redistribution entre MDP possible\n• La clôture comptable fige l\'état à l\'instant T, définitivement',
-          critere:'Écart = 0 → tous les KPI en état résolu\nLe FM peut modifier la répartition tant que somme = Écart_initial\nCloture = seul verrou définitif' }
+
+        // ══ PLANNING ══════════════════════════════════════════════════════
+        { tab:'Planning', mode:'MVP · Cible', titre:'Structure de la grille planning',
+          regle:'Le planning croise les chambres du village (en lignes) avec les jours de la période affichée (en colonnes). Chaque séjour occupe une bande horizontale continue, positionnée sur ses dates réelles d’arrivée et de départ. La grille est le point d’entrée unique vers toutes les informations d’une chambre.',
+          comportement:'• Colonne de gauche figée : code chambre, type, occupation, pictogramme d’état\n• 14 colonnes de jours pour la vue 2 weeks\n• Une bande par séjour, positionnée et dimensionnée sur ses dates\n• Le jour courant est surligné sur toute la hauteur de la grille\n• Une chambre sans séjour sur la période affiche une ligne vide\n• La grille défile verticalement, l’en-tête de dates reste visible',
+          critere:'Une bande commence le jour d’arrivée et finit le jour de départ\nDeux séjours ne se superposent jamais sur une même ligne\nLe nombre de lignes correspond au nombre de chambres du village' },
+
+        { tab:'Planning', mode:'MVP · Cible', titre:'Signalétique d’une bande de séjour',
+          regle:'La couleur d’une bande porte une information métier, mais elle n’est jamais la seule : chaque état est doublé d’un libellé ou d’un pictogramme. Un GO daltonien doit pouvoir lire le planning sans perte d’information.',
+          comportement:'• Nom du GM et dates affichés dans la bande\n• Statut de fidélité affiché en toutes lettres (Platinum, Gold, Silver, NGM)\n• Mention « Excellence corpo » en clair lorsque le séjour est concerné\n• Nombre d’accompagnants affiché sous la forme « +N »\n• Chambre verrouillée : pictogramme cadenas sur la bande\n• Séjour déplacé : pictogramme double flèche sur la bande\n• Immobilisation (maintenance, blocage propriétaire) : bande rouge + libellé explicite',
+          critere:'Aucun état n’est identifiable par la seule couleur\nLe cadenas et la double flèche restent visibles même sur une bande courte\nUne immobilisation porte toujours son motif en toutes lettres' },
+
+        { tab:'Planning', mode:'MVP · Cible', titre:'Infobulle d’un séjour à l’information tronquée',
+          regle:'Une bande peut ne pas afficher toute son information : soit elle est trop courte pour ses badges, soit elle dépasse de la période affichée et se trouve rognée. Dans ces deux cas seulement, une infobulle restitue l’information manquante au survol ou au focus clavier.',
+          comportement:'• Infobulle déclenchée uniquement si l’information est tronquée\n• Une bande complète n’ouvre aucune infobulle — elle répéterait l’écran\n• Contenu : nom, dates complètes, statut, Excellence corpo, occupation, verrouillage, déplacement\n• Ouverture au survol souris ET au focus clavier\n• Fermeture à la sortie du survol, à la perte du focus, ou par la touche Échap\n• L’infobulle se replace sous la bande si elle n’a pas la place au-dessus',
+          critere:'Bande de moins de 4 jours → infobulle disponible\nBande rognée par le bord de la période → infobulle disponible\nBande entièrement lisible → aucune infobulle\nL’infobulle reste toujours dans l’écran' },
+
+        { tab:'Planning', mode:'MVP · Cible', titre:'En-tête de dates au défilement',
+          regle:'La ligne des dates reste visible pendant que la grille défile : sans elle, le GO ne sait plus à quel jour correspond une bande. Elle se cale au ras du haut de la zone de défilement, sur un fond opaque.',
+          comportement:'• La ligne de dates se fige en haut dès que la grille défile\n• Fond blanc opaque sur toute la largeur\n• Aucun contenu ne doit apparaître au-dessus de cette ligne pendant le défilement\n• Une ombre portée apparaît pour signaler que la ligne est décollée du contenu\n• La position des dates ne bouge pas d’un pixel au moment où elle se fige',
+          critere:'Aucune bande de séjour n’est visible au-dessus de la ligne de dates\nLes dates restent lisibles à toute position de défilement\nLa grille ne saute pas au moment où l’en-tête se fige' },
+
+        { tab:'Planning', mode:'MVP · Cible', titre:'Sélection de la période affichée',
+          regle:'La période affichée est pilotée par le sélecteur de dates : flèches pour avancer ou reculer, libellé cliquable pour choisir une date de début dans un calendrier. Le libellé indique toujours le mois et l’amplitude exacte de la période visible.',
+          comportement:'• Flèche gauche : recule la période\n• Flèche droite : avance la période\n• Clic sur le libellé : ouvre un calendrier de sélection de date de début\n• Le libellé affiche le mois et l’amplitude (ex. « Mon 15 - Sun 28 »)\n• La grille et l’en-tête de dates se recalculent à chaque changement',
+          critere:'Le libellé reflète toujours la période réellement affichée\nLes bandes se repositionnent correctement après navigation\nUn séjour qui sort de la période disparaît de la grille' },
+
+        { tab:'Planning', mode:'Cible', titre:'Onglets de vue — 2 weeks, Week, Month, Day',
+          regle:'La version cible propose quatre amplitudes d’affichage. L’onglet actif détermine le nombre de colonnes de la grille. Cette commutation n’existe pas dans le MVP, qui ne sert que la vue 2 weeks.',
+          comportement:'• Quatre onglets : 2 week, Week, Month, Day\n• L’onglet actif est signalé par un fond plein, pas seulement par la couleur du texte\n• Changer d’onglet recalcule le nombre de colonnes et repositionne les bandes\n• 2 week = 14 jours, Week = 7 jours, Month = 30 jours, Day = 1 jour',
+          critere:'Un seul onglet actif à la fois\nLa grille se recalcule sans rechargement de page\nLe sélecteur de dates reste synchronisé avec l’amplitude choisie' },
+
+        { tab:'Planning', mode:'MVP', titre:'Barre de navigation du MVP',
+          regle:'Le MVP ne sert qu’une seule amplitude d’affichage : les onglets de vue n’ont rien à commuter et sont retirés. Le sélecteur de dates devient alors l’élément principal de la barre et se centre, les commandes d’affichage restant calées à droite.',
+          comportement:'• Onglets 2 week / Week / Month / Day masqués\n• Sélecteur de dates centré horizontalement dans la barre\n• Commandes plein écran et densité conservées, alignées à droite\n• La période affichée reste de 14 jours',
+          critere:'Aucun onglet de vue visible en version MVP\nLe sélecteur de dates est centré à moins de 2px près\nLes commandes d’affichage restent accessibles' },
+
+        { tab:'Planning', mode:'MVP · Cible', titre:'Filtres chambre et état',
+          regle:'Deux filtres permettent de réduire le nombre de lignes affichées : par type de chambre et par état d’occupation. Chaque entrée indique le nombre de chambres concernées, pour que le GO sache ce qu’il va obtenir avant de filtrer.',
+          comportement:'• Filtre Room : liste les types de chambre avec leur effectif (DX, EC K, EC S, EC S+…)\n• Filtre States : liste les états d’occupation avec leur effectif\n• Le libellé du filtre indique la sélection courante et le total\n• Les filtres se cumulent\n• La grille se recalcule immédiatement après sélection',
+          critere:'Le compteur de chaque entrée correspond au nombre réel de chambres\nUn filtre sans résultat affiche une grille vide, jamais une erreur\nLes filtres n’altèrent pas la période affichée' },
+
+        { tab:'Planning', mode:'MVP · Cible', titre:'Export et modes d’affichage',
+          regle:'Le planning peut être exporté pour un usage hors outil, et affiché en pleine page pour libérer de la surface de lecture sur les longues périodes.',
+          comportement:'• Bouton Download : exporte la vue courante\n• Commande plein écran : masque les éléments périphériques, élargit la grille\n• Commande densité : revient à l’affichage standard\n• L’export reprend la période et les filtres courants',
+          critere:'L’export reflète exactement ce qui est affiché à l’écran\nLe passage en plein écran ne modifie ni la période ni les filtres' },
+
+        // ══ FICHE CHAMBRE ═════════════════════════════════════════════════
+        { tab:'Fiche chambre', mode:'MVP · Cible', titre:'Ouverture de la fiche chambre',
+          regle:'La fiche chambre est le point d’accès unique au détail. Elle s’ouvre aussi bien depuis une chambre que depuis un séjour : le GO n’a pas à savoir où cliquer, les deux chemins mènent à la bonne information.',
+          comportement:'• Clic sur une bande de séjour : ouvre la fiche de la chambre avec le séjour en cours\n• Clic sur une chambre ou une cellule vide : ouvre la fiche de la chambre sans séjour\n• Clic sur une immobilisation (maintenance, blocage) : ouvre la fiche sans séjour — ce n’est pas un séjour GM\n• La fiche s’ouvre en tiroir sur la droite, le planning reste visible derrière\n• Les bandes sont atteignables au clavier et s’activent par Entrée ou Espace',
+          critere:'Une immobilisation n’affiche jamais de bloc séjour avec des champs vides\nLa fiche est atteignable sans souris\nLe planning reste lisible derrière le tiroir' },
+
+        { tab:'Fiche chambre', mode:'MVP · Cible', titre:'Contenu de la fiche — chambre occupée',
+          regle:'Quand la chambre porte un séjour, la fiche présente d’abord le séjour en cours, puis les voyageurs, puis les caractéristiques de la chambre. Cet ordre répond à la question la plus fréquente en premier : qui occupe cette chambre.',
+          comportement:'• Titre : code chambre et type\n• Séjour en cours : nom du GM, arrivée, départ, occupation, numéro d’adhérent, statut, numéro de dossier\n• Note de contexte si le séjour en comporte une\n• Voyageurs du dossier : nom et rôle de chacun, occupant principal signalé\n• Caractéristiques : étage, exposition, surface, literie, chambre communicante, accessibilité',
+          critere:'Aucun champ affiché vide — un champ sans valeur affiche un tiret\nLe statut est écrit en toutes lettres, jamais porté par la seule couleur\nLe nombre de voyageurs listés correspond à l’occupation annoncée' },
+
+        { tab:'Fiche chambre', mode:'MVP · Cible', titre:'Contenu de la fiche — chambre libre',
+          regle:'Quand la chambre ne porte aucun séjour sur la date consultée, la fiche se limite aux caractéristiques de la chambre. Aucun bloc séjour vide n’est affiché.',
+          comportement:'• Titre : code chambre et type\n• Caractéristiques uniquement : étage, exposition, surface, literie, chambre communicante, accessibilité\n• Aucun bloc séjour ni liste de voyageurs',
+          critere:'Aucun intitulé de section sans contenu\nLa chambre communicante est nommée et son état précisé (libre, occupée)' },
+
+        { tab:'Fiche chambre', mode:'MVP · Cible', titre:'Bandeau chambre verrouillée',
+          regle:'Une chambre verrouillée porte un bandeau en tête de fiche rappelant le motif et la période du verrouillage. L’information doit être visible avant toute autre, car elle conditionne ce que le GO peut faire de la chambre.',
+          comportement:'• Bandeau affiché en tête de fiche, avant les caractéristiques\n• Rappelle le motif du verrouillage et sa période\n• Le cadenas apparaît également sur la ligne du planning\n• Le bandeau disparaît dès que la chambre est déverrouillée',
+          critere:'Le bandeau et le cadenas du planning sont toujours cohérents\nLe motif est affiché en toutes lettres' },
+
+        // ══ ACTIONS ═══════════════════════════════════════════════════════
+        { tab:'Actions', mode:'Cible', titre:'Affecter un GM à une chambre',
+          regle:'L’affectation associe un dossier client à une chambre libre. Le GO recherche le GM, le sélectionne, puis confirme. L’action n’existe pas dans le MVP.',
+          comportement:'• Accès depuis la fiche d’une chambre libre\n• Recherche par nom, liste des derniers clients consultés\n• Sélection multiple possible pour un dossier à plusieurs voyageurs\n• Le bouton de validation reste inactif tant qu’aucun GM n’est sélectionné\n• Une fenêtre de confirmation rappelle la chambre et les GM concernés avant enregistrement',
+          critere:'Aucune affectation sans confirmation explicite\nLe bouton reste inactif tant que la sélection est vide\nLa chambre affectée apparaît immédiatement sur le planning' },
+
+        { tab:'Actions', mode:'Cible', titre:'Verrouiller et déverrouiller une chambre',
+          regle:'Le verrouillage retire temporairement une chambre de la disponibilité, pour une période et un motif donnés. Le déverrouillage se fait depuis la même fiche. L’action n’existe pas dans le MVP.',
+          comportement:'• Accès depuis la fiche chambre, occupée ou libre\n• Saisie d’une période de verrouillage avec date et heure de début et de fin\n• Choix d’un motif dans une liste\n• Une fenêtre de confirmation rappelle la chambre, la période, la durée et le motif\n• Une chambre verrouillée propose l’action inverse à la place : déverrouiller\n• Le cadenas apparaît sur la ligne du planning dès le verrouillage',
+          critere:'Le verrouillage est impossible sans motif\nLa fiche et le planning reflètent le verrouillage immédiatement\nLe déverrouillage fait disparaître le cadenas et le bandeau' },
+
+        { tab:'Actions', mode:'Cible', titre:'Réserver une chambre',
+          regle:'La réservation bloque une chambre pour un usage à venir sans lui affecter de dossier client. Elle se distingue du verrouillage par son intention : garder la chambre disponible pour quelqu’un, pas la retirer du parc. L’action n’existe pas dans le MVP.',
+          comportement:'• Accès depuis la fiche d’une chambre libre\n• Saisie d’une période de réservation\n• Saisie d’un motif en texte libre\n• Une fenêtre de confirmation rappelle la chambre, la période, la durée et le motif',
+          critere:'Aucune réservation sans motif renseigné\nLa période de réservation apparaît sur le planning' },
+
+        { tab:'Actions', mode:'Cible', titre:'Changer un séjour de chambre',
+          regle:'Le changement de chambre déplace un séjour existant vers une autre chambre. Seules les chambres réellement libres sur toute la durée du séjour sont proposées : une chambre occupée, en maintenance ou verrouillée ne l’est jamais. L’action n’existe pas dans le MVP.',
+          comportement:'• Accès depuis la fiche d’une chambre occupée\n• Rappel du séjour concerné avant toute saisie\n• Filtres catégorie et occupation déduits du parc réel, jamais saisis à la main\n• La liste se resserre à chaque filtre appliqué\n• La chambre retenue s’affiche en étiquette à côté du champ\n• Le bouton de validation reste inactif tant qu’aucune chambre n’est choisie\n• Une fenêtre de confirmation rappelle les deux chambres, le séjour et la période\n• Après validation, la bande se déplace sur la nouvelle ligne et porte la double flèche',
+          critere:'Une chambre occupée sur la période du séjour n’est jamais proposée\nUn occupant résiduel est renvoyé vers la chambre d’origine, jamais écrasé\nLe planning reflète le déplacement immédiatement' },
+
+        { tab:'Actions', mode:'Cible', titre:'Confirmation avant toute action',
+          regle:'Toute action qui modifie le planning passe par une fenêtre de confirmation. Celle-ci récapitule ce qui va être modifié, pour que le GO puisse vérifier avant de valider plutôt que de corriger après coup.',
+          comportement:'• Une fenêtre de confirmation précède chaque affectation, verrouillage, réservation et changement de chambre\n• Elle rappelle la chambre concernée et les paramètres saisis\n• Deux issues : revenir en arrière sans rien modifier, ou confirmer\n• Revenir en arrière ramène à la saisie en conservant ce qui a été renseigné',
+          critere:'Aucune modification du planning sans confirmation explicite\nLe retour en arrière ne perd jamais la saisie\nLe récapitulatif correspond exactement à ce qui sera enregistré' },
+
+        // ══ PANEL & VERSIONS ══════════════════════════════════════════════
+        { tab:'Panel & versions', mode:'MVP · Cible', titre:'Bascule entre version MVP et version cible',
+          regle:'Le wireframe porte les deux périmètres et permet de passer de l’un à l’autre à tout moment. La version MVP correspond à la première livraison : consultation seule. La version cible correspond au périmètre visé, actions comprises.',
+          comportement:'• Sélecteur à deux entrées dans le panel : VERSION CIBLE et VERSION MVP\n• Disponible pour le designer comme pour le PO\n• La version active est signalée par une étoile et une bordure, pas seulement par la couleur\n• VERSION MVP : aucun bouton d’action dans les fiches, onglets de vue masqués, sélecteur de dates centré\n• VERSION CIBLE : actions disponibles, quatre onglets de vue\n• Le choix est mémorisé d’une visite à l’autre\n• Changer de version referme la fiche ouverte, qui porterait sinon les commandes de l’autre périmètre',
+          critere:'Le choix de version survit au rechargement de la page\nAucun bouton d’action n’est atteignable en version MVP\nLa préférence est propre au Calendrier et n’affecte aucun autre écran' },
+
+        { tab:'Panel & versions', mode:'MVP · Cible', titre:'Accessibilité — exigences permanentes',
+          regle:'Tous les écrans du Calendrier sont accessibles, sans exception. Si un choix de mise en page compromet l’accessibilité, c’est la mise en page qui change. Cette exigence s’applique aux deux versions et à tout élément ajouté par la suite.',
+          comportement:'• Contraste du texte sur son fond d’au moins 4.5:1, 3:1 pour les grandes tailles et les bordures\n• Cibles cliquables d’au moins 44 pixels de haut\n• Aucune information portée par la seule couleur\n• Tout champ et tout interrupteur porte un libellé visible — un texte d’aide dans le champ n’est pas un libellé\n• Tout élément interactif est atteignable au clavier et montre son focus\n• Ordre de tabulation conforme à l’ordre de lecture',
+          critere:'Un écran dont une information n’est lisible qu’en couleur est refusé\nUn champ sans libellé visible est refusé\nUn élément cliquable inatteignable au clavier est refusé' }
+
       ];
       // Merge : conserver les RG existantes, ajouter uniquement les nouvelles (par titre)
       const toAdd = RG_DATA.filter(r => !existingTitles.has(r.titre));
       const merged = [...existing, ...toAdd];
       localStorage.setItem(RG_BLOCKS_KEY, JSON.stringify(merged));
-      localStorage.setItem('wf_rg_version', RG_VERSION);
+      localStorage.setItem(RG_VERSION_KEY, RG_VERSION);
     }
   })();
 
@@ -4092,6 +4092,11 @@
     document.getElementById('cal-room-modal-overlay')?.classList.remove('open');
     document.getElementById('cal-rm-popup-overlay')?.classList.remove('open');
     hideCalTip();
+    // Les règles de gestion suivent le périmètre : la liste du panel PO et le
+    // document ouvert doivent refléter la version qu'on vient de choisir.
+    if (typeof renderPoPanelContent === 'function') renderPoPanelContent();
+    const _drawer = document.getElementById('doc-drawer');
+    if (_drawer && getComputedStyle(_drawer).display !== 'none') openDocDrawer();
   }
   window.setCalVersion = setCalVersion;
 
@@ -5632,13 +5637,25 @@
     const content = document.getElementById('doc-drawer-content');
     if (!drawer || !content) return;
 
-    const rgBlocks = JSON.parse(localStorage.getItem('wf_rg_blocks') || '[]');
+    // Clé isolée : les RG du Calendrier, jamais celles de la Télécollecte.
+    const allRg = JSON.parse(localStorage.getItem('wf_rg_blocks_calendrier') || '[]');
+    // Le document suit la version active du panel : en MVP on ne lit que le
+    // périmètre livré, en cible on lit tout. Une RG « MVP · Cible » est dans
+    // les deux documents.
+    const isMvpDoc = (typeof CAL_VERSION !== 'undefined') && CAL_VERSION === 'mvp';
+    const rgBlocks = allRg.filter(b => {
+      const m = b.mode || '';
+      return isMvpDoc ? m.indexOf('MVP') !== -1 : m.indexOf('Cible') !== -1;
+    });
     const today = new Date().toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+    // Numérotation calée sur la liste COMPLÈTE, partagée par le corps et le
+    // sommaire : RG-14 désigne la même règle dans les deux documents.
+    const numById = new Map(allRg.map((b, i) => [b.titre, i + 1]));
 
-    const TAB_COLORS = { 'Telecollection':'#E8F4FD', 'Previous Date':'#FEF3C7', 'Regularisation':'#F0FDF4' };
-    const TAB_TEXT   = { 'Telecollection':'#0057A8', 'Previous Date':'#92400E', 'Regularisation':'#1A6B31' };
-    const MODE_COLORS = { 'Interfacé':'#EDE9FE', 'Non interfacé':'#F3F4F6', 'Tous modes':'#F3F4F6' };
-    const MODE_TEXT   = { 'Interfacé':'#5B21B6', 'Non interfacé':'#374151', 'Tous modes':'#374151' };
+    const TAB_COLORS = { 'Planning':'#E8F4FD', 'Fiche chambre':'#FEF3C7', 'Actions':'#F0FDF4', 'Panel & versions':'#EDE9FE' };
+    const TAB_TEXT   = { 'Planning':'#0057A8', 'Fiche chambre':'#92400E', 'Actions':'#1A6B31', 'Panel & versions':'#5B21B6' };
+    const MODE_COLORS = { 'MVP':'#FEF3C7', 'Cible':'#EDE9FE', 'MVP · Cible':'#F3F4F6' };
+    const MODE_TEXT   = { 'MVP':'#92400E', 'Cible':'#5B21B6', 'MVP · Cible':'#374151' };
 
     if (rgBlocks.length === 0) {
       content.innerHTML = `
@@ -5650,24 +5667,26 @@
     } else {
       // Grouper par tab en conservant l'index global pour la numérotation
       const grouped = {};
-      rgBlocks.forEach((b, i) => {
-        const t = b.tab || 'Telecollection';
+      rgBlocks.forEach(b => {
+        const t = b.tab || 'Planning';
         if (!grouped[t]) grouped[t] = [];
-        grouped[t].push({ ...b, _globalIdx: i });
+        grouped[t].push({ ...b, _globalIdx: (numById.get(b.titre) || 0) - 1 });
       });
 
       content.innerHTML = `
         <!-- Intro -->
         <div style="margin-bottom:40px;padding-bottom:28px;border-bottom:2px solid var(--grey-bd);">
           <div style="font-size:12px;font-weight:700;color:var(--grey-txt);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Documentation fonctionnelle · ${today}</div>
-          <h1 style="font-size:26px;font-weight:800;color:var(--navy);margin:0 0 14px;line-height:1.2;">Télécollecte TPE — Règles de gestion</h1>
+          <h1 style="font-size:26px;font-weight:800;color:var(--navy);margin:0 0 14px;line-height:1.2;">Calendrier planning — Règles de gestion<br><span style="font-size:17px;font-weight:700;color:${isMvpDoc ? '#92400E' : '#5B21B6'};">${isMvpDoc ? 'VERSION MVP — consultation seule' : 'VERSION CIBLE — périmètre complet'}</span></h1>
           <p style="font-size:15px;color:#374151;line-height:1.7;margin:0 0 10px;">
-            Ce document recense les règles de gestion de l'écran Télécollecte TPE de l'outil Odyssey (Club Med).
+            Ce document recense les règles de gestion de l'écran Calendrier planning de l'outil Odyssey (Club Med).
             Il est destiné aux Product Owners, développeurs, QA et équipes métier pour comprendre le comportement attendu de l'interface.
           </p>
           <p style="font-size:14px;color:var(--grey-txt);margin:0;">
-            L'écran permet aux GOs et équipes réception des villages Club Med de saisir, valider et régulariser les remises TPE en fin de journée comptable.
-            Deux modes coexistent selon la configuration du village : <strong>Interfacé</strong> (montants remontés automatiquement des TPE) et <strong>Non interfacé</strong> (saisie manuelle).
+            L'écran permet aux GOs et équipes réception des villages Club Med de visualiser l'occupation des chambres jour par jour et d'accéder au détail de chaque séjour.
+            ${isMvpDoc
+              ? 'Ce document décrit le périmètre de la <strong>première livraison</strong> : consultation seule, sans action sur le planning. Les règles portant sur les actions figurent dans la version cible.'
+              : 'Ce document décrit le <strong>périmètre visé</strong>, actions comprises (affectation, verrouillage, réservation, changement de chambre). Basculer le panel sur VERSION MVP affiche le périmètre de la première livraison.'}
           </p>
           <div style="margin-top:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <span style="background:#F0FDF4;color:#1A6B31;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;">● ${rgBlocks.length} règle${rgBlocks.length > 1 ? 's' : ''} documentée${rgBlocks.length > 1 ? 's' : ''}</span>
@@ -5733,13 +5752,17 @@
     // Générer le sommaire
     const toc = document.getElementById('doc-drawer-toc');
     if (toc && rgBlocks.length > 0) {
+      // Même numérotation que le corps du document : le sommaire renumérotait
+      // séquentiellement la liste filtrée, si bien qu'une RG portait deux
+      // numéros différents selon qu'on la lisait dans le sommaire ou dans le
+      // corps dès qu'une règle était absente du périmètre affiché.
       const grouped2 = {};
-      rgBlocks.forEach((b, i) => {
-        const t = b.tab || 'Telecollection';
+      rgBlocks.forEach(b => {
+        const t = b.tab || 'Planning';
         if (!grouped2[t]) grouped2[t] = [];
-        grouped2[t].push({ ...b, _idx: i });
+        grouped2[t].push({ ...b, _idx: (numById.get(b.titre) || 0) - 1 });
       });
-      const TAB_TEXT2 = { 'Telecollection':'#0057A8', 'Previous Date':'#92400E', 'Regularisation':'#1A6B31' };
+      const TAB_TEXT2 = { 'Planning':'#0057A8', 'Fiche chambre':'#92400E', 'Actions':'#1A6B31', 'Panel & versions':'#5B21B6' };
       toc.innerHTML = `
         <div style="font-size:11px;font-weight:700;color:var(--grey-txt);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;">Sommaire</div>
         ${Object.entries(grouped2).map(([tab, rgs]) => `
@@ -6247,9 +6270,15 @@
     // RG lecture seule
     const rgEl = document.getElementById('po-rg-list');
     if (rgEl) {
-      const rg = JSON.parse(localStorage.getItem('wf_rg_blocks_calendrier') || '[]');
+      // Les RG suivent la version active du panel, comme le document complet.
+      // Le numéro reste celui de la liste complète : RG-14 désigne la même règle
+      // qu'on lise le périmètre MVP ou le périmètre cible.
+      const all = JSON.parse(localStorage.getItem('wf_rg_blocks_calendrier') || '[]');
+      const isMvp = (typeof CAL_VERSION !== 'undefined') && CAL_VERSION === 'mvp';
+      const rg = all.map((r, i) => ({ ...r, _n: i + 1 }))
+                    .filter(r => (r.mode || '').indexOf(isMvp ? 'MVP' : 'Cible') !== -1);
       rgEl.innerHTML = rg.length
-        ? rg.map((r,i) => `<div style="font-size:12px;color:#1E2643;padding:4px 0;border-bottom:1px solid #E0E0E0;"><strong>RG-${String(i+1).padStart(2,'0')}</strong> ${r.titre}</div>`).join('')
+        ? rg.map(r => `<div style="font-size:12px;color:#1E2643;padding:4px 0;border-bottom:1px solid #E0E0E0;"><strong>RG-${String(r._n).padStart(2,'0')}</strong> ${r.titre}</div>`).join('')
         : '<span style="font-size:12px;color:#6B7280;font-style:italic;">Aucune règle de gestion</span>';
     }
   }

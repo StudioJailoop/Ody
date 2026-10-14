@@ -1,5 +1,7 @@
 # MEMORY
 
+- [Toute évolution UX crée sa règle de gestion](feedback_rg_obligatoire_par_element_ux.md) — Ajout/modif UX = sa RG dans la foulée, format Télécollecte, périmètre MVP/Cible, clés isolées, numérotation stable
+- [Accessibilité non négociable](feedback_a11y_non_negociable.md) — TOUS les écrans Club Med doivent être a11y : contraste, cibles 44px, libellés visibles, jamais la couleur seule — aucune exception
 - [Odyssey Trident 1.0 deprecated](feedback_ody_trident_v1_deprecated.md) — Ne jamais mentionner Odyssey Trident Ψ 1.0, il est définitivement abandonné
 - [Odyssey — profil utilisateurs](project_odyssey_users.md) — Utilisateurs pros internes Club Med (GOs, réception), pas du B2C — adapter les reviews UX en conséquence
 - [Figma references Odyssey / Club Med](reference_figma_odyssey.md) — Liens Figma : Trident 2.0 DS, Main 2.0 template, références listes et caisse
@@ -31,3 +33,4 @@
 - [Cardex — sous-projet Club Med](project_loopcraft_cardex.md) — wireframe-cardex-V1.html livré 2026-06-10 : fiche client Odyssey DS, 3 props layout (A/B/C), Firebase+localStorage isolés
 - [Propositions dans le panel uniquement](feedback_propositions_panel_only.md) — switcher A/B/C JAMAIS dans le corps du wireframe — uniquement dans wf-panel section Propositions
 - [Règles de conception Cardex](feedback_cardex_design_rules.md) — DS strict, no new components, spacing grille x4, cohérence > créativité — checklist obligatoire avant toute production
+- [État check-444 — session 2026-06-25/26](project_loopcraft_check444_state.md) — commit 0da33b2 : archivage PO corrigé, bloc écart Régularisation ajouté, sticky Régularisation — reprendre ici
