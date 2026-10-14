@@ -1211,6 +1211,47 @@
      chambre) : sur la pastille blanche de la bande, il faut l'inverser pour
      qu'il reste lisible. L'asset flèches, lui, est déjà noir. */
   .cal-booking .b-flag.lock img { filter: brightness(0); }
+
+  /* ══ Sélecteur de version (panel) — VERSION CIBLE / VERSION MVP ══
+     Deux boutons radio accessibles : l'état sélectionné n'est jamais porté par
+     la seule couleur (étoile + bordure épaisse + aria-checked), et chaque cible
+     fait au moins 44px de haut. ══ */
+  .cal-vswitch { display: flex; flex-direction: column; gap: 6px; }
+  .cal-vswitch-btn {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    min-height: 44px; padding: 7px 10px;
+    border-radius: 8px; border: 1.5px solid var(--grey-bd); background: var(--white);
+    font-family: inherit; font-size: 13px; font-weight: 600; color: var(--grey-txt);
+    text-align: left; cursor: pointer; transition: background .12s, border-color .12s;
+  }
+  .cal-vswitch-btn:hover { background: #F3F4F6; }
+  .cal-vswitch-btn:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+  .cal-vswitch-btn[aria-checked="true"] {
+    border-color: var(--navy); background: #F0F1F8; color: var(--navy); font-weight: 700;
+  }
+  .cal-vswitch-star { font-size: 11px; width: 12px; flex-shrink: 0; }
+  .cal-vswitch-sub { font-size: 11px; font-weight: 500; color: var(--grey-txt); }
+  .cal-vswitch-btn[aria-checked="true"] .cal-vswitch-sub { color: var(--navy); opacity: .75; }
+
+  /* ══ Infobulle de réservation ══
+     Le rendu de la bande masque les badges sous 4 jours et rogne les séjours qui
+     dépassent la fenêtre : l'infobulle restitue l'information manquante. Elle
+     s'ouvre au survol ET au focus clavier (sinon elle serait inaccessible). ══ */
+  .cal-tip {
+    position: fixed; z-index: 2400; display: none; max-width: 260px;
+    background: var(--white); border: 1px solid var(--grey-bd); border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(16,24,40,.16); padding: 10px 12px;
+    font-size: 12px; line-height: 16px; color: var(--navy); pointer-events: none;
+  }
+  .cal-tip.open { display: block; }
+  .cal-tip-name { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+  .cal-tip-dates { color: var(--grey-txt); margin-bottom: 6px; }
+  .cal-tip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cal-tip-chip {
+    display: inline-block; padding: 2px 8px; border-radius: 100px;
+    background: #F3F4F6; color: var(--navy); font-size: 11px; font-weight: 600;
+  }
+  .cal-booking:focus-visible { outline: 2px solid #fff; outline-offset: -3px; box-shadow: 0 0 0 4px var(--navy); }
   </style>
 </head>
 <body>
@@ -1570,11 +1611,21 @@
 
   <div class="panel-body">
 
-  <!-- En cours -->
-  <div class="panel-title">En cours</div>
-  <div id="current-version-block" style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;border:1.5px solid var(--navy);background:#F0F1F8;font-size:13px;font-weight:700;color:var(--navy);">
-    <span style="font-size:11px;">★</span>
-    <span style="flex:1;">Version active</span>
+  <!-- En cours — sélecteur de version (VERSION CIBLE / VERSION MVP).
+       Présent dans les deux vues (Designer et PO) : le PO doit pouvoir comparer
+       le périmètre livré au périmètre visé. -->
+  <div class="panel-title" id="cal-vswitch-label">En cours</div>
+  <div id="current-version-block" class="cal-vswitch" role="radiogroup" aria-labelledby="cal-vswitch-label">
+    <button type="button" class="cal-vswitch-btn" role="radio" aria-checked="true"
+            data-version="cible" onclick="setCalVersion('cible')">
+      <span class="cal-vswitch-star" aria-hidden="true">★</span>
+      <span style="flex:1;">VERSION CIBLE<br><span class="cal-vswitch-sub">Toutes les actions</span></span>
+    </button>
+    <button type="button" class="cal-vswitch-btn" role="radio" aria-checked="false"
+            data-version="mvp" onclick="setCalVersion('mvp')">
+      <span class="cal-vswitch-star" aria-hidden="true"></span>
+      <span style="flex:1;">VERSION MVP<br><span class="cal-vswitch-sub">Consultation seule</span></span>
+    </button>
   </div>
 
   <hr>
@@ -3991,6 +4042,40 @@
     return days;
   }
   let CAL_DAYS = buildCalDays();
+
+  // ══ Version affichée — VERSION CIBLE / VERSION MVP ═══════════════════════
+  // CIBLE = le périmètre visé, toutes les actions (Lock / Assign / Switch /
+  // Reserve). MVP = consultation seule : mêmes écrans, mêmes informations, mais
+  // aucun CTA d'action dans les fiches chambre et séjour.
+  // Clé localStorage préfixée _calendrier : l'isolation des sous-projets est un
+  // invariant Loopcraft, cette préférence ne doit pas fuir sur Télécollecte.
+  const CAL_VERSION_KEY = 'wf_version_calendrier';
+  let CAL_VERSION = localStorage.getItem(CAL_VERSION_KEY) === 'mvp' ? 'mvp' : 'cible';
+  const calIsMvp = () => CAL_VERSION === 'mvp';
+
+  function syncCalVersionUI() {
+    document.body.dataset.calVersion = CAL_VERSION;
+    document.querySelectorAll('#current-version-block .cal-vswitch-btn').forEach(btn => {
+      const on = btn.dataset.version === CAL_VERSION;
+      btn.setAttribute('aria-checked', on ? 'true' : 'false');
+      const star = btn.querySelector('.cal-vswitch-star');
+      if (star) star.textContent = on ? '★' : '';
+    });
+  }
+
+  function setCalVersion(v) {
+    const next = v === 'mvp' ? 'mvp' : 'cible';
+    if (next === CAL_VERSION) return;
+    CAL_VERSION = next;
+    try { localStorage.setItem(CAL_VERSION_KEY, CAL_VERSION); } catch (e) {}
+    syncCalVersionUI();
+    // Une fiche ouverte montrerait encore les CTA de l'autre version : on la ferme.
+    document.getElementById('cal-room-modal-overlay')?.classList.remove('open');
+    document.getElementById('cal-rm-popup-overlay')?.classList.remove('open');
+    hideCalTip();
+  }
+  window.setCalVersion = setCalVersion;
+
   const CAL_ROOMS = [
     { code:'A1-101',  type:'DX-A1',  pax:'2 pax', status:'occupied' },
     { code:'A1-102',  type:'EC S+',  pax:null,    status:'maintenance' },
@@ -4274,7 +4359,14 @@
       // (b.locked, déjà présent dans la maquette), soit la chambre a été
       // verrouillée en session depuis la modale.
       const locked = !!b.locked || !!calRoomLockInfo(b.room);
-      return `<div class="cal-booking" data-booking-idx="${bi}" data-room-idx="${b.room}" style="top:${top}px; left:${left}; width:${width}; background:${bg}; color:${color}; pointer-events:auto;" title="${b.name}${b.dates ? ' — ' + b.dates : ''}${b.tag ? ' — ' + b.tag : ''}${b.corpo ? ' — Excellence corpo' : ''}${locked ? ' — Locked room' : ''}${switched ? ' — Switched room' : ''}">
+      // Information tronquée : soit la bande déborde de la fenêtre visible (séjour
+      // rogné à gauche ou à droite), soit elle est trop courte pour ses badges.
+      // Dans les deux cas l'infobulle restitue ce qui manque.
+      const truncated = visStart < 0 || visEnd > CAL_VIEW_DAYS - 1 || !showBadges;
+      // aria-label remplace l'ancien title natif : non stylable, non atteignable
+      // au clavier et lu de façon incohérente selon les lecteurs d'écran.
+      const aria = `${b.name}${b.dates ? ' — ' + b.dates : ''}${b.tag ? ' — ' + b.tag : ''}${b.corpo ? ' — Excellence corpo' : ''}${locked ? ' — Locked room' : ''}${switched ? ' — Switched room' : ''}`.replace(/"/g, '&quot;');
+      return `<div class="cal-booking" data-booking-idx="${bi}" data-room-idx="${b.room}" tabindex="0" role="button" aria-label="${aria}" data-truncated="${truncated ? '1' : '0'}" style="top:${top}px; left:${left}; width:${width}; background:${bg}; color:${color}; pointer-events:auto;">
         <div style="display:flex;flex-direction:column;min-width:0;overflow:hidden;">
           <span class="b-name">${b.name}</span>
           ${b.dates ? `<span class="b-date">${b.dates}</span>` : ''}
@@ -4294,6 +4386,72 @@
     body.style.height = (visibleRow * rowH) + 'px';
   }
   renderCalendar();
+  syncCalVersionUI();
+
+  // ══ Infobulle de réservation ═════════════════════════════════════════════
+  // Présente dans les DEUX versions : c'est de l'affichage d'information, pas
+  // une action. Elle ne s'ouvre que sur les bandes dont l'information est
+  // tronquée (data-truncated="1"), sinon elle répéterait ce qui est déjà lisible.
+  let calTipEl = null;
+  function getCalTip() {
+    if (!calTipEl) {
+      calTipEl = document.createElement('div');
+      calTipEl.className = 'cal-tip';
+      calTipEl.id = 'cal-tip';
+      calTipEl.setAttribute('role', 'tooltip');
+      document.body.appendChild(calTipEl);
+    }
+    return calTipEl;
+  }
+  function hideCalTip() {
+    if (calTipEl) calTipEl.classList.remove('open');
+  }
+  function showCalTip(el) {
+    if (el.getAttribute('data-truncated') !== '1') return;
+    const b = CAL_BOOKINGS[+el.dataset.bookingIdx];
+    if (!b) return;
+    const chips = [];
+    if (b.tag) chips.push(b.tag);
+    if (b.corpo) chips.push('Excellence corpo');
+    if (b.pax) chips.push(b.pax);
+    if (b.locked || calRoomLockInfo(b.room)) chips.push('Locked room');
+    if (calSwitchedBookings.has(+el.dataset.bookingIdx)) chips.push('Switched room');
+    const tip = getCalTip();
+    tip.innerHTML = `
+      <div class="cal-tip-name">${b.name}</div>
+      ${b.dates ? `<div class="cal-tip-dates">${b.dates}</div>` : ''}
+      ${chips.length ? `<div class="cal-tip-row">${chips.map(c => `<span class="cal-tip-chip">${c}</span>`).join('')}</div>` : ''}`;
+    tip.classList.add('open');
+    // Positionnement après affichage : la hauteur dépend du contenu rendu.
+    const r = el.getBoundingClientRect();
+    const t = tip.getBoundingClientRect();
+    let left = r.left;
+    if (left + t.width > window.innerWidth - 8) left = window.innerWidth - t.width - 8;
+    let top = r.top - t.height - 8;
+    if (top < 8) top = r.bottom + 8; // pas de place au-dessus → on bascule dessous
+    tip.style.left = Math.max(8, left) + 'px';
+    tip.style.top = top + 'px';
+  }
+  document.addEventListener('mouseover', e => {
+    const el = e.target.closest?.('.cal-booking');
+    if (el) showCalTip(el);
+  });
+  document.addEventListener('mouseout', e => {
+    if (e.target.closest?.('.cal-booking')) hideCalTip();
+  });
+  document.addEventListener('focusin', e => {
+    const el = e.target.closest?.('.cal-booking');
+    if (el) showCalTip(el);
+  });
+  document.addEventListener('focusout', e => {
+    if (e.target.closest?.('.cal-booking')) hideCalTip();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') hideCalTip();
+    // Une bande est un bouton : Entrée et Espace doivent l'activer comme un clic.
+    const el = e.target.closest?.('.cal-booking');
+    if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); el.click(); }
+  });
 
   // ══ Modale chambre — clic réservation (assigné) ou chambre/cellule vide (routage) ══
   // Fidèle aux nœuds Figma 15733:7949 (Room EC-01, assigné) et 15776:20299
@@ -4739,23 +4897,25 @@
         </div>
         <div class="cal-rm-section-label">ROOM CHARACTERISTICS</div>
         ${renderRoomCharacteristics(r)}
+        ${calIsMvp() ? '' : `
         <hr class="cal-rm-divider" />
         <div class="cal-rm-cta">
           <button class="cal-rm-btn lock" id="cal-rm-btn-lock">${lockReason ? 'Unlock' : 'Lock'}</button>
           <button class="cal-rm-btn solid" id="cal-rm-btn-switch">Switch</button>
-        </div>`;
+        </div>`}`;
     }
     return `
       ${titleHtml}
       <hr class="cal-rm-divider" />
       <div class="cal-rm-section-label">ROOM CHARACTERISTICS</div>
       ${renderRoomCharacteristics(r)}
+      ${calIsMvp() ? '' : `
       <hr class="cal-rm-divider" />
       <div class="cal-rm-cta">
         <button class="cal-rm-btn lock" id="cal-rm-btn-lock">${lockReason ? 'Unlock' : 'Lock'}</button>
         <button class="cal-rm-btn lock" id="cal-rm-btn-reserve">Reserve</button>
         <button class="cal-rm-btn solid" id="cal-rm-btn-assign">Assign</button>
-      </div>`;
+      </div>`}`;
   }
   function openRoomModal(roomIdx, bookingIdx) {
     // Une bande rouge (Maintenance/Blocage propriétaire) n'est pas un séjour GM —
@@ -6002,6 +6162,23 @@
         <button onclick="togglePanel()" style="background:none;border:none;cursor:pointer;font-size:16px;color:#6B7280;line-height:1;" title="Réduire">−</button>
       </div>
       <div class="panel-body">
+        <!-- Sélecteur de version — identique au panel Designer : le PO doit
+             pouvoir comparer le périmètre MVP au périmètre cible. Lecture du
+             wireframe uniquement, aucune action d'édition n'est ouverte ici. -->
+        <div class="panel-title" id="cal-vswitch-label-po">En cours</div>
+        <div id="current-version-block" class="cal-vswitch" role="radiogroup" aria-labelledby="cal-vswitch-label-po">
+          <button type="button" class="cal-vswitch-btn" role="radio" aria-checked="true"
+                  data-version="cible" onclick="setCalVersion('cible')">
+            <span class="cal-vswitch-star" aria-hidden="true">★</span>
+            <span style="flex:1;">VERSION CIBLE<br><span class="cal-vswitch-sub">Toutes les actions</span></span>
+          </button>
+          <button type="button" class="cal-vswitch-btn" role="radio" aria-checked="false"
+                  data-version="mvp" onclick="setCalVersion('mvp')">
+            <span class="cal-vswitch-star" aria-hidden="true"></span>
+            <span style="flex:1;">VERSION MVP<br><span class="cal-vswitch-sub">Consultation seule</span></span>
+          </button>
+        </div>
+        <hr>
         <div class="panel-title">Règles de gestion</div>
         <div id="po-rg-list" style="font-size:12px;color:#6B7280;font-style:italic;padding:4px 2px;">Aucune règle</div>
         <hr>
@@ -6025,6 +6202,9 @@
       </div>
     `;
     renderPoPanelContent();
+    // Le panel PO est reconstruit après l'init du calendrier : il faut
+    // resynchroniser le sélecteur sur la version réellement active.
+    syncCalVersionUI();
     // Bouton commentaire PO bas-gauche
     const poBtn = document.createElement('div');
     poBtn.id = 'po-btn';
