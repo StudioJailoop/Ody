@@ -1178,6 +1178,40 @@
   }
   .cal-rm-lock-banner img { width: 24px; height: 24px; flex-shrink: 0; filter: brightness(0) invert(1); }
 
+  /* ══ Carte « chambre verrouillée » ══
+     L'aplat orange plein portait le seul motif et ne pouvait rien accueillir
+     d'autre. La carte reprend la couleur de verrouillage en liseré et en titre,
+     sur un fond clair : le texte long redevient lisible, la provenance du
+     verrou tient dedans, et l'action de déverrouillage est posée au même
+     endroit que l'information qui la justifie — plutôt qu'en bas de fiche. ══ */
+  .cal-rm-lock-card {
+    display: flex; flex-direction: column; gap: 10px;
+    background: #FFF6F0; border: 1px solid #F0C3A3; border-left: 4px solid #C75300;
+    border-radius: 12px; padding: 14px 16px; margin: 16px 0 0;
+    width: 100%; box-sizing: border-box;
+  }
+  .cal-rm-lock-head { display: flex; align-items: center; gap: 10px; }
+  .cal-rm-lock-head img { width: 20px; height: 20px; flex-shrink: 0; }
+  .cal-rm-lock-title {
+    flex: 1; font-size: 14px; font-weight: 700; color: #8A3A00; line-height: 20px;
+  }
+  .cal-rm-lock-reason { font-size: 14px; line-height: 20px; color: #1F2937; }
+  .cal-rm-lock-meta {
+    display: flex; flex-wrap: wrap; gap: 4px 18px; padding-top: 2px;
+    border-top: 1px solid #F0C3A3; margin-top: 2px; padding-top: 10px;
+  }
+  .cal-rm-lock-meta div { font-size: 12px; line-height: 18px; color: #4B5563; }
+  .cal-rm-lock-meta b { display: block; font-size: 11px; font-weight: 700; color: #8A3A00;
+    text-transform: uppercase; letter-spacing: .04em; }
+  .cal-rm-lock-btn {
+    flex-shrink: 0; min-height: 44px; padding: 0 18px;
+    border-radius: 100px; border: 1.5px solid #C75300; background: var(--white);
+    color: #8A3A00; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px; transition: background .12s;
+  }
+  .cal-rm-lock-btn:hover { background: #FDEADF; }
+  .cal-rm-lock-btn:focus-visible { outline: 2px solid #8A3A00; outline-offset: 2px; }
+
   /* ══ Pop-up de confirmation d'assignation — nœud Figma 15929:44073. Récapitule
      la chambre et les GM retenus avant validation. ══ */
   /* z-index au-dessus du drawer chambre (1500) : le pop-up le recouvre, il ne
@@ -2925,7 +2959,7 @@
     // mélanger à celles de la Télécollecte (invariant d’étanchéité Loopcraft).
     const RG_BLOCKS_KEY = 'wf_rg_blocks_calendrier';
     const RG_VERSION_KEY = 'wf_rg_version_calendrier';
-    const RG_VERSION = 'cal-v1.0-18rg';
+    const RG_VERSION = 'cal-v1.2-21rg';
     if (localStorage.getItem(RG_VERSION_KEY) !== RG_VERSION) {
       const existing = JSON.parse(localStorage.getItem(RG_BLOCKS_KEY) || '[]');
       const existingTitles = new Set(existing.map(r => r.titre));
@@ -2998,10 +3032,15 @@
           comportement:'• Titre : code chambre et type\n• Caractéristiques uniquement : étage, exposition, surface, literie, chambre communicante, accessibilité\n• Aucun bloc séjour ni liste de voyageurs',
           critere:'Aucun intitulé de section sans contenu\nLa chambre communicante est nommée et son état précisé (libre, occupée)' },
 
-        { tab:'Fiche chambre', mode:'MVP · Cible', titre:'Bandeau chambre verrouillée',
-          regle:'Une chambre verrouillée porte un bandeau en tête de fiche rappelant le motif et la période du verrouillage. L’information doit être visible avant toute autre, car elle conditionne ce que le GO peut faire de la chambre.',
-          comportement:'• Bandeau affiché en tête de fiche, avant les caractéristiques\n• Rappelle le motif du verrouillage et sa période\n• Le cadenas apparaît également sur la ligne du planning\n• Le bandeau disparaît dès que la chambre est déverrouillée',
-          critere:'Le bandeau et le cadenas du planning sont toujours cohérents\nLe motif est affiché en toutes lettres' },
+        { tab:'Fiche chambre', mode:'MVP · Cible', titre:'Carte chambre verrouillée',
+          regle:'Une chambre verrouillée ne peut plus être réattribuée. Quand elle porte un séjour, cette contrainte doit être lue AVANT le séjour lui-même : elle conditionne ce que le GO peut faire de la chambre. La carte répond aux trois questions qui se posent dans l’ordre — la chambre est-elle bloquée, pourquoi, et par qui.',
+          comportement:'• Carte placée en tête de fiche, au-dessus du séjour en cours\n• Titre explicite « Chambre verrouillée », doublé du pictogramme cadenas\n• Motif du verrouillage en toutes lettres\n• Provenance du verrou : auteur, rôle et horodatage de la pose\n• Le cadenas apparaît également sur la ligne du planning\n• La carte disparaît dès que la chambre est déverrouillée',
+          critere:'La carte précède toujours le bloc séjour en cours\nL’état verrouillé n’est jamais porté par la seule couleur\nAuteur et horodatage sont renseignés pour tout verrou posé\nLa carte et le cadenas du planning sont toujours cohérents' },
+
+        { tab:'Fiche chambre', mode:'Cible', titre:'Déverrouiller depuis la carte',
+          regle:'L’action de déverrouillage est posée dans la carte elle-même, à côté de l’information qui la motive : le GO qui vient de lire pourquoi la chambre est bloquée peut la débloquer sans aller chercher un bouton en bas de fiche. Le déverrouillage reste également disponible dans les actions de bas de fiche.',
+          comportement:'• Bouton « Unlock » dans l’en-tête de la carte, aligné à droite du titre\n• Absent en version MVP, qui ne porte aucune action\n• Le déverrouillage retire la carte, le cadenas de la ligne du planning, et rebascule l’action de bas de fiche sur « Lock »\n• Le bouton porte un intitulé nommant la chambre concernée pour les lecteurs d’écran',
+          critere:'Cible de 44px de haut minimum\nLe déverrouillage met à jour la fiche et le planning dans le même geste\nAucun bouton de déverrouillage en version MVP' },
 
         // ══ ACTIONS ═══════════════════════════════════════════════════════
         { tab:'Actions', mode:'Cible', titre:'Affecter un GM à une chambre',
@@ -3041,9 +3080,23 @@
           critere:'Un écran dont une information n’est lisible qu’en couleur est refusé\nUn champ sans libellé visible est refusé\nUn élément cliquable inatteignable au clavier est refusé' }
 
       ];
-      // Merge : conserver les RG existantes, ajouter uniquement les nouvelles (par titre)
-      const toAdd = RG_DATA.filter(r => !existingTitles.has(r.titre));
-      const merged = [...existing, ...toAdd];
+      // Merge : le socle de RG livré avec le wireframe est marqué `_seed` et
+      // remplacé à chaque montée de version — sans quoi une règle corrigée
+      // resterait figée dans l'ancien texte chez qui l'a déjà chargée. Les RG
+      // écrites à la main dans l'outil ne portent pas ce marqueur et sont
+      // conservées telles quelles.
+      // Le marqueur `_seed` n'existait pas dans la toute première livraison des
+      // RG Calendrier : les règles déjà en place n'en portent pas et seraient
+      // reprises comme « écrites à la main », créant un doublon de chaque règle.
+      // Cette purge ne vaut qu'une fois, le temps de poser le marqueur.
+      const MIGRATED_KEY = 'wf_rg_seed_tagged_calendrier';
+      const alreadyTagged = localStorage.getItem(MIGRATED_KEY) === '1';
+      const seedTitles = new Set(RG_DATA.map(r => r.titre));
+      const custom = alreadyTagged
+        ? existing.filter(r => !r._seed && !seedTitles.has(r.titre))
+        : [];
+      localStorage.setItem(MIGRATED_KEY, '1');
+      const merged = [...RG_DATA.map(r => ({ ...r, _seed: true })), ...custom];
       localStorage.setItem(RG_BLOCKS_KEY, JSON.stringify(merged));
       localStorage.setItem(RG_VERSION_KEY, RG_VERSION);
     }
@@ -4284,7 +4337,18 @@
   // vérifié contre Figma — l'état utilisateur se superpose, il ne l'écrase pas.
   // Déclarés avant renderCalendar() : la bande lit calSwitchedBookings dès le
   // premier rendu, une déclaration plus bas les laisserait en zone morte.
-  const calLockedRooms = new Map();      // roomIdx → motif du verrou posé en session
+  // roomIdx → { reason, by, at } : le motif seul ne disait pas qui avait posé le
+  // verrou ni quand, alors que c'est la première question quand on tombe sur une
+  // chambre bloquée. calRoomLockInfo continue de rendre le motif seul pour les
+  // appelants qui ne veulent que ça.
+  const calLockedRooms = new Map();
+  // Verrou présent dans le jeu de données Figma (I9-901, maquette 15743:8400) :
+  // sa provenance fait partie de la donnée de maquette, au même titre que les
+  // noms de GM et les dates de séjour.
+  const CAL_SEED_LOCKS = {
+    locked: { reason:'Family with young children - connected rooms locked against automatic reassignment.',
+              by:'Camille Berger', role:'Réception', at:'12/09/2025 à 17:42' }
+  };
   const calUnlockedRooms = new Set();    // roomIdx relâchés (y compris ceux verrouillés d'origine)
   const calSwitchedBookings = new Set(); // index dans CAL_BOOKINGS
   // Statut affiché par la ligne : l'action de l'utilisateur l'emporte sur la
@@ -4853,21 +4917,42 @@
         <button class="cal-rm-btn yellow" id="cal-rm-btn-confirm-reserve" style="flex:0 0 auto;min-width:150px;">Reserve</button>
       </div>`;
   }
-  function calRoomLockInfo(roomIdx) {
+  // Détail complet du verrou : motif, auteur, rôle, horodatage.
+  function calRoomLockDetails(roomIdx) {
     if (calUnlockedRooms.has(roomIdx)) return null;
     if (calLockedRooms.has(roomIdx)) return calLockedRooms.get(roomIdx);
-    // I9-901 arrive déjà verrouillée dans le jeu de données Figma — on lui donne
-    // le motif de la maquette 15743:8400.
-    if (CAL_ROOMS[roomIdx].status === 'locked') {
-      return 'Family with young children - connected rooms locked against automatic reassignment.';
-    }
+    if (CAL_ROOMS[roomIdx].status === 'locked') return CAL_SEED_LOCKS.locked;
     return null;
   }
-  function renderLockBanner(reason) {
+  // Conservé tel quel : plusieurs appelants ne testent que la présence d'un
+  // verrou ou n'affichent que le motif.
+  function calRoomLockInfo(roomIdx) {
+    const d = calRoomLockDetails(roomIdx);
+    return d ? d.reason : null;
+  }
+  function renderLockBanner(roomIdx) {
+    const d = calRoomLockDetails(roomIdx);
+    if (!d) return '';
+    // Le déverrouillage est une action : absent du périmètre MVP, où la carte
+    // reste purement informative.
+    const unlockBtn = calIsMvp() ? '' : `
+        <button type="button" class="cal-rm-lock-btn" id="cal-rm-btn-unlock-inline"
+                aria-label="Déverrouiller la chambre ${CAL_ROOMS[roomIdx].code}">
+          <img src="assets-calendrier/icon-padlock.svg" alt="" width="16" height="16" />
+          Unlock
+        </button>`;
     return `
-      <div class="cal-rm-lock-banner">
-        <img src="assets-calendrier/icon-padlock.svg" alt="" />
-        <span>${reason}</span>
+      <div class="cal-rm-lock-card" role="group" aria-label="Chambre verrouillée">
+        <div class="cal-rm-lock-head">
+          <img src="assets-calendrier/icon-padlock.svg" alt="" />
+          <span class="cal-rm-lock-title">Chambre verrouillée</span>
+          ${unlockBtn}
+        </div>
+        <div class="cal-rm-lock-reason">${d.reason}</div>
+        <div class="cal-rm-lock-meta">
+          <div><b>Verrouillée par</b>${d.by || '—'}${d.role ? ' · ' + d.role : ''}</div>
+          <div><b>Le</b>${d.at || '—'}</div>
+        </div>
       </div>`;
   }
   function renderRoomModalContent(roomIdx, booking) {
@@ -4879,7 +4964,7 @@
         <h2>Room ${r.code}</h2>
       </div>
       <div class="cal-rm-subtitle">${r.type}</div>
-      ${lockReason ? renderLockBanner(lockReason) : ''}`;
+      ${renderLockBanner(roomIdx)}`;
     if (booking) {
       const fullName = `${booking.travelers[0].familyName.toUpperCase()} ${booking.travelers[0].firstName}`;
       return `
@@ -4967,6 +5052,14 @@
       }
       openLockSubModal(roomIdx, bookingIdx);
     });
+    // Déverrouillage depuis la carte elle-même : même effet que le CTA Unlock du
+    // bas de fiche, posé à côté de l'information qui le motive.
+    document.getElementById('cal-rm-btn-unlock-inline')?.addEventListener('click', () => {
+      calLockedRooms.delete(roomIdx);
+      calUnlockedRooms.add(roomIdx);
+      renderCalendar(); // le cadenas doit disparaître de la ligne aussi
+      openRoomModal(roomIdx, bookingIdx);
+    });
     document.getElementById('cal-rm-btn-switch')?.addEventListener('click', () => openSwitchSubModal(roomIdx, bookingIdx, booking));
     document.getElementById('cal-rm-btn-assign')?.addEventListener('click', () => openAssignSubModal(roomIdx, bookingIdx));
     document.getElementById('cal-rm-btn-reserve')?.addEventListener('click', () => openReserveSubModal(roomIdx, bookingIdx));
@@ -4976,7 +5069,16 @@
     wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
     document.getElementById('cal-rm-btn-activate-lock')?.addEventListener('click', () => {
       const reason = document.getElementById('cal-rm-lock-reason')?.value;
-      calLockedRooms.set(roomIdx, reason || 'Room locked against automatic reassignment.');
+      // On enregistre la provenance en même temps que le motif : sans auteur ni
+      // horodatage, la carte ne pourrait pas répondre à « qui a verrouillé ».
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      calLockedRooms.set(roomIdx, {
+        reason: reason || 'Room locked against automatic reassignment.',
+        by: CURRENT_USER,
+        role: isDesigner ? 'Designer' : 'Réception',
+        at: `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} à ${pad(now.getHours())}:${pad(now.getMinutes())}`
+      });
       calUnlockedRooms.delete(roomIdx);
       renderCalendar(); // cadenas sur la carte chambre et sur la bande
       openRoomModal(roomIdx, bookingIdx); // retour chambre, bandeau orange posé
