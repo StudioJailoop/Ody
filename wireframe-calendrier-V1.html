@@ -840,14 +840,33 @@
   .cal-nav-actions { display: flex; gap: 8px; }
   .cal-nav-actions svg { width: 30px; height: 30px; stroke: var(--navy); cursor: pointer; }
 
+  /* ══ VERSION MVP — barre de navigation ══
+     Le MVP ne sert qu'une vue (2 weeks) : les onglets de vue n'ont rien à
+     commuter, ils disparaissent. Le sélecteur de dates devient alors l'élément
+     principal de la barre et se centre, les actions d'affichage restant calées
+     à droite. La version cible n'est pas touchée. ══ */
+  body[data-cal-version="mvp"] .cal-nav-row { justify-content: center; position: relative; }
+  body[data-cal-version="mvp"] .cal-view-tabs { display: none; }
+  body[data-cal-version="mvp"] .cal-nav-actions {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+  }
+
   .cal-grid-wrap { position: relative; }
+  /* La zone de scroll (.content) porte un padding-top de 28px. Un sticky à
+     `top: 0` se cale APRÈS ce padding : il restait donc une fenêtre de 28px au
+     dessus de la barre dans laquelle les réservations défilaient à découvert.
+     On remonte le point d'accroche de ces 28px et on les rend à l'élément en
+     padding : la barre se cale au ras du haut, son fond blanc opaque couvre
+     toute la bande, et la ligne de dates ne bouge pas d'un pixel.
+     Le margin négatif annule ce padding tant que la barre n'est pas collée. */
   .cal-header-row {
     display: grid; grid-template-columns: 212px repeat(14, 1fr);
     margin-bottom: 8px;
-    position: sticky; top: 0; z-index: 20; background: var(--grey-bg);
+    position: sticky; top: -28px; z-index: 20; background: var(--white);
+    padding-top: 28px; margin-top: -28px;
     transition: box-shadow .15s;
   }
-  .cal-header-row.is-stuck { box-shadow: 0 2px 8px rgba(0,0,0,.08); padding-top: 8px; margin-top: -8px; }
+  .cal-header-row.is-stuck { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
   .cal-header-cell { text-align: center; }
   .cal-header-cell .dow { font-size: 12px; color: #000; line-height: 14px; border-radius: 4px; }
   .cal-header-cell .dnum { font-size: 14px; color: #000; margin-top: 2px; line-height: 20px; border-radius: 4px; }
