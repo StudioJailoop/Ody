@@ -1,5 +1,6 @@
 # MEMORY
 
+- [Jamais de valeur hors DS — couleur ni typo](feedback_jamais_de_couleur_hors_ds.md) — Aucune couleur, taille ou graisse choisie à la main : tokens Semantic colors + styles Inter/B0-B3-B4-B5 (pas de 11px)
 - [Toute évolution UX crée sa règle de gestion](feedback_rg_obligatoire_par_element_ux.md) — Ajout/modif UX = sa RG dans la foulée, format Télécollecte, périmètre MVP/Cible, clés isolées, numérotation stable
 - [Accessibilité non négociable](feedback_a11y_non_negociable.md) — TOUS les écrans Club Med doivent être a11y : contraste, cibles 44px, libellés visibles, jamais la couleur seule — aucune exception
 - [Odyssey Trident 1.0 deprecated](feedback_ody_trident_v1_deprecated.md) — Ne jamais mentionner Odyssey Trident Ψ 1.0, il est définitivement abandonné
