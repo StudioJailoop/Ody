@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Comparatif — bandeau vs carte de verrouillage · Calendrier Odyssey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+  :root {
+    --navy: #1E2643;
+    --white: #FFFFFF;
+    --grey-bg: #F4F4F4;
+    --grey-bd: #E0E0E0;
+    --grey-txt: #6B7280;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 32px 64px;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--grey-bg); color: var(--navy);
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  h1 { font-size: 26px; font-weight: 800; margin: 0 0 8px; }
+  .lede { font-size: 15px; line-height: 1.6; color: #374151; margin: 0 0 8px; max-width: 70ch; }
+  .meta { font-size: 13px; color: var(--grey-txt); margin: 0 0 32px; }
+  .meta a { color: #0057A8; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+
+  .col { background: var(--white); border: 1px solid var(--grey-bd); border-radius: 16px; overflow: hidden; }
+  .col-head { padding: 14px 20px; border-bottom: 1px solid var(--grey-bd); display: flex; align-items: center; gap: 10px; }
+  .tag { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+         border-radius: 100px; padding: 4px 12px; }
+  .tag.before { background: #F3F4F6; color: #4B5563; }
+  .tag.after  { background: #E7F6EC; color: #1A6B31; }
+  .col-head h2 { font-size: 15px; font-weight: 700; margin: 0; }
+  .col-body { padding: 20px; }
+
+  /* Contexte de fiche, repris du wireframe pour situer le bloc */
+  .fiche-title { display: flex; align-items: center; gap: 10px; }
+  .fiche-title h3 { font-size: 22px; font-weight: 800; margin: 0; }
+  .fiche-sub { font-size: 14px; color: var(--grey-txt); margin: 2px 0 0 34px; }
+  .section-label { font-size: 12px; font-weight: 700; letter-spacing: .06em;
+                   color: var(--navy); text-transform: uppercase; margin: 22px 0 10px; }
+  .stay-card { background: #F7F1EA; border-radius: 16px; padding: 16px; }
+  .stay-name { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+  .stay-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+  .stay-cols b { display: block; font-size: 13px; font-weight: 700; }
+  .stay-cols span { display: block; font-size: 13px; color: #333; margin-bottom: 6px; }
+
+  /* ── AVANT : bandeau plein, tel qu'il était ── */
+  .lock-banner {
+    display: flex; align-items: flex-start; gap: 12px; background: #C75300; color: #fff;
+    border-radius: 16px; padding: 16px 20px; margin: 16px 0 0; font-size: 14px; line-height: 20px;
+  }
+  .lock-banner .ico { flex-shrink: 0; font-size: 18px; line-height: 20px; }
+
+  /* ── APRÈS : carte, telle qu'elle est en production ── */
+  .lock-card {
+    display: flex; flex-direction: column; gap: 10px;
+    background: #FFF6F0; border: 1px solid #F0C3A3; border-left: 4px solid #C75300;
+    border-radius: 12px; padding: 14px 16px; margin: 16px 0 0;
+  }
+  .lock-head { display: flex; align-items: center; gap: 10px; }
+  .lock-head .ico { font-size: 17px; line-height: 20px; }
+  .lock-title { flex: 1; font-size: 14px; font-weight: 700; color: #8A3A00; line-height: 20px; }
+  .lock-reason { font-size: 14px; line-height: 20px; color: #1F2937; }
+  .lock-meta { display: flex; flex-wrap: wrap; gap: 4px 18px;
+               border-top: 1px solid #F0C3A3; margin-top: 2px; padding-top: 10px; }
+  .lock-meta div { font-size: 12px; line-height: 18px; color: #4B5563; }
+  .lock-meta b { display: block; font-size: 11px; font-weight: 700; color: #8A3A00;
+                 text-transform: uppercase; letter-spacing: .04em; }
+  .lock-btn {
+    flex-shrink: 0; min-height: 44px; padding: 0 18px; border-radius: 100px;
+    border: 1.5px solid #C75300; background: #fff; color: #8A3A00;
+    font-family: inherit; font-size: 14px; font-weight: 700; cursor: default;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+
+  /* Relevé */
+  /* Le titre vit hors du tableau : en <caption>, le overflow:hidden qui donne
+     ses coins arrondis au tableau le rognait sur la gauche. */
+  .table-title { font-size: 13px; font-weight: 700; color: var(--grey-txt);
+                 text-transform: uppercase; letter-spacing: .06em; margin: 36px 0 10px; }
+  table { width: 100%; border-collapse: collapse; background: var(--white);
+          border: 1px solid var(--grey-bd); border-radius: 16px; overflow: hidden; }
+  th, td { text-align: left; font-size: 14px; padding: 12px 16px; border-bottom: 1px solid var(--grey-bd); }
+  th { background: #FAFAFA; font-weight: 700; }
+  tr:last-child td { border-bottom: none; }
+  td.no { color: #9A3412; }
+  td.yes { color: #1A6B31; font-weight: 600; }
+  .note { margin-top: 28px; font-size: 14px; line-height: 1.7; color: #374151; max-width: 78ch; }
+  .note strong { color: var(--navy); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Carte de verrouillage — avant / après</h1>
+  <p class="lede">
+    Comparatif du bloc affiché en tête de fiche chambre quand la chambre est <strong>assignée et verrouillée</strong>.
+    Les deux colonnes utilisent les mêmes données, celles de la chambre O16-1601 (TEIXEIRA Catarina).
+  </p>
+  <p class="meta">
+    Page de comparaison autonome — elle ne touche pas au wireframe.
+    Le cas réel se voit dans le planning en cliquant sur une bande portant un cadenas :
+    <a href="wireframe-calendrier-V1.html?role=designer&amp;cb=1">ouvrir le wireframe</a>.
+  </p>
+
+  <div class="cols">
+
+    <!-- AVANT -->
+    <div class="col">
+      <div class="col-head"><span class="tag before">Avant</span><h2>Bandeau plein</h2></div>
+      <div class="col-body">
+        <div class="fiche-title"><span aria-hidden="true">🛏</span><h3>Room O16-1601</h3></div>
+        <div class="fiche-sub">DX-O16</div>
+
+        <div class="lock-banner">
+          <span class="ico" aria-hidden="true">🔒</span>
+          <span>Family with young children - connected rooms locked against automatic reassignment.</span>
+        </div>
+
+        <div class="section-label">Current stay</div>
+        <div class="stay-card">
+          <div class="stay-name">TEIXEIRA Catarina</div>
+          <div class="stay-cols">
+            <div><b>Arrival</b><span>Sep 15, 2025</span><b>Guest</b><span>3 pax</span></div>
+            <div><b>Departure</b><span>Sep 26, 2025</span><b>Type</b><span>Platinum</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APRÈS -->
+    <div class="col">
+      <div class="col-head"><span class="tag after">Après</span><h2>Carte de verrouillage</h2></div>
+      <div class="col-body">
+        <div class="fiche-title"><span aria-hidden="true">🛏</span><h3>Room O16-1601</h3></div>
+        <div class="fiche-sub">DX-O16</div>
+
+        <div class="lock-card" role="group" aria-label="Chambre verrouillée">
+          <div class="lock-head">
+            <span class="ico" aria-hidden="true">🔒</span>
+            <span class="lock-title">Chambre verrouillée</span>
+            <button type="button" class="lock-btn" aria-label="Déverrouiller la chambre O16-1601">Unlock</button>
+          </div>
+          <div class="lock-reason">Family with young children - connected rooms locked against automatic reassignment.</div>
+          <div class="lock-meta">
+            <div><b>Verrouillée par</b>Camille Berger · Réception</div>
+            <div><b>Le</b>12/09/2025 à 17:42</div>
+          </div>
+        </div>
+
+        <div class="section-label">Current stay</div>
+        <div class="stay-card">
+          <div class="stay-name">TEIXEIRA Catarina</div>
+          <div class="stay-cols">
+            <div><b>Arrival</b><span>Sep 15, 2025</span><b>Guest</b><span>3 pax</span></div>
+            <div><b>Departure</b><span>Sep 26, 2025</span><b>Type</b><span>Platinum</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="table-title" id="tbl-title">Ce qui change</p>
+  <table aria-labelledby="tbl-title">
+    <thead>
+      <tr><th scope="col">Point</th><th scope="col">Avant</th><th scope="col">Après</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Motif du verrouillage</td><td class="yes">Affiché</td><td class="yes">Affiché</td></tr>
+      <tr><td>Qui a posé le verrou</td><td class="no">Absent</td><td class="yes">Nom et rôle</td></tr>
+      <tr><td>Quand</td><td class="no">Absent</td><td class="yes">Date et heure</td></tr>
+      <tr><td>Déverrouiller</td><td class="no">Seulement en bas de fiche</td><td class="yes">Dans la carte et en bas de fiche</td></tr>
+      <tr><td>Contraste du texte</td><td>4.68:1 (blanc sur orange plein)</td><td class="yes">7.33 à 13.77:1</td></tr>
+      <tr><td>Lisibilité d’un motif long</td><td class="no">Texte blanc sur aplat saturé</td><td class="yes">Texte foncé sur fond clair</td></tr>
+      <tr><td>En version MVP</td><td>—</td><td class="yes">Carte sans bouton, information conservée</td></tr>
+    </tbody>
+  </table>
+
+  <p class="note">
+    <strong>Pourquoi ce changement.</strong> L’aplat orange plein convenait à une ligne de texte, mais
+    il ne pouvait rien accueillir d’autre : ni la provenance du verrou, ni une action. La carte garde la
+    couleur de verrouillage là où elle sert — en liseré et en titre — et rend le fond au texte.
+    Le bouton de déverrouillage est posé à côté de l’information qui le motive, plutôt qu’en bas de fiche.
+  </p>
+
+</div>
+</body>
+</html>
