@@ -2984,7 +2984,7 @@
     // mélanger à celles de la Télécollecte (invariant d’étanchéité Loopcraft).
     const RG_BLOCKS_KEY = 'wf_rg_blocks_calendrier';
     const RG_VERSION_KEY = 'wf_rg_version_calendrier';
-    const RG_VERSION = 'cal-v1.2-21rg';
+    const RG_VERSION = 'cal-v1.3-22rg';
     if (localStorage.getItem(RG_VERSION_KEY) !== RG_VERSION) {
       const existing = JSON.parse(localStorage.getItem(RG_BLOCKS_KEY) || '[]');
       const existingTitles = new Set(existing.map(r => r.titre));
@@ -3003,7 +3003,7 @@
 
         { tab:'Planning', mode:'MVP · Cible', titre:'Signalétique d’une bande de séjour',
           regle:'La couleur d’une bande porte une information métier, mais elle n’est jamais la seule : chaque état est doublé d’un libellé ou d’un pictogramme. Un GO daltonien doit pouvoir lire le planning sans perte d’information.',
-          comportement:'• Nom du GM et dates affichés dans la bande\n• Statut de fidélité affiché en toutes lettres (Platinum, Gold, Silver, NGM)\n• Mention « Excellence corpo » en clair lorsque le séjour est concerné\n• Nombre d’accompagnants affiché sous la forme « +N »\n• Chambre verrouillée : pictogramme cadenas sur la bande\n• Séjour déplacé : pictogramme double flèche sur la bande\n• Immobilisation (maintenance, blocage propriétaire) : bande rouge + libellé explicite',
+          comportement:'• Nom du GM et dates affichés dans la bande\n• Statut de fidélité affiché en toutes lettres (Platinum, Gold, Silver, NGM)\n• Mention « Excellence corpo » en clair lorsque le séjour est concerné\n• Nombre d’accompagnants affiché sous la forme « +N »\n• Room blocked : pictogramme cadenas sur la bande\n• Séjour déplacé : pictogramme double flèche sur la bande\n• Immobilisation (maintenance, blocage propriétaire) : bande rouge + libellé explicite',
           critere:'Aucun état n’est identifiable par la seule couleur\nLe cadenas et la double flèche restent visibles même sur une bande courte\nUne immobilisation porte toujours son motif en toutes lettres' },
 
         { tab:'Planning', mode:'MVP · Cible', titre:'Infobulle d’un séjour à l’information tronquée',
@@ -3057,29 +3057,34 @@
           comportement:'• Titre : code chambre et type\n• Caractéristiques uniquement : étage, exposition, surface, literie, chambre communicante, accessibilité\n• Aucun bloc séjour ni liste de voyageurs',
           critere:'Aucun intitulé de section sans contenu\nLa chambre communicante est nommée et son état précisé (libre, occupée)' },
 
-        { tab:'Fiche chambre', mode:'MVP · Cible', titre:'Carte chambre verrouillée',
-          regle:'Une chambre verrouillée ne peut plus être réattribuée. Quand elle porte un séjour, cette contrainte doit être lue AVANT le séjour lui-même : elle conditionne ce que le GO peut faire de la chambre. La carte répond aux trois questions qui se posent dans l’ordre — la chambre est-elle bloquée, pourquoi, et par qui.',
-          comportement:'• Carte placée en tête de fiche, au-dessus du séjour en cours\n• Titre explicite « Chambre verrouillée », doublé du pictogramme cadenas\n• Motif du verrouillage en toutes lettres\n• Provenance du verrou : auteur, rôle et horodatage de la pose\n• Le cadenas apparaît également sur la ligne du planning\n• La carte disparaît dès que la chambre est déverrouillée',
-          critere:'La carte précède toujours le bloc séjour en cours\nL’état verrouillé n’est jamais porté par la seule couleur\nAuteur et horodatage sont renseignés pour tout verrou posé\nLa carte et le cadenas du planning sont toujours cohérents' },
+        { tab:'Fiche chambre', mode:'MVP · Cible', titre:'Carte chambre bloquée',
+          regle:'Une chambre bloquée sort du parc : des travaux y sont prévus, aucun client ne peut y être placé. Quand elle porte un séjour, cette contrainte doit être lue AVANT le séjour lui-même : elle conditionne ce que le GO peut faire de la chambre. La carte répond aux trois questions qui se posent dans l’ordre — la chambre est-elle bloquée, pourquoi, et par qui.',
+          comportement:'• Carte placée en tête de fiche, au-dessus du séjour en cours\n• Titre explicite « Room blocked », doublé du pictogramme cadenas\n• Reason for blocking en toutes lettres\n• Provenance du blocage : auteur, rôle et horodatage de la pose\n• Le cadenas apparaît également sur la ligne du planning\n• La carte disparaît dès que la chambre est débloquée',
+          critere:'La carte précède toujours le bloc séjour en cours\nL’état bloqué n’est jamais porté par la seule couleur\nAuteur et horodatage sont renseignés pour tout blocage posé\nLa carte et le cadenas du planning sont toujours cohérents' },
 
-        { tab:'Fiche chambre', mode:'Cible', titre:'Déverrouiller depuis la carte',
-          regle:'L’action de déverrouillage est posée dans la carte elle-même, à côté de l’information qui la motive : le GO qui vient de lire pourquoi la chambre est bloquée peut la débloquer sans aller chercher un bouton en bas de fiche. Le déverrouillage reste également disponible dans les actions de bas de fiche.',
-          comportement:'• Bouton « Unlock » dans l’en-tête de la carte, aligné à droite du titre\n• Absent en version MVP, qui ne porte aucune action\n• Le déverrouillage retire la carte, le cadenas de la ligne du planning, et rebascule l’action de bas de fiche sur « Lock »\n• Le bouton porte un intitulé nommant la chambre concernée pour les lecteurs d’écran',
-          critere:'Cible de 44px de haut minimum\nLe déverrouillage met à jour la fiche et le planning dans le même geste\nAucun bouton de déverrouillage en version MVP' },
+        { tab:'Fiche chambre', mode:'Cible', titre:'Débloquer depuis la carte',
+          regle:'L’action de déblocage est posée dans la carte elle-même, à côté de l’information qui la motive : le GO qui vient de lire pourquoi la chambre est bloquée peut la débloquer sans aller chercher un bouton en bas de fiche. Le déverrouillage reste également disponible dans les actions de bas de fiche.',
+          comportement:'• Bouton « Unblock » dans l’en-tête de la carte, aligné à droite du titre\n• Absent en version MVP, qui ne porte aucune action\n• Le déblocage retire la carte, le pictogramme de la ligne du planning, et rebascule l’action de bas de fiche sur « Block »\n• Le bouton porte un intitulé nommant la chambre concernée pour les lecteurs d’écran',
+          critere:'Cible de 44px de haut minimum\nLe déverrouillage met à jour la fiche et le planning dans le même geste\nAucun bouton de déblocage en version MVP' },
 
         // ══ ACTIONS ═══════════════════════════════════════════════════════
+        { tab:'Actions', mode:'Cible', titre:'Trois actions distinctes sur une chambre',
+          regle:'Trois actions portent sur une chambre et sont régulièrement confondues parce qu’elles la rendent toutes indisponible. Elles n’ont ni la même intention, ni le même déclencheur, ni les mêmes conséquences.',
+          comportement:'• Reserve — un client arrive dans plusieurs mois : la chambre lui est gardée, sans dossier affecté. Bouton, période + motif.\n• Block — des travaux sont prévus : la chambre sort du parc, aucun client ne peut y être placé. Bouton, période + motif.\n• Lock — l’affectation est faite et ne doit plus bouger : « pas touche ». Interrupteur dans la fiche, pas un bouton, car on ne déclenche pas un parcours, on fige un état existant.\n• Reserve et Block visent une chambre libre, Lock vise une chambre déjà assignée',
+          critere:'Un libellé ne mélange jamais deux de ces trois actions\nLock se présente toujours comme un interrupteur, jamais comme un bouton\nBlock et Reserve ouvrent chacun leur parcours avec période et motif' },
+
         { tab:'Actions', mode:'Cible', titre:'Affecter un GM à une chambre',
           regle:'L’affectation associe un dossier client à une chambre libre. Le GO recherche le GM, le sélectionne, puis confirme. L’action n’existe pas dans le MVP.',
           comportement:'• Accès depuis la fiche d’une chambre libre\n• Recherche par nom, liste des derniers clients consultés\n• Sélection multiple possible pour un dossier à plusieurs voyageurs\n• Le bouton de validation reste inactif tant qu’aucun GM n’est sélectionné\n• Une fenêtre de confirmation rappelle la chambre et les GM concernés avant enregistrement',
           critere:'Aucune affectation sans confirmation explicite\nLe bouton reste inactif tant que la sélection est vide\nLa chambre affectée apparaît immédiatement sur le planning' },
 
-        { tab:'Actions', mode:'Cible', titre:'Verrouiller et déverrouiller une chambre',
-          regle:'Le verrouillage retire temporairement une chambre de la disponibilité, pour une période et un motif donnés. Le déverrouillage se fait depuis la même fiche. L’action n’existe pas dans le MVP.',
-          comportement:'• Accès depuis la fiche chambre, occupée ou libre\n• Saisie d’une période de verrouillage avec date et heure de début et de fin\n• Choix d’un motif dans une liste\n• Une fenêtre de confirmation rappelle la chambre, la période, la durée et le motif\n• Une chambre verrouillée propose l’action inverse à la place : déverrouiller\n• Le cadenas apparaît sur la ligne du planning dès le verrouillage',
-          critere:'Le verrouillage est impossible sans motif\nLa fiche et le planning reflètent le verrouillage immédiatement\nLe déverrouillage fait disparaître le cadenas et le bandeau' },
+        { tab:'Actions', mode:'Cible', titre:'Bloquer et débloquer une chambre',
+          regle:'Le blocage retire une chambre du parc pour des travaux, sur une période et avec un motif donnés. Le déblocage se fait depuis la même fiche. À ne pas confondre avec le verrouillage, qui fige une affectation sans retirer la chambre du parc. L’action n’existe pas dans le MVP.',
+          comportement:'• Accès depuis la fiche chambre, occupée ou libre\n• Saisie d’une période de blocage avec date et heure de début et de fin\n• Choix d’un motif dans une liste\n• Une fenêtre de confirmation rappelle la chambre, la période, la durée et le motif\n• Une chambre bloquée propose l’action inverse à la place : débloquer\n• Le pictogramme apparaît sur la ligne du planning dès le blocage',
+          critere:'Le blocage est impossible sans motif\nLa fiche et le planning reflètent le blocage immédiatement\nLe déblocage fait disparaître le pictogramme et la carte' },
 
         { tab:'Actions', mode:'Cible', titre:'Réserver une chambre',
-          regle:'La réservation bloque une chambre pour un usage à venir sans lui affecter de dossier client. Elle se distingue du verrouillage par son intention : garder la chambre disponible pour quelqu’un, pas la retirer du parc. L’action n’existe pas dans le MVP.',
+          regle:'La réservation garde une chambre pour un client dont l’arrivée est lointaine, sans lui affecter encore de dossier. Elle se distingue du blocage par son intention : la chambre reste destinée à un client, elle ne sort pas du parc pour travaux. L’action n’existe pas dans le MVP.',
           comportement:'• Accès depuis la fiche d’une chambre libre\n• Saisie d’une période de réservation\n• Saisie d’un motif en texte libre\n• Une fenêtre de confirmation rappelle la chambre, la période, la durée et le motif',
           critere:'Aucune réservation sans motif renseigné\nLa période de réservation apparaît sur le planning' },
 
@@ -4478,13 +4483,13 @@
       const truncated = visStart < 0 || visEnd > CAL_VIEW_DAYS - 1 || !showBadges;
       // aria-label remplace l'ancien title natif : non stylable, non atteignable
       // au clavier et lu de façon incohérente selon les lecteurs d'écran.
-      const aria = `${b.name}${b.dates ? ' — ' + b.dates : ''}${b.tag ? ' — ' + b.tag : ''}${b.corpo ? ' — Excellence corpo' : ''}${locked ? ' — Locked room' : ''}${switched ? ' — Switched room' : ''}`.replace(/"/g, '&quot;');
+      const aria = `${b.name}${b.dates ? ' — ' + b.dates : ''}${b.tag ? ' — ' + b.tag : ''}${b.corpo ? ' — Excellence corpo' : ''}${locked ? ' — Blocked room' : ''}${switched ? ' — Switched room' : ''}`.replace(/"/g, '&quot;');
       return `<div class="cal-booking" data-booking-idx="${bi}" data-room-idx="${b.room}" tabindex="0" role="button" aria-label="${aria}" data-truncated="${truncated ? '1' : '0'}" style="top:${top}px; left:${left}; width:${width}; background:${bg}; color:${color}; pointer-events:auto;">
         <div style="display:flex;flex-direction:column;min-width:0;overflow:hidden;">
           <span class="b-name">${b.name}</span>
           ${b.dates ? `<span class="b-date">${b.dates}</span>` : ''}
         </div>
-        ${locked ? `<span class="b-flag lock"><img src="assets-calendrier/icon-padlock.svg" alt="Locked room" /></span>` : ''}
+        ${locked ? `<span class="b-flag lock"><img src="assets-calendrier/icon-padlock.svg" alt="Blocked room" /></span>` : ''}
         ${switched ? `<span class="b-flag"><img src="assets-calendrier/icon-compare-arrows.svg" alt="Switched room" /></span>` : ''}
         ${showBadges && b.tag ? `<span class="b-tag" style="${b.locked ? 'background:#fff;color:#088a20;' : ''}">${b.tag}</span>` : ''}
         ${showBadges && b.corpo ? `<span class="b-corpo">Excellence corpo</span>` : ''}
@@ -4527,7 +4532,7 @@
     if (b.tag) chips.push(b.tag);
     if (b.corpo) chips.push('Excellence corpo');
     if (b.pax) chips.push(b.pax);
-    if (b.locked || calRoomLockInfo(b.room)) chips.push('Locked room');
+    if (b.locked || calRoomLockInfo(b.room)) chips.push('Blocked room');
     if (calSwitchedBookings.has(+el.dataset.bookingIdx)) chips.push('Switched room');
     const tip = getCalTip();
     tip.innerHTML = `
@@ -4627,25 +4632,36 @@
           <div class="cal-rm-field-display">am<img src="assets-calendrier/icon-chevron-down.svg" alt="" /></div>` : ''}
       </div>`;
   }
-  // Sous-modale LOCK — node Figma 15753:10847 ("Lock a EC-S-01 room").
+  // ══ Trois actions distinctes sur une chambre — ne pas les confondre ══
+  //   Reserve : un client arrive dans plusieurs mois, on garde la chambre pour
+  //             lui. Bouton, période + motif.
+  //   Block   : des travaux sont à faire, la chambre sort du parc. Bouton,
+  //             période + motif. C'est ce que ce code appelait « lock » jusqu'ici.
+  //   Lock    : l'affectation est faite et ne doit plus bouger — « pas touche ».
+  //             Interrupteur dans la fiche, pas un bouton. Maquetté en Figma,
+  //             pas encore porté ici.
+  // Les identifiants internes (calLockedRooms, calRoomLockInfo…) datent d'avant
+  // cette distinction et désignent le BLOCAGE. Ils seront renommés quand le
+  // verrouillage sera implémenté, pour ne pas mélanger deux refactos.
+  // Sous-modale BLOCK — node Figma 15753:10847 ("Block a EC-S-01 room").
   function renderLockModalContent(roomIdx) {
     const r = CAL_ROOMS[roomIdx];
     return `
       <div class="cal-rm-title with-back">
         <button class="cal-rm-back-btn" id="cal-rm-back-btn"><img src="assets-calendrier/icon-back-arrow.svg" alt="" /></button>
-        <h2>Lock a <span class="hl">${r.code}</span> room</h2>
+        <h2>Block a <span class="hl">${r.code}</span> room</h2>
       </div>
       <hr class="cal-rm-divider" />
       <div class="cal-rm-assign-block">
         <p>You are about to assign this room for :</p>
         ${renderRoomCardMini(r)}
       </div>
-      <div class="cal-rm-section-label small-gap" style="margin-top:24px;">LOCK DURATION</div>
+      <div class="cal-rm-section-label small-gap" style="margin-top:24px;">BLOCKING PERIOD</div>
       <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
         ${renderDateTimeRow('From', true)}
         ${renderDateTimeRow('To', true)}
       </div>
-      <div class="cal-rm-section-label small-gap">REASON FOR LOCKING</div>
+      <div class="cal-rm-section-label small-gap">REASON FOR BLOCKING</div>
       <div class="cal-rm-field">
         <select class="cal-rm-field-select" id="cal-rm-lock-reason">
           <option value="">Select reason</option>
@@ -4655,7 +4671,7 @@
       <div style="flex:1 0 0;min-height:0;"></div>
       <hr class="cal-rm-divider" />
       <div class="cal-rm-cta">
-        <button class="cal-rm-btn yellow" id="cal-rm-btn-activate-lock">Activate lock</button>
+        <button class="cal-rm-btn yellow" id="cal-rm-btn-activate-lock">Activate block</button>
       </div>`;
   }
   // ── Sous-modale SWITCH : état du formulaire ──────────────────────────────
@@ -4962,18 +4978,18 @@
     // reste purement informative.
     const unlockBtn = calIsMvp() ? '' : `
         <button type="button" class="cal-rm-lock-btn" id="cal-rm-btn-unlock-inline"
-                aria-label="Déverrouiller la chambre ${CAL_ROOMS[roomIdx].code}">Unlock</button>`;
+                aria-label="Unblock room ${CAL_ROOMS[roomIdx].code}">Unblock</button>`;
     return `
-      <div class="cal-rm-lock-card" role="group" aria-label="Chambre verrouillée">
+      <div class="cal-rm-lock-card" role="group" aria-label="Room blocked">
         <div class="cal-rm-lock-head">
           <span class="cal-rm-lock-ico" aria-hidden="true"></span>
-          <span class="cal-rm-lock-title">Chambre verrouillée</span>
+          <span class="cal-rm-lock-title">Room blocked</span>
           ${unlockBtn}
         </div>
         <div class="cal-rm-lock-reason">${d.reason}</div>
         <div class="cal-rm-lock-meta">
-          <div><b>Verrouillée par</b>${d.by || '—'}${d.role ? ' · ' + d.role : ''}</div>
-          <div><b>Le</b>${d.at || '—'}</div>
+          <div><b>Blocked by</b>${d.by || '—'}${d.role ? ' · ' + d.role : ''}</div>
+          <div><b>On</b>${d.at || '—'}</div>
         </div>
       </div>`;
   }
@@ -5031,7 +5047,7 @@
         ${calIsMvp() ? '' : `
         <hr class="cal-rm-divider" />
         <div class="cal-rm-cta">
-          <button class="cal-rm-btn lock" id="cal-rm-btn-lock">${lockReason ? 'Unlock' : 'Lock'}</button>
+          <button class="cal-rm-btn lock" id="cal-rm-btn-lock">${lockReason ? 'Unblock' : 'Block'}</button>
           <button class="cal-rm-btn solid" id="cal-rm-btn-switch">Switch</button>
         </div>`}`;
     }
@@ -5043,7 +5059,7 @@
       ${calIsMvp() ? '' : `
       <hr class="cal-rm-divider" />
       <div class="cal-rm-cta">
-        <button class="cal-rm-btn lock" id="cal-rm-btn-lock">${lockReason ? 'Unlock' : 'Lock'}</button>
+        <button class="cal-rm-btn lock" id="cal-rm-btn-lock">${lockReason ? 'Unblock' : 'Block'}</button>
         <button class="cal-rm-btn lock" id="cal-rm-btn-reserve">Reserve</button>
         <button class="cal-rm-btn solid" id="cal-rm-btn-assign">Assign</button>
       </div>`}`;
