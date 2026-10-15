@@ -955,8 +955,11 @@
     background: rgba(0,0,0,.32); visibility: visible; opacity: 1; pointer-events: auto;
     transition: opacity .25s ease, background .25s ease, visibility 0s linear 0s;
   }
+  /* 680px : la fiche porte jusqu'à cinq actions sur une seule ligne
+     (Lock/Unlock · Reserve · Block/Unblock · Switch · Assign). La largeur ne
+     change pas d'un état à l'autre, le tiroir ne doit pas sauter. */
   .cal-room-modal {
-    position: absolute; top: 0; right: 0; bottom: 0; width: 560px; max-width: 100vw;
+    position: absolute; top: 0; right: 0; bottom: 0; width: 680px; max-width: 100vw;
     background: var(--white); box-shadow: -8px 0 32px rgba(0,0,0,.18);
     display: flex; flex-direction: column; padding: 32px; overflow-y: auto;
     /* Arrivée de droite à gauche : part hors champ à droite, glisse ensuite
@@ -1330,6 +1333,24 @@
     background: #F3F4F6; color: var(--navy); font-size: 11px; font-weight: 600;
   }
   .cal-booking:focus-visible { outline: 2px solid #fff; outline-offset: -3px; box-shadow: 0 0 0 4px var(--navy); }
+
+  /* ══ Cibles tactiles — 44px minimum ══
+     Les composants du DS sont plus petits que 44px : onglets de vue 28px,
+     cases à cocher 24px, interrupteurs 24px. On n'agrandit pas le visuel, qui
+     appartient au DS : on étend la zone cliquable autour, par un pseudo-élément
+     centré. L'apparence ne bouge pas, la cible devient conforme. ══ */
+  .cal-view-tab, .cal-nav-actions img, .switch, .cal-room-card,
+  .cal-rm-lock-btn, .cal-select, .cal-download-btn {
+    position: relative;
+  }
+  .cal-view-tab::after, .cal-nav-actions img::after, .switch::after {
+    content: ''; position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%; height: 44px; min-width: 44px;
+  }
+  /* Le pseudo-élément ne doit pas masquer ce qu'il recouvre */
+  .cal-view-tab::after, .switch::after { pointer-events: auto; }
+  .cal-rm-btn { min-height: 44px; }
   </style>
 </head>
 <body>
@@ -2984,7 +3005,7 @@
     // mélanger à celles de la Télécollecte (invariant d’étanchéité Loopcraft).
     const RG_BLOCKS_KEY = 'wf_rg_blocks_calendrier';
     const RG_VERSION_KEY = 'wf_rg_version_calendrier';
-    const RG_VERSION = 'cal-v1.3-22rg';
+    const RG_VERSION = 'cal-v1.4-25rg';
     if (localStorage.getItem(RG_VERSION_KEY) !== RG_VERSION) {
       const existing = JSON.parse(localStorage.getItem(RG_BLOCKS_KEY) || '[]');
       const existingTitles = new Set(existing.map(r => r.titre));
@@ -3068,6 +3089,21 @@
           critere:'Cible de 44px de haut minimum\nLe déverrouillage met à jour la fiche et le planning dans le même geste\nAucun bouton de déblocage en version MVP' },
 
         // ══ ACTIONS ═══════════════════════════════════════════════════════
+        { tab:'Actions', mode:'Cible', titre:'Barre d’actions de la fiche chambre',
+          regle:'Les actions d’une chambre se lisent toujours au même endroit et dans le même ordre, quel que soit son état. Ce qui change, c’est le libellé de celle qui est déjà posée et la présence de l’action liée à l’occupation. Un GO qui cherche « Reserve » le trouve toujours à la même place.',
+          comportement:'• Trois actions de période toujours présentes, dans cet ordre : Lock, Reserve, Block\n• L’action déjà posée bascule en son inverse : Lock→Unlock, Block→Unblock\n• Switch n’apparaît que si la chambre porte un séjour — on ne déplace pas ce qui n’existe pas\n• Assign est toujours présent, y compris sur une chambre occupée\n• Hiérarchie visuelle : filaire pour les actions de période, plein noir pour Switch, jaune pour Assign\n• Quatre actions sur une chambre libre, cinq sur une chambre occupée',
+          critere:'L’ordre des actions ne change jamais d’un état à l’autre\nAucune chambre libre ne propose Switch\nLes cinq actions tiennent sur une seule ligne\nUne seule action jaune par écran' },
+
+        { tab:'Actions', mode:'Cible', titre:'Verrouiller une affectation',
+          regle:'Le verrouillage fige une affectation existante : la chambre reste occupée et dans le parc, elle ne doit simplement plus être réattribuée automatiquement. À ne pas confondre avec le blocage, qui retire la chambre du parc pour travaux. Les deux états peuvent coexister sur des périodes différentes.',
+          comportement:'• Accès par le bouton Lock de la fiche, ou par l’interrupteur « Lock the assignment? » au moment de l’assignation\n• Saisie d’une période en dates seules, sans heure : on fige à la journée, pas à la minute\n• Motif obligatoire, choisi dans une liste\n• Une fenêtre de confirmation rappelle la période et le motif avant enregistrement\n• Une fois posé : carte « Room locked » en tête de fiche avec période, motif, auteur et horodatage\n• Le déverrouillage se fait depuis la carte ou depuis le bouton Unlock de la barre',
+          critere:'Le verrouillage ne retire jamais la chambre du parc\nUne chambre verrouillée reste réservable et blocable sur d’autres périodes\nLa confirmation affiche exactement la période et le motif saisis\nAucune heure n’est affichée, puisque le formulaire n’en saisit pas' },
+
+        { tab:'Panel & versions', mode:'MVP · Cible', titre:'Cibles tactiles — 44 pixels minimum',
+          regle:'Tout élément interactif offre une zone de clic d’au moins 44 pixels de haut. Plusieurs composants du design system sont plus petits : onglets de vue, cases à cocher, interrupteurs. On n’agrandit pas leur apparence, qui appartient au DS — on étend la zone cliquable autour d’eux.',
+          comportement:'• Zone cliquable étendue par un pseudo-élément centré, sans toucher au visuel\n• Onglets de vue : 28px affichés, 44px cliquables\n• Interrupteurs et cases à cocher : même traitement\n• Boutons d’action : 44px de haut réels\n• L’extension ne recouvre jamais un élément voisin',
+          critere:'Aucune cible interactive sous 44px de haut\nL’apparence des composants DS reste inchangée\nDeux cibles voisines ne se chevauchent pas' },
+
         { tab:'Actions', mode:'Cible', titre:'Trois actions distinctes sur une chambre',
           regle:'Trois actions portent sur une chambre et sont régulièrement confondues parce qu’elles la rendent toutes indisponible. Elles n’ont ni la même intention, ni le même déclencheur, ni les mêmes conséquences.',
           comportement:'• Reserve — un client arrive dans plusieurs mois : la chambre lui est gardée, sans dossier affecté. Bouton, période + motif.\n• Block — des travaux sont prévus : la chambre sort du parc, aucun client ne peut y être placé. Bouton, période + motif.\n• Lock — l’affectation est faite et ne doit plus bouger : « pas touche ». Interrupteur dans la fiche, pas un bouton, car on ne déclenche pas un parcours, on fige un état existant.\n• Reserve et Block visent une chambre libre, Lock vise une chambre déjà assignée',
@@ -4379,8 +4415,23 @@
     locked: { reason:'Family with young children - connected rooms locked against automatic reassignment.',
               by:'Camille Berger', role:'Réception', at:'12/09/2025 à 17:42' }
   };
-  const calUnlockedRooms = new Set();    // roomIdx relâchés (y compris ceux verrouillés d'origine)
+  const calUnlockedRooms = new Set();    // roomIdx débloqués (y compris ceux bloqués d'origine)
   const calSwitchedBookings = new Set(); // index dans CAL_BOOKINGS
+
+  // ══ Verrouillage d'affectation — distinct du blocage ══
+  // Block retire la chambre du parc pour travaux. Lock fige une affectation
+  // existante : la chambre reste occupée, elle ne doit simplement plus être
+  // réattribuée. Deux états séparés, deux Map séparées.
+  // roomIdx → { reason, by, role, at, from, to }
+  const calAssignmentLocks = new Map();
+  function calRoomAssignmentLock(roomIdx) {
+    return calAssignmentLocks.get(roomIdx) || null;
+  }
+  // Horodatage de pose, au format des autres provenances de la maquette.
+  function calStampNow() {
+    const n = new Date(), p = v => String(v).padStart(2, '0');
+    return `${p(n.getDate())}/${p(n.getMonth() + 1)}/${n.getFullYear()} à ${p(n.getHours())}:${p(n.getMinutes())}`;
+  }
   // Statut affiché par la ligne : l'action de l'utilisateur l'emporte sur la
   // donnée de référence, qui n'est jamais réécrite. calRoomLockInfo est une
   // déclaration de fonction (hoistée), donc utilisable dès le premier rendu.
@@ -4674,6 +4725,48 @@
         <button class="cal-rm-btn yellow" id="cal-rm-btn-activate-lock">Activate block</button>
       </div>`;
   }
+  // Motifs de verrouillage d'affectation — distincts des motifs de blocage, qui
+  // parlent de travaux. Ici on fige une affectation déjà posée.
+  const CAL_ASSIGNMENT_LOCK_REASONS = [
+    'Family with young children - connected rooms locked against automatic reassignment.',
+    'VIP guest - room assignment confirmed with the guest.',
+    'Accessibility requirement - room adapted to this guest.',
+    'Group allocation - rooms kept together.'
+  ];
+  // Sous-modale LOCK — node Figma « Lock a room ». Même ossature que Block, mais
+  // la période ne porte pas d'heure : on fige une affectation à la journée, pas
+  // une intervention technique.
+  function renderAssignmentLockModalContent(roomIdx) {
+    const r = CAL_ROOMS[roomIdx];
+    return `
+      <div class="cal-rm-title with-back">
+        <button class="cal-rm-back-btn" id="cal-rm-back-btn"><img src="assets-calendrier/icon-back-arrow.svg" alt="" /></button>
+        <h2>Lock a <span class="hl">${r.code}</span> room</h2>
+      </div>
+      <hr class="cal-rm-divider" />
+      <div class="cal-rm-assign-block">
+        <p>You are about to lock this assignment :</p>
+        ${renderRoomCardMini(r)}
+      </div>
+      <div class="cal-rm-section-label small-gap" style="margin-top:24px;">LOCKING DATE</div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+        ${renderDateTimeRow('From', false)}
+        ${renderDateTimeRow('To', false)}
+      </div>
+      <div class="cal-rm-section-label small-gap">REASON FOR LOCKING</div>
+      <div class="cal-rm-field">
+        <select class="cal-rm-field-select" id="cal-rm-assignlock-reason" aria-label="Motif du verrouillage">
+          <option value="">Select reason</option>
+          ${CAL_ASSIGNMENT_LOCK_REASONS.map(x => `<option value="${x}">${x}</option>`).join('')}
+        </select>
+      </div>
+      <div style="flex:1 0 0;min-height:0;"></div>
+      <hr class="cal-rm-divider" />
+      <div class="cal-rm-cta">
+        <button class="cal-rm-btn yellow" id="cal-rm-btn-activate-assignlock">Activate lock</button>
+      </div>`;
+  }
+
   // ── Sous-modale SWITCH : état du formulaire ──────────────────────────────
   // Catégorie et occupation sont DÉDUITES de CAL_ROOMS, jamais écrites en dur :
   // une chambre ajoutée demain apparaît toute seule dans les deux filtres.
@@ -4987,12 +5080,69 @@
           ${unlockBtn}
         </div>
         <div class="cal-rm-lock-reason">${d.reason}</div>
+        ${d.from && d.to ? `
+        <div class="cal-rm-lock-meta">
+          <div><b>Blocked from</b>${d.from}</div>
+          <div><b>To</b>${d.to}</div>
+        </div>` : ''}
         <div class="cal-rm-lock-meta">
           <div><b>Blocked by</b>${d.by || '—'}${d.role ? ' · ' + d.role : ''}</div>
           <div><b>On</b>${d.at || '—'}</div>
         </div>
       </div>`;
   }
+
+  // Carte « Room locked » — même ossature que la carte de blocage, vocabulaire
+  // du verrouillage. Les deux peuvent coexister : une chambre peut être bloquée
+  // pour travaux en octobre ET son affectation de septembre figée.
+  function renderAssignmentLockCard(roomIdx) {
+    const d = calRoomAssignmentLock(roomIdx);
+    if (!d) return '';
+    const unlockBtn = calIsMvp() ? '' : `
+        <button type="button" class="cal-rm-lock-btn" id="cal-rm-btn-unlock-inline-assign"
+                aria-label="Unlock the assignment of room ${CAL_ROOMS[roomIdx].code}">Unlock</button>`;
+    return `
+      <div class="cal-rm-lock-card" role="group" aria-label="Room locked">
+        <div class="cal-rm-lock-head">
+          <span class="cal-rm-lock-ico" aria-hidden="true"></span>
+          <span class="cal-rm-lock-title">Room locked</span>
+          ${unlockBtn}
+        </div>
+        <div class="cal-rm-lock-reason">${d.reason}</div>
+        ${d.from && d.to ? `
+        <div class="cal-rm-lock-meta">
+          <div><b>Locked from</b>${d.from}</div>
+          <div><b>To</b>${d.to}</div>
+        </div>` : ''}
+        <div class="cal-rm-lock-meta">
+          <div><b>Locked by</b>${d.by || '—'}${d.role ? ' · ' + d.role : ''}</div>
+          <div><b>On</b>${d.at || '—'}</div>
+        </div>
+      </div>`;
+  }
+  // ══ Barre d'actions de la fiche chambre ══
+  // Trois actions de période toujours présentes, à la même place : celle qui est
+  // déjà posée bascule en son inverse (Lock↔Unlock, Block↔Unblock). Puis Switch,
+  // seulement si la chambre porte un séjour — on ne déplace pas ce qui n'existe
+  // pas. Puis Assign, action principale, disponible même sur une chambre occupée
+  // puisque les dates du séjour font office de période.
+  function renderRoomCta(roomIdx, booking) {
+    if (calIsMvp()) return '';
+    const bloque    = !!calRoomLockDetails(roomIdx);
+    const verrouille = !!calRoomAssignmentLock(roomIdx);
+    const b = [];
+    b.push(verrouille
+      ? `<button class="cal-rm-btn lock" id="cal-rm-btn-unlock">Unlock</button>`
+      : `<button class="cal-rm-btn lock" id="cal-rm-btn-lock">Lock</button>`);
+    b.push(`<button class="cal-rm-btn lock" id="cal-rm-btn-reserve">Reserve</button>`);
+    b.push(bloque
+      ? `<button class="cal-rm-btn lock" id="cal-rm-btn-unblock">Unblock</button>`
+      : `<button class="cal-rm-btn lock" id="cal-rm-btn-block">Block</button>`);
+    if (booking) b.push(`<button class="cal-rm-btn solid" id="cal-rm-btn-switch">Switch</button>`);
+    b.push(`<button class="cal-rm-btn yellow" id="cal-rm-btn-assign">Assign</button>`);
+    return `<hr class="cal-rm-divider" /><div class="cal-rm-cta">${b.join('')}</div>`;
+  }
+
   function renderRoomModalContent(roomIdx, booking) {
     const r = CAL_ROOMS[roomIdx];
     const lockReason = calRoomLockInfo(roomIdx);
@@ -5002,6 +5152,7 @@
         <h2>Room ${r.code}</h2>
       </div>
       <div class="cal-rm-subtitle">${r.type}</div>
+      ${renderAssignmentLockCard(roomIdx)}
       ${renderLockBanner(roomIdx)}`;
     if (booking) {
       const fullName = `${booking.travelers[0].familyName.toUpperCase()} ${booking.travelers[0].firstName}`;
@@ -5044,25 +5195,14 @@
         </div>
         <div class="cal-rm-section-label">ROOM CHARACTERISTICS</div>
         ${renderRoomCharacteristics(r)}
-        ${calIsMvp() ? '' : `
-        <hr class="cal-rm-divider" />
-        <div class="cal-rm-cta">
-          <button class="cal-rm-btn lock" id="cal-rm-btn-lock">${lockReason ? 'Unblock' : 'Block'}</button>
-          <button class="cal-rm-btn solid" id="cal-rm-btn-switch">Switch</button>
-        </div>`}`;
+        ${renderRoomCta(roomIdx, booking)}`;
     }
     return `
       ${titleHtml}
       <hr class="cal-rm-divider" />
       <div class="cal-rm-section-label">ROOM CHARACTERISTICS</div>
       ${renderRoomCharacteristics(r)}
-      ${calIsMvp() ? '' : `
-      <hr class="cal-rm-divider" />
-      <div class="cal-rm-cta">
-        <button class="cal-rm-btn lock" id="cal-rm-btn-lock">${lockReason ? 'Unblock' : 'Block'}</button>
-        <button class="cal-rm-btn lock" id="cal-rm-btn-reserve">Reserve</button>
-        <button class="cal-rm-btn solid" id="cal-rm-btn-assign">Assign</button>
-      </div>`}`;
+      ${renderRoomCta(roomIdx, booking)}`;
   }
   function openRoomModal(roomIdx, bookingIdx) {
     // Une bande rouge (Maintenance/Blocage propriétaire) n'est pas un séjour GM —
@@ -5079,17 +5219,24 @@
     // Les CTA ouvrent la sous-modale correspondante (nœuds Figma 15753:10847 Lock,
     // 15753:12764 Switch, 15918:48476 Assign, 15899:20985 Reserve) ; le bouton
     // retour de chaque sous-modale revient à la modale principale chambre.
-    document.getElementById('cal-rm-btn-lock')?.addEventListener('click', () => {
-      if (calRoomLockInfo(roomIdx)) {
-        // La chambre est verrouillée : le CTA vaut Unlock, on relâche sur place.
-        calLockedRooms.delete(roomIdx);
-        calUnlockedRooms.add(roomIdx);
-        renderCalendar(); // le cadenas doit disparaître de la ligne, pas seulement de la modale
-        openRoomModal(roomIdx, bookingIdx);
-        return;
-      }
-      openLockSubModal(roomIdx, bookingIdx);
+    // Block : retire la chambre du parc pour travaux.
+    document.getElementById('cal-rm-btn-block')?.addEventListener('click', () => openLockSubModal(roomIdx, bookingIdx));
+    document.getElementById('cal-rm-btn-unblock')?.addEventListener('click', () => {
+      calLockedRooms.delete(roomIdx);
+      calUnlockedRooms.add(roomIdx);
+      renderCalendar(); // le pictogramme doit disparaître de la ligne, pas seulement de la fiche
+      openRoomModal(roomIdx, bookingIdx);
     });
+    // Lock : fige une affectation existante, sans retirer la chambre du parc.
+    document.getElementById('cal-rm-btn-lock')?.addEventListener('click', () => openAssignmentLockSubModal(roomIdx, bookingIdx));
+    const relacherVerrou = () => {
+      calAssignmentLocks.delete(roomIdx);
+      renderCalendar();
+      openRoomModal(roomIdx, bookingIdx);
+    };
+    document.getElementById('cal-rm-btn-unlock')?.addEventListener('click', relacherVerrou);
+    // Même action depuis la carte, posée à côté de l'information qui la motive.
+    document.getElementById('cal-rm-btn-unlock-inline-assign')?.addEventListener('click', relacherVerrou);
     // Déverrouillage depuis la carte elle-même : même effet que le CTA Unlock du
     // bas de fiche, posé à côté de l'information qui le motive.
     document.getElementById('cal-rm-btn-unlock-inline')?.addEventListener('click', () => {
@@ -5120,6 +5267,27 @@
       calUnlockedRooms.delete(roomIdx);
       renderCalendar(); // cadenas sur la carte chambre et sur la bande
       openRoomModal(roomIdx, bookingIdx); // retour chambre, bandeau orange posé
+    });
+  }
+  function openAssignmentLockSubModal(roomIdx, bookingIdx) {
+    document.getElementById('cal-room-modal').innerHTML = renderAssignmentLockModalContent(roomIdx);
+    wireBackButton(() => openRoomModal(roomIdx, bookingIdx));
+    document.getElementById('cal-rm-btn-activate-assignlock')?.addEventListener('click', () => {
+      const reason = document.getElementById('cal-rm-assignlock-reason')?.value;
+      // Les champs de date de ce wireframe sont décoratifs : on retient la
+      // période de référence du planning affiché plutôt que d'inventer une
+      // saisie qui n'existe pas.
+      // La provenance est enregistrée à la pose : sans auteur ni horodatage, la
+      // carte de résultat ne saurait pas répondre à « qui a verrouillé ».
+      calAssignmentLocks.set(roomIdx, {
+        reason: reason || 'Room assignment locked.',
+        by: CURRENT_USER,
+        role: isDesigner ? 'Designer' : 'Réception',
+        at: calStampNow(),
+        from: '18/09/2025', to: '22/09/2025'
+      });
+      renderCalendar();
+      openRoomModal(roomIdx, bookingIdx);
     });
   }
   function openSwitchSubModal(roomIdx, bookingIdx, booking) {
