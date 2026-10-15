@@ -849,6 +849,20 @@
   .cal-view-tab.active { background: #000; color: var(--white); }
   .cal-nav-actions { display: flex; gap: 8px; }
   .cal-nav-actions svg { width: 30px; height: 30px; stroke: var(--navy); cursor: pointer; }
+  /* icon-expand.svg est livré en #CCCCCC et icon-reduce.svg en noir : deux
+     commandes voisines de couleurs différentes, dont l'une à 1.51:1 sur le fond
+     du bandeau — sous le seuil de 3:1 des éléments graphiques. On ne retouche
+     pas les assets du DS : on s'en sert comme masque et c'est le token qui
+     peint, ce qui aligne les deux icônes au passage. */
+  #cal-btn-expand, #cal-btn-compact {
+    width: 30px; height: 30px; cursor: pointer;
+    background-color: var(--ds-content-secondary);
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-position: center;  mask-position: center;
+    -webkit-mask-size: contain;     mask-size: contain;
+  }
+  #cal-btn-expand  { -webkit-mask-image: url(assets-calendrier/icon-expand.svg); mask-image: url(assets-calendrier/icon-expand.svg); }
+  #cal-btn-compact { -webkit-mask-image: url(assets-calendrier/icon-reduce.svg); mask-image: url(assets-calendrier/icon-reduce.svg); }
 
   /* ══ VERSION MVP — barre de navigation ══
      Le MVP ne sert qu'une vue (2 weeks) : les onglets de vue n'ont rien à
