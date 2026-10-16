@@ -6632,11 +6632,20 @@
           </button>
         </div>
         <hr>
-        <div class="panel-title">Règles de gestion</div>
-        <div id="po-rg-list" style="font-size:12px;color:#6B7280;font-style:italic;padding:4px 2px;">Aucune règle</div>
-        <hr>
         <div class="panel-title">Propositions</div>
         <div id="po-props-list" style="font-size:12px;color:#6B7280;font-style:italic;padding:4px 2px;">Aucune proposition</div>
+        <hr>
+        <div class="panel-title">Mes commentaires</div>
+        <div id="po-my-comments" style="font-size:12px;color:#6B7280;font-style:italic;padding:4px 2px;">Aucun commentaire</div>
+        <button onclick="startPoComment()"
+          style="margin-top:8px;width:100%;height:36px;border:1.5px solid #1E2643;border-radius:20px;background:transparent;font-size:13px;font-weight:600;color:#1E2643;cursor:pointer;font-family:inherit;">
+          + Ajouter un commentaire
+        </button>
+        <!-- Les règles de gestion se lisent dans le document, jamais en liste
+             dans le panel : le panel annonce où aller, le drawer porte le
+             contenu. Une liste de 27 titres ici noyait les deux sections qui
+             demandent une action, et n'existe pas côté Designer. Documentation
+             reste en dernier, comme dans le panel Designer. -->
         <hr>
         <div class="panel-title">Documentation</div>
         <button onclick="openDocDrawer()"
@@ -6644,13 +6653,6 @@
           onmouseover="this.style.background='#F3F4F6'" onmouseout="this.style.background='none'">
           <span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:#1E2643;"><span>📘</span> Règles de gestion</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
-        <hr>
-        <div class="panel-title">Mes commentaires</div>
-        <div id="po-my-comments" style="font-size:12px;color:#6B7280;font-style:italic;padding:4px 2px;">Aucun commentaire</div>
-        <button onclick="startPoComment()"
-          style="margin-top:8px;width:100%;height:36px;border:1.5px solid #1E2643;border-radius:20px;background:transparent;font-size:13px;font-weight:600;color:#1E2643;cursor:pointer;font-family:inherit;">
-          + Ajouter un commentaire
         </button>
       </div>
     `;
@@ -6678,20 +6680,9 @@
         ? mine.map(c => `<div style="background:#F4F4F4;border-radius:8px;padding:8px 10px;font-size:12px;color:#1E2643;line-height:1.4;margin-bottom:4px;"><div style="font-size:10px;color:#6B7280;margin-bottom:3px;">${c.date||''}</div>${c.text}</div>`).join('')
         : '<span style="font-size:12px;color:#6B7280;font-style:italic;">Aucun commentaire pour l\'instant</span>';
     }
-    // RG lecture seule
-    const rgEl = document.getElementById('po-rg-list');
-    if (rgEl) {
-      // Les RG suivent la version active du panel, comme le document complet.
-      // Le numéro reste celui de la liste complète : RG-14 désigne la même règle
-      // qu'on lise le périmètre MVP ou le périmètre cible.
-      const all = JSON.parse(localStorage.getItem('wf_rg_blocks_calendrier') || '[]');
-      const isMvp = (typeof CAL_VERSION !== 'undefined') && CAL_VERSION === 'mvp';
-      const rg = all.map((r, i) => ({ ...r, _n: i + 1 }))
-                    .filter(r => (r.mode || '').indexOf(isMvp ? 'MVP' : 'Cible') !== -1);
-      rgEl.innerHTML = rg.length
-        ? rg.map(r => `<div style="font-size:12px;color:#1E2643;padding:4px 0;border-bottom:1px solid #E0E0E0;"><strong>RG-${String(r._n).padStart(2,'0')}</strong> ${r.titre}</div>`).join('')
-        : '<span style="font-size:12px;color:#6B7280;font-style:italic;">Aucune règle de gestion</span>';
-    }
+    // La liste des règles de gestion a été retirée du panel : elle se lit dans
+    // le drawer Documentation, qui filtre déjà sur la version active et porte
+    // la numérotation stable. Le panel n'a pas à en tenir une seconde copie.
   }
 
   function startPoComment() {
