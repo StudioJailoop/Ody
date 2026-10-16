@@ -32,6 +32,15 @@
           "version": "V1",
           "updated": "2026-10-15",
           "label": "Versions Cible et MVP — Assign, Reserve, Block, Lock, Switch · 26 règles"
+        },
+        {
+          "id": "assurance-ski",
+          "name": "Assurance ski",
+          "status": "in_progress",
+          "wireframe": "../wireframe-assurance-ski-V1.html",
+          "version": "V1",
+          "updated": "2026-10-16",
+          "label": "Pop-in GM insurance — 4 états du parcours · aucune règle écrite"
         }
       ]
     }

@@ -2,10 +2,3 @@ figma-bridge/
 *.bak
 .DS_Store
 node_modules/
-
-# Dumps Firebase — contiennent les commentaires PO internes.
-# Ce repo est public (GitHub Pages) : ne jamais committer.
-_backups-firebase/
-
-# Outillage BMAD local — pas un livrable.
-clubmed-ux/
