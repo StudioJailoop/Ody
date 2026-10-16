@@ -1004,17 +1004,23 @@
     font-size: 14px; font-weight: 600; color: #000; margin-bottom: 12px;
   }
   .cal-rm-stay-card { background: #F6EFE7; border-radius: 16px; padding: 16px; margin-bottom: 24px; }
-  .cal-rm-stay-name { font-size: 16px; font-weight: 600; color: #000; margin-bottom: 10px; }
+  /* Interlignes relevés sur le bloc GM des maquettes : le nom tient dans 24px,
+     étiquettes et valeurs dans 20px. Sans ça la carte se tasse de 10px et ne
+     se superpose plus à la maquette. */
+  .cal-rm-stay-name { font-size: 16px; font-weight: 600; color: #000; line-height: 24px; margin-bottom: 10px; }
   .cal-rm-stay-columns { display: flex; gap: 48px; }
   .cal-rm-stay-col { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
-  .cal-rm-stay-field-label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #000; }
+  .cal-rm-stay-field-label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; line-height: 20px; color: #000; }
   .cal-rm-stay-field-label img { width: 24px; height: 24px; flex-shrink: 0; }
-  .cal-rm-stay-field-value { font-size: 14px; color: #333; }
+  .cal-rm-stay-field-value { font-size: 14px; line-height: 20px; color: #333; }
   .cal-rm-stay-field-value.with-icon { display: flex; align-items: center; gap: 4px; }
   .cal-rm-stay-field-value.with-icon img { width: 12px; height: 12px; flex-shrink: 0; }
   .cal-rm-loyalty-badge {
     display: inline-flex; width: fit-content; font-size: 12px; font-weight: 600; color: var(--white);
-    background: #1e2643; border-radius: 100px; padding: 4px 16px;
+    /* 12px d'interligne + 2×4 de marge = 20px, la hauteur du composant
+       « Display / Type » dans la maquette. Sans interligne imposé la pastille
+       dépassait de 2px et décalait toute la colonne. */
+    line-height: 12px; background: #1e2643; border-radius: 100px; padding: 4px 16px;
   }
   .cal-rm-stay-note { font-size: 12px; color: #000; margin-top: 10px; }
   .cal-rm-travelers { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
@@ -1080,18 +1086,10 @@
     font-size: 14px; color: #333; font-family: inherit; resize: vertical; box-sizing: border-box; margin-bottom: 24px;
   }
   .cal-rm-textarea::placeholder { color: #333; }
-  .cal-rm-stay-condensed { background: #F6EFE7; border-radius: 16px; padding: 16px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
-  /* Variante compacte du rappel de réservation (sous-modale Switch) : les mêmes
-     4 informations qu'en deux colonnes, mais sur deux lignes. La hauteur libérée
-     sert à l'étiquette de la chambre retenue et aux dates, sans scroll. */
-  .cal-rm-stay-inline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .cal-rm-stay-inline .cal-rm-stay-name { margin-bottom: 0; }
-  .cal-rm-stay-facts {
-    display: flex; align-items: center; gap: 8px; margin-top: 8px;
-    font-size: 14px; color: #333; flex-wrap: wrap;
-  }
-  .cal-rm-stay-facts img { width: 18px; height: 18px; }
-  .cal-rm-stay-facts .sep { color: #999; }
+  /* La variante condensée du rappel de réservation a été retirée : la maquette
+     Switch pose le même bloc GM à deux colonnes que la fiche chambre. Elle
+     économisait de la hauteur, mais au prix de valeurs sans étiquette visible
+     — une date derrière un simple pictogramme d'avion. */
   /* Chambre retenue : le champ et son étiquette tiennent sur la même ligne.
      L'étiquette est la continuation directe de la sélection — ni cadre, ni
      fond — et s'aligne sur le bas du champ, sous le libellé. */
@@ -3039,7 +3037,7 @@
     // mélanger à celles de la Télécollecte (invariant d’étanchéité Loopcraft).
     const RG_BLOCKS_KEY = 'wf_rg_blocks_calendrier';
     const RG_VERSION_KEY = 'wf_rg_version_calendrier';
-    const RG_VERSION = 'cal-v1.6-26rg';
+    const RG_VERSION = 'cal-v1.7-27rg';
     if (localStorage.getItem(RG_VERSION_KEY) !== RG_VERSION) {
       const existing = JSON.parse(localStorage.getItem(RG_BLOCKS_KEY) || '[]');
       const existingTitles = new Set(existing.map(r => r.titre));
@@ -3122,6 +3120,11 @@
           comportement:'• Rangée de titre : pictogramme de chambre, code, type, puis pictogramme d’état — tout sur une ligne\n• Chambre assignée : pictogramme Check, teinte Ultramarine blue\n• Chambre bloquée : pictogramme Maintenance, teinte Orange\n• Chambre verrouillée : pictogramme Cadenas, teinte Orange\n• Présence GM : pictogramme Personnes, teinte Ultramarine blue — Rappel de réservation : pictogramme Calendrier, teinte Orange\n• Chambre libre : aucun pictogramme d’état, il n’y a rien à signaler\n• La teinte suit le sens — bleu pour un état courant, orange pour une action qui contraint la chambre — et non la couleur de fond de l’étiquette du planning\n• Une chambre à la fois bloquée et verrouillée affiche le blocage : une chambre en travaux est indisponible, c’est l’information la plus forte\n• Le pictogramme porte un nom accessible énonçant l’état, puisque aucun texte ne le double\n• Présent dans les deux versions : c’est une information, pas une action',
           critere:'Le symbole de la fiche et celui de la ligne du planning désignent toujours le même état\nL’état est annoncé aux lecteurs d’écran, jamais porté par la seule couleur\nPoser ou retirer une action met à jour la ligne et la fiche dans le même geste\nUne chambre libre n’affiche aucun pictogramme d’état' },
 
+        { tab:'Fiche chambre', mode:'MVP · Cible', titre:'Bloc GM — un seul composant, deux emplacements',
+          regle:'Les informations d’un séjour se présentent toujours de la même façon, quel que soit l’écran qui les rappelle : une carte à deux colonnes où chaque valeur est précédée de son étiquette. Le rappel de réservation de Changer de chambre utilise ce même bloc, simplement réduit à quatre champs. Un GO n’a pas à réapprendre une mise en forme parce qu’il a changé d’écran, et aucune valeur n’est laissée derrière un pictogramme seul.',
+          comportement:'• Carte unique : nom du GM, puis deux colonnes de champs étiquetés\n• Fiche chambre, section CURRENT STAY : Arrival, Guest, Members, Status à gauche — Departure, Type, File à droite — puis la note de séjour\n• Changer de chambre, rappel de réservation : les quatre premiers champs seulement, Arrival et Guest à gauche, Departure et Type à droite\n• Chaque valeur porte son étiquette en toutes lettres — un pictogramme d’avion ne remplace jamais le mot Arrival\n• Les dates de séjour s’écrivent JJ/MM/AAAA partout : fiche, rappel de réservation et fenêtres de confirmation\n• Le type de fidélité est une pastille placée sous son étiquette, jamais flottante en coin de carte',
+          critere:'Les deux emplacements rendent le même composant, aucune seconde mise en forme\nAucune valeur de séjour sans étiquette visible\nUne même date s’écrit à l’identique sur tous les écrans' },
+
         { tab:'Fiche chambre', mode:'Cible', titre:'Débloquer depuis la carte',
           regle:'L’action de déblocage est posée dans la carte elle-même, à côté de l’information qui la motive : le GO qui vient de lire pourquoi la chambre est bloquée peut la débloquer sans aller chercher un bouton en bas de fiche. Le déverrouillage reste également disponible dans les actions de bas de fiche.',
           comportement:'• Bouton « Unblock » dans l’en-tête de la carte, aligné à droite du titre\n• Absent en version MVP, qui ne porte aucune action\n• Le déblocage retire la carte, le pictogramme de la ligne du planning, et rebascule l’action de bas de fiche sur « Block »\n• Le bouton porte un intitulé nommant la chambre concernée pour les lecteurs d’écran',
@@ -3165,7 +3168,7 @@
 
         { tab:'Actions', mode:'Cible', titre:'Changer un séjour de chambre',
           regle:'Le changement de chambre déplace un séjour existant vers une autre chambre. Seules les chambres réellement libres sur toute la durée du séjour sont proposées : une chambre occupée, en maintenance ou verrouillée ne l’est jamais. L’action n’existe pas dans le MVP.',
-          comportement:'• Accès depuis la fiche d’une chambre occupée\n• Rappel du séjour concerné avant toute saisie\n• Filtres catégorie et occupation déduits du parc réel, jamais saisis à la main\n• La liste se resserre à chaque filtre appliqué\n• La chambre retenue s’affiche en étiquette à côté du champ\n• Le bouton de validation reste inactif tant qu’aucune chambre n’est choisie\n• Une fenêtre de confirmation rappelle les deux chambres, le séjour et la période\n• Après validation, la bande se déplace sur la nouvelle ligne et porte la double flèche',
+          comportement:'• Accès depuis la fiche d’une chambre occupée\n• Rappel du séjour concerné avant toute saisie, dans le même bloc GM que CURRENT STAY — deux colonnes de champs étiquetés, limitées à Arrival, Guest, Departure et Type\n• Filtres catégorie et occupation déduits du parc réel, jamais saisis à la main\n• La liste se resserre à chaque filtre appliqué\n• La chambre retenue s’affiche en étiquette à côté du champ\n• Le bouton de validation reste inactif tant qu’aucune chambre n’est choisie\n• Une fenêtre de confirmation rappelle les deux chambres, le séjour et la période\n• Après validation, la bande se déplace sur la nouvelle ligne et porte la double flèche',
           critere:'Une chambre occupée sur la période du séjour n’est jamais proposée\nUn occupant résiduel est renvoyé vers la chambre d’origine, jamais écrasé\nLe planning reflète le déplacement immédiatement' },
 
         { tab:'Actions', mode:'Cible', titre:'Confirmation avant toute action',
@@ -4714,9 +4717,49 @@
   // ══ Modale chambre — clic réservation (assigné) ou chambre/cellule vide (routage) ══
   // Fidèle aux nœuds Figma 15733:7949 (Room EC-01, assigné) et 15776:20299
   // (Room A4-60, non assigné) — structure et contenu, pas d'action câblée (différé).
+  // Format relevé sur les maquettes : toutes les dates de séjour y sont en
+  // JJ/MM/AAAA, sur les six écrans qui portent un bloc GM. Le wireframe
+  // affichait « Sep 15, 2025 », une forme qui n'existe nulle part dans le
+  // fichier Figma.
   function formatModalDate(d) {
-    const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return `${MONTHS_SHORT[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+    const p = v => String(v).padStart(2, '0');
+    return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`;
+  }
+  // ══ Bloc « info GM » ══════════════════════════════════════════════════
+  // Un seul rendu pour les deux emplacements où il apparaît : CURRENT STAY en
+  // fiche chambre, et le rappel de réservation de Switch. La maquette y pose
+  // le même composant — deux colonnes de champs étiquetés — Switch n'en montre
+  // que les quatre premiers. Une variante de contenu, pas une seconde carte.
+  function renderStayCard(booking, variant) {
+    const full = variant !== 'compact';
+    const fullName = `${booking.travelers[0].familyName.toUpperCase()} ${booking.travelers[0].firstName}`;
+    return `
+      <div class="cal-rm-stay-card">
+        <div class="cal-rm-stay-name">${fullName}</div>
+        <div class="cal-rm-stay-columns">
+          <div class="cal-rm-stay-col">
+            <div class="cal-rm-stay-field-label"><img src="assets-calendrier/icon-transport-arrival.svg" alt="" />Arrival</div>
+            <div class="cal-rm-stay-field-value">${formatModalDate(booking.arrival)}</div>
+            <div class="cal-rm-stay-field-label">Guest</div>
+            <div class="cal-rm-stay-field-value">${booking.guestCount} pax</div>
+            ${full ? `
+            <div class="cal-rm-stay-field-label">Members</div>
+            <div class="cal-rm-stay-field-value">${booking.memberNumber}</div>
+            <div class="cal-rm-stay-field-label">Status</div>
+            <div class="cal-rm-stay-field-value with-icon"><img src="assets-calendrier/icon-diamond.svg" alt="" />${booking.statusLabel}</div>` : ''}
+          </div>
+          <div class="cal-rm-stay-col">
+            <div class="cal-rm-stay-field-label"><img src="assets-calendrier/icon-transport-departure.svg" alt="" />Departure</div>
+            <div class="cal-rm-stay-field-value">${formatModalDate(booking.departure)}</div>
+            <div class="cal-rm-stay-field-label">Type</div>
+            ${booking.tag ? `<span class="cal-rm-loyalty-badge">${booking.tag}</span>` : '<div class="cal-rm-stay-field-value">—</div>'}
+            ${full ? `
+            <div class="cal-rm-stay-field-label">File</div>
+            <div class="cal-rm-stay-field-value">${booking.fileNumber}</div>` : ''}
+          </div>
+        </div>
+        ${full ? `<div class="cal-rm-stay-note">${booking.statusNote}</div>` : ''}
+      </div>`;
   }
   function findActiveBookingForRoom(roomIdx) {
     // Réservation (non-red) dont [dayStart,dayEnd] couvre CAL_TODAY — définit l'état "assigné".
@@ -4931,7 +4974,6 @@
   // Sous-modale SWITCH — node Figma 15753:12764 ("Switch room").
   function renderSwitchModalContent(roomIdx, booking) {
     const r = CAL_ROOMS[roomIdx];
-    const fullName = `${booking.travelers[0].familyName.toUpperCase()} ${booking.travelers[0].firstName}`;
     return `
       <div class="cal-rm-title">
         <img src="assets-calendrier/icon-compare-arrows.svg" alt="" />
@@ -4939,21 +4981,7 @@
       </div>
       <hr class="cal-rm-divider" />
       <p class="cal-rm-swap-label">The room switch will take place for this reservation:</p>
-      <div class="cal-rm-stay-condensed">
-        <div class="cal-rm-stay-inline">
-          <span class="cal-rm-stay-name">${fullName}</span>
-          ${booking.tag ? renderLoyaltyBadge(booking.tag) : ''}
-        </div>
-        <div class="cal-rm-stay-facts">
-          <img src="assets-calendrier/icon-transport-arrival.svg" alt="Arrival" />
-          <span>${formatModalDate(booking.arrival)}</span>
-          <span class="sep">→</span>
-          <img src="assets-calendrier/icon-transport-departure.svg" alt="Departure" />
-          <span>${formatModalDate(booking.departure)}</span>
-          <span class="sep">·</span>
-          <span>${booking.guestCount} pax</span>
-        </div>
-      </div>
+      ${renderStayCard(booking, 'compact')}
       <p class="cal-rm-swap-label">Swap the assignments of these two rooms :</p>
       <div class="cal-rm-swap-roomwrap">${renderRoomCardMini(r)}</div>
       <div class="cal-rm-swap-arrow"><img src="assets-calendrier/icon-swap-down.svg?v=2" alt="" /></div>
@@ -5249,35 +5277,11 @@
       ${renderAssignmentLockCard(roomIdx)}
       ${renderLockBanner(roomIdx)}`;
     if (booking) {
-      const fullName = `${booking.travelers[0].familyName.toUpperCase()} ${booking.travelers[0].firstName}`;
       return `
         ${titleHtml}
         <hr class="cal-rm-divider" />
         <div class="cal-rm-section-label">CURRENT STAY</div>
-        <div class="cal-rm-stay-card">
-          <div class="cal-rm-stay-name">${fullName}</div>
-          <div class="cal-rm-stay-columns">
-            <div class="cal-rm-stay-col">
-              <div class="cal-rm-stay-field-label"><img src="assets-calendrier/icon-transport-arrival.svg" alt="" />Arrival</div>
-              <div class="cal-rm-stay-field-value">${formatModalDate(booking.arrival)}</div>
-              <div class="cal-rm-stay-field-label">Guest</div>
-              <div class="cal-rm-stay-field-value">${booking.guestCount} pax</div>
-              <div class="cal-rm-stay-field-label">Members</div>
-              <div class="cal-rm-stay-field-value">${booking.memberNumber}</div>
-              <div class="cal-rm-stay-field-label">Status</div>
-              <div class="cal-rm-stay-field-value with-icon"><img src="assets-calendrier/icon-diamond.svg" alt="" />${booking.statusLabel}</div>
-            </div>
-            <div class="cal-rm-stay-col">
-              <div class="cal-rm-stay-field-label"><img src="assets-calendrier/icon-transport-departure.svg" alt="" />Departure</div>
-              <div class="cal-rm-stay-field-value">${formatModalDate(booking.departure)}</div>
-              <div class="cal-rm-stay-field-label">Type</div>
-              ${booking.tag ? `<span class="cal-rm-loyalty-badge">${booking.tag}</span>` : '<div class="cal-rm-stay-field-value">—</div>'}
-              <div class="cal-rm-stay-field-label">File</div>
-              <div class="cal-rm-stay-field-value">${booking.fileNumber}</div>
-            </div>
-          </div>
-          <div class="cal-rm-stay-note">${booking.statusNote}</div>
-        </div>
+        ${renderStayCard(booking)}
         <div class="cal-rm-section-label">TRAVELERS ON THIS BOOKING</div>
         <div class="cal-rm-travelers">
           ${booking.travelers.map(t => `
