@@ -12,7 +12,14 @@
   (function () {
     var NS = 'calendrier';
     var ISOLEES = ['wf_documentation', 'wf_documentation_date', 'wf_pins_visible',
-                   'wf_rg_blocks', 'wf_rg_selection', 'wf_rg_version'];
+                   'wf_rg_blocks', 'wf_rg_selection', 'wf_rg_version',
+                   // Ajoutées le 16/10 : ces deux-là portaient le même nom dans
+                   // le Calendrier et la Télécollecte et se marchaient dessus.
+                   // Corbeille commune : « Vider la corbeille » ici détruisait
+                   // celle de la Télécollecte. Archives communes : les
+                   // commentaires PO archivés d'un projet apparaissaient dans
+                   // la liste de l'autre.
+                   'wf_briefs_trash', 'wf_team_comments_archives'];
     var ls  = window.localStorage;
     var get = ls.getItem.bind(ls), set = ls.setItem.bind(ls), del = ls.removeItem.bind(ls);
     function map(k) {
@@ -1868,7 +1875,7 @@
     <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:6px;" id="reply-username"></div>
     <textarea id="reply-text" placeholder="Répondre..." style="width:100%;height:60px;border:1px solid var(--grey-bd);border-radius:8px;padding:8px;font-size:13px;font-family:inherit;resize:none;outline:none;"></textarea>
     <div class="cp-actions">
-      <button class="cp-cancel" onclick="deleteThreadComment()" style="color:var(--red);border-color:var(--red);">Supprimer</button>
+      <button id="thread-delete-btn" class="cp-cancel" onclick="deleteThreadComment()" style="color:var(--red);border-color:var(--red);">Supprimer</button>
       <button class="cp-cancel" onclick="closeThread()">Fermer</button>
       <button class="cp-save" onclick="saveReply()">Répondre</button>
     </div>
@@ -2800,7 +2807,11 @@
       return;
     }
 
-    const tabLabels = { tpe:'Telecollection', ant:'Previous Date', reg:'Regularisation' };
+    // Libellés des écrans du Calendrier. `tpe` est conservé en repli : les
+    // commentaires enregistrés avant le 16/10 portent cette valeur héritée de
+    // la Télécollecte et doivent rester lisibles.
+    const tabLabels = { planning:'Planning', fiche:'Fiche chambre', actions:'Actions',
+                        panel:'Panel & versions', tpe:'Planning' };
     list.innerHTML = teamComments.map((c,i) => {
       const inClaude = claudeSelection.has(c.key);
       const qualType = c.qualifiedType || '';
@@ -3246,7 +3257,10 @@
     const saved = localStorage.getItem(DOC_KEY) || '';
     const savedDate = localStorage.getItem(DOC_DATE_KEY) || '';
 
-    const RG_BLOCKS_KEY = 'wf_rg_blocks';
+    // Source unique des RG du Calendrier — la même que initRgBlocks() et
+    // openDocDrawer(). Lisait 'wf_rg_blocks', que le shim d'en-tête remappe en
+    // 'wf_calendrier_rg_blocks' : une clé que le Calendrier n'écrit jamais.
+    const RG_BLOCKS_KEY = 'wf_rg_blocks_calendrier';
     if (false) { // bloc désactivé — init déplacé dans initRgBlocks()
       const RG_DATA = [
         { tab:'Telecollection', mode:'Interfacé', titre:'Logique des montants en mode interfacé',
@@ -3370,8 +3384,11 @@
     }
     const rgBlocks = JSON.parse(localStorage.getItem(RG_BLOCKS_KEY) || '[]');
 
-    const TABS_OPTS = ['Telecollection','Previous Date','Regularisation'];
-    const MODES_OPTS = ['Interfacé','Non interfacé','Tous modes'];
+    // Écrans et périmètres du Calendrier — doivent correspondre à TAB_COLORS
+    // et MODE_COLORS du drawer (lignes ~6076-6079), sinon les badges perdent
+    // leur couleur.
+    const TABS_OPTS = ['Planning','Fiche chambre','Actions','Panel & versions'];
+    const MODES_OPTS = ['MVP','Cible','MVP · Cible'];
 
     const blocksHTML = rgBlocks.length === 0
       ? '<div style="font-size:13px;color:var(--grey-txt);font-style:italic;padding:8px 0;">Aucun bloc RG — créez-en un ci-dessus.</div>'
@@ -3417,7 +3434,7 @@
           </div>
           <div>
             <div style="font-size:11px;font-weight:600;color:var(--grey-txt);margin-bottom:4px;">Titre de la règle</div>
-            <input id="rgb-titre" type="text" placeholder="Ex : Logique des montants en mode interfacé" style="width:100%;border:1px solid var(--grey-bd);border-radius:6px;padding:7px 10px;font-size:13px;font-family:inherit;color:var(--navy);outline:none;box-sizing:border-box;"/>
+            <input id="rgb-titre" type="text" placeholder="Ex : Structure de la grille planning" style="width:100%;border:1px solid var(--grey-bd);border-radius:6px;padding:7px 10px;font-size:13px;font-family:inherit;color:var(--navy);outline:none;box-sizing:border-box;"/>
           </div>
           <div>
             <div style="font-size:11px;font-weight:600;color:var(--grey-txt);margin-bottom:4px;">Règle</div>
@@ -3563,7 +3580,7 @@
     const comp  = document.getElementById('rgb-comportement')?.value.trim();
     const crit  = document.getElementById('rgb-critere')?.value.trim();
     if (!titre) { alert('Le titre est obligatoire.'); return; }
-    const RG_BLOCKS_KEY = 'wf_rg_blocks';
+    const RG_BLOCKS_KEY = 'wf_rg_blocks_calendrier';
     const blocks = JSON.parse(localStorage.getItem(RG_BLOCKS_KEY) || '[]');
     blocks.push({ titre, tab, mode, regle, comportement: comp, critere: crit });
     localStorage.setItem(RG_BLOCKS_KEY, JSON.stringify(blocks));
@@ -3571,7 +3588,7 @@
   }
 
   function deleteRgBlock(i) {
-    const RG_BLOCKS_KEY = 'wf_rg_blocks';
+    const RG_BLOCKS_KEY = 'wf_rg_blocks_calendrier';
     const blocks = JSON.parse(localStorage.getItem(RG_BLOCKS_KEY) || '[]');
     blocks.splice(i, 1);
     localStorage.setItem(RG_BLOCKS_KEY, JSON.stringify(blocks));
@@ -3804,7 +3821,7 @@
       byType[b.type].push(b);
     });
 
-    let prompt = `Voici les retours de l'équipe sur le wireframe Télécollecte. Merci de les traiter dans l'ordre de priorité suivant :\n\n`;
+    let prompt = `Voici les retours de l'équipe sur le wireframe Calendrier. Merci de les traiter dans l'ordre de priorité suivant :\n\n`;
 
     const order = ['rg','retour','idee'];
     order.forEach(type => {
@@ -6001,7 +6018,7 @@
   let commentMode = isPO ? true
     : localStorage.getItem('wf_pins_visible') !== '0';
   let pendingPin = null;
-  let currentTab = 'tpe'; // tab active au moment du commentaire
+  let currentTab = 'planning'; // écran actif au moment du commentaire
   const AUTHOR_COLORS = {
     'Sébastien': '#FF6B35',
     'Julie':     '#EC4899',
@@ -6026,7 +6043,7 @@
   }
 
   function copyRgBlock(idx) {
-    const rgBlocks = JSON.parse(localStorage.getItem('wf_rg_blocks') || '[]');
+    const rgBlocks = JSON.parse(localStorage.getItem('wf_rg_blocks_calendrier') || '[]');
     const b = rgBlocks[idx];
     if (!b) return;
     const id = String(idx + 1).padStart(2, '0');
@@ -6237,10 +6254,16 @@
     document.querySelectorAll('.comment-pin').forEach(p => p.remove());
     if (!commentMode) return;
     comments
-      .filter(c => (c.tab || 'tpe') === currentTab)
+      // Les commentaires enregistrés avant le 16/10 portent tab:'tpe' (valeur
+      // héritée de la Télécollecte). On les rattache au planning, sinon tous les
+      // pins existants disparaîtraient de l'écran.
+      .filter(c => (!c.tab || c.tab === 'tpe' ? 'planning' : c.tab) === currentTab)
       .filter(c => !filterAuthor || c.author === filterAuthor)
       .filter(c => {
-        if ((c.qualifiedType || c.commentType) === 'rg') return false;
+        // Côté Designer, une RG qualifiée quitte l'écran : elle a rejoint le
+        // corpus de règles. Côté PO, la masquer revenait à faire disparaître son
+        // commentaire à l'instant où il l'enregistrait, sans aucune confirmation.
+        if (isDesigner && (c.qualifiedType || c.commentType) === 'rg') return false;
         const linkedBrief = briefs.find(b => String(b.sourcePin) === String(c.id));
         if (linkedBrief && linkedBrief.type === 'rg') return false;
         return true;
@@ -6295,7 +6318,12 @@
   // Clic sur le layout principal pour poser un pin
   document.querySelector('.layout').addEventListener('click', function(e) {
     if (!commentMode) return;
-    if (e.target.closest('.wf-panel, .comment-popover, .comment-pin, button, input, textarea, select')) return;
+    // Les éléments interactifs du planning sont des <div>, pas des <button> :
+    // sans eux dans ce garde-fou, un clic sur un séjour ouvrait la fiche chambre
+    // ET posait un pin derrière elle, en volant le focus clavier.
+    if (e.target.closest('.wf-panel, .comment-popover, .comment-pin, button, input, textarea, select,' +
+                         '[role="button"], .cal-booking, [data-room-idx],' +
+                         '#cal-room-modal-overlay, #cal-rm-popup-overlay, #cal-datepicker-pop')) return;
     // Ne pas poser de pin si le thread popover est ouvert
     const threadPop = document.getElementById('thread-popover');
     if (threadPop && threadPop.classList.contains('visible')) return;
@@ -6538,6 +6566,9 @@
   }
 
   function deleteThreadComment() {
+    // Le PO n'a pas le droit de suppression (LOOPCRAFT_ROLE_MODEL.md). Le bouton
+    // lui est masqué à l'init ; ce garde-fou couvre un appel direct.
+    if (isPO) return;
     if (!currentThreadId) return;
     const idToDelete = currentThreadId;
     closeThread();
@@ -6599,6 +6630,10 @@
   if (isPO) {
     const designerBtn = document.getElementById('briefs-nav-btn');
     if (designerBtn) designerBtn.style.display = 'none';
+    // Suppression réservée au Designer : le PO pouvait effacer définitivement
+    // le commentaire de n'importe qui, pour tout le monde, sans confirmation.
+    const delBtn = document.getElementById('thread-delete-btn');
+    if (delBtn) delBtn.style.display = 'none';
     renderPanelByRole();
   }
   // ─────────────────────────────────────────────────────────────
