@@ -983,19 +983,22 @@
   }
   .cal-room-modal-overlay.open .cal-room-modal { transform: translateX(0); }
   .cal-rm-title { display: flex; align-items: center; gap: 12px; }
-  .cal-rm-title img { width: 30px; height: 30px; flex-shrink: 0; }
+  .cal-rm-title img { width: 32px; height: 32px; flex-shrink: 0; }
   .cal-rm-title h2 { font-size: 28px; font-weight: 700; color: var(--navy); margin: 0; line-height: 34px; }
-  /* Pastille d'état en tête de fiche : même couleur et même picto que
-     l'étiquette de gauche du planning, pour qu'ouvrir une chambre confirme ce
-     que la ligne annonçait. Le picto ne porte rien seul — c'est le libellé
-     texte du sous-titre qui nomme l'état. */
-  .cal-rm-status-chip {
-    width: 30px; height: 30px; flex-shrink: 0; border-radius: 8px;
-    display: inline-flex; align-items: center; justify-content: center;
+  /* Rangée de titre relevée sur les maquettes (frame « Title », 32px de picto,
+     gap 12, centrée) : picto de chambre, nom, type en 16px Regular sur la MÊME
+     ligne, puis le picto d'état en fin de rangée. */
+  .cal-rm-type { font-size: 16px; font-weight: 400; color: var(--grey-txt); line-height: 24px; white-space: nowrap; }
+  /* Picto d'état : vecteur teinté, sans aplat de fond — c'est la forme qui
+     porte l'état, jamais la couleur seule. Le SVG sert de masque, le token
+     peint, ce qui permet d'utiliser les assets du DS quelle que soit la
+     couleur dans laquelle ils ont été exportés. */
+  .cal-rm-state-ico {
+    width: 32px; height: 32px; flex-shrink: 0;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-position: center;  mask-position: center;
+    -webkit-mask-size: 26px 26px;   mask-size: 26px 26px;
   }
-  .cal-rm-title .cal-rm-status-chip img { width: 18px; height: 18px; }
-  .cal-rm-state { font-weight: 600; color: var(--ds-content-secondary); }
-  .cal-rm-subtitle { font-size: 16px; color: var(--grey-txt); margin: 4px 0 0 42px; }
   .cal-rm-divider { height: 0; border: none; border-top: 1px solid #CCCCCC; opacity: .5; margin: 24px 0; width: 100%; flex-shrink: 0; }
   .cal-rm-section-label {
     font-size: 14px; font-weight: 600; color: #000; margin-bottom: 12px;
@@ -3036,7 +3039,7 @@
     // mélanger à celles de la Télécollecte (invariant d’étanchéité Loopcraft).
     const RG_BLOCKS_KEY = 'wf_rg_blocks_calendrier';
     const RG_VERSION_KEY = 'wf_rg_version_calendrier';
-    const RG_VERSION = 'cal-v1.5-26rg';
+    const RG_VERSION = 'cal-v1.6-26rg';
     if (localStorage.getItem(RG_VERSION_KEY) !== RG_VERSION) {
       const existing = JSON.parse(localStorage.getItem(RG_BLOCKS_KEY) || '[]');
       const existingTitles = new Set(existing.map(r => r.titre));
@@ -3115,9 +3118,9 @@
           critere:'La carte précède toujours le bloc séjour en cours\nL’état bloqué n’est jamais porté par la seule couleur\nAuteur et horodatage sont renseignés pour tout blocage posé\nLa carte, la pastille de la fiche et le pictogramme du planning portent le même symbole' },
 
         { tab:'Fiche chambre', mode:'MVP · Cible', titre:'Rappel d’état en tête de fiche',
-          regle:'Ouvrir une chambre doit confirmer ce que sa ligne annonçait, pas repartir de zéro. La fiche reprend donc en titre la pastille d’état du planning — même couleur, même pictogramme — doublée du nom de l’état écrit en toutes lettres. Un GO qui ouvre une chambre après l’avoir repérée dans la grille retrouve immédiatement le même repère, et celui qui vient de poser une action voit son effet sans fermer le tiroir.',
-          comportement:'• Pastille d’état à gauche du code chambre, reprise à l’identique de l’étiquette du planning\n• Nom de l’état accolé au type de chambre : Occupied, GM presence, Free, Blocked, Locked, Reservation reminder\n• Chambre libre : pas d’aplat de couleur, pictogramme de chambre neutre, état écrit « Free »\n• Bloquer affiche le pictogramme maintenance, Verrouiller le cadenas — deux actions distinctes, deux symboles distincts\n• Une chambre à la fois bloquée et verrouillée affiche le blocage : une chambre en travaux est indisponible, c’est l’information la plus forte\n• La pastille est décorative pour les lecteurs d’écran, c’est le libellé texte qui porte l’état\n• Présente dans les deux versions : c’est une information, pas une action',
-          critere:'La pastille de la fiche et le pictogramme de la ligne sont toujours identiques\nL’état est lisible sans percevoir la couleur\nPoser ou retirer une action met à jour la ligne et la fiche dans le même geste\nUne chambre libre n’affiche jamais une pastille vide' },
+          regle:'Ouvrir une chambre doit confirmer ce que sa ligne annonçait, pas repartir de zéro. La rangée de titre porte donc, après le code et le type, un pictogramme qui rappelle l’état de la chambre. Un GO qui ouvre une chambre repérée dans la grille retrouve le même symbole, et celui qui vient de poser une action en voit l’effet sans fermer le tiroir.',
+          comportement:'• Rangée de titre : pictogramme de chambre, code, type, puis pictogramme d’état — tout sur une ligne\n• Chambre assignée : pictogramme Check, teinte Ultramarine blue\n• Chambre bloquée : pictogramme Maintenance, teinte Orange\n• Chambre verrouillée : pictogramme Cadenas, teinte Orange\n• Présence GM : pictogramme Personnes, teinte Ultramarine blue — Rappel de réservation : pictogramme Calendrier, teinte Orange\n• Chambre libre : aucun pictogramme d’état, il n’y a rien à signaler\n• La teinte suit le sens — bleu pour un état courant, orange pour une action qui contraint la chambre — et non la couleur de fond de l’étiquette du planning\n• Une chambre à la fois bloquée et verrouillée affiche le blocage : une chambre en travaux est indisponible, c’est l’information la plus forte\n• Le pictogramme porte un nom accessible énonçant l’état, puisque aucun texte ne le double\n• Présent dans les deux versions : c’est une information, pas une action',
+          critere:'Le symbole de la fiche et celui de la ligne du planning désignent toujours le même état\nL’état est annoncé aux lecteurs d’écran, jamais porté par la seule couleur\nPoser ou retirer une action met à jour la ligne et la fiche dans le même geste\nUne chambre libre n’affiche aucun pictogramme d’état' },
 
         { tab:'Fiche chambre', mode:'Cible', titre:'Débloquer depuis la carte',
           regle:'L’action de déblocage est posée dans la carte elle-même, à côté de l’information qui la motive : le GO qui vient de lire pourquoi la chambre est bloquée peut la débloquer sans aller chercher un bouton en bas de fiche. Le déverrouillage reste également disponible dans les actions de bas de fiche.',
@@ -4501,13 +4504,30 @@
     if (calRoomAssignmentLock(i)) return 'Locked';
     return CAL_STATUS_LABEL[calEffectiveRoomStatus(CAL_ROOMS[i], i)] || '';
   }
-  // Pastille reprise à l'identique de l'étiquette de gauche. Chambre libre :
-  // pas d'aplat, on garde le picto de chambre neutre plutôt qu'un vide.
-  function renderRoomStatusChip(i) {
-    const st = calEffectiveRoomStatus(CAL_ROOMS[i], i);
-    const color = CAL_STATUS_COLOR[st];
-    if (!color) return `<img src="assets-calendrier/icon-room-bedroom.svg" alt="" />`;
-    return `<span class="cal-rm-status-chip" style="background:${color};" aria-hidden="true">${CAL_STATUS_ICON[st] || ''}</span>`;
+  // Picto d'état de la rangée de titre, relevé sur les maquettes :
+  //   2.1 chambre assignée  → Actions / Check      teinté Ultramarine blue
+  //   3.3 chambre bloquée   → Services / Maintenance teinté Orange
+  //   2.4 chambre verrouillée → Utilities / Padlock  teinté Orange
+  // La teinte suit le sens, pas la couleur de fond de l'étiquette du planning :
+  // bleu pour un état normal, orange pour une action posée qui contraint la
+  // chambre. GM presence et Reservation reminder ne sont pas maquettés, ils
+  // suivent la même logique. Chambre libre : aucun picto, rien à signaler
+  // (la maquette MVP 6.3 n'a que trois éléments dans sa rangée de titre).
+  const CAL_STATE_PICTO = {
+    occupied:    { ico:'icon-check.svg',       tint:'var(--navy)'      },
+    presence:    { ico:'icon-people.svg',      tint:'var(--navy)'      },
+    maintenance: { ico:'icon-maintenance.svg', tint:'var(--ds-orange)' },
+    locked:      { ico:'icon-padlock.svg',     tint:'var(--ds-orange)' },
+    calendar:    { ico:'icon-calendars.svg',   tint:'var(--ds-orange)' }
+  };
+  function renderRoomStatePicto(i) {
+    const p = CAL_STATE_PICTO[calEffectiveRoomStatus(CAL_ROOMS[i], i)];
+    if (!p) return '';
+    const url = `url(assets-calendrier/${p.ico})`;
+    // Le picto est seul à porter l'état visuellement : il lui faut un nom pour
+    // les lecteurs d'écran, sinon l'information n'existe que pour qui voit.
+    return `<span class="cal-rm-state-ico" role="img" aria-label="${calRoomStateLabel(i)}"
+      style="background-color:${p.tint};-webkit-mask-image:${url};mask-image:${url};"></span>`;
   }
   function renderCalendar() {
     const header = document.getElementById('cal-header-row');
@@ -5219,13 +5239,13 @@
   function renderRoomModalContent(roomIdx, booking) {
     const r = CAL_ROOMS[roomIdx];
     const lockReason = calRoomLockInfo(roomIdx);
-    const stateLabel = calRoomStateLabel(roomIdx);
     const titleHtml = `
       <div class="cal-rm-title">
-        ${renderRoomStatusChip(roomIdx)}
+        <img src="assets-calendrier/icon-room-bedroom.svg" alt="" />
         <h2>Room ${r.code}</h2>
+        <span class="cal-rm-type">${r.type}</span>
+        ${renderRoomStatePicto(roomIdx)}
       </div>
-      <div class="cal-rm-subtitle">${r.type}${stateLabel ? ` · <span class="cal-rm-state">${stateLabel}</span>` : ''}</div>
       ${renderAssignmentLockCard(roomIdx)}
       ${renderLockBanner(roomIdx)}`;
     if (booking) {
