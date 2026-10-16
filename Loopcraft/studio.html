@@ -1556,6 +1556,11 @@ function openSubproject(pid, spid) {
 
   const url = new URL(sp.wireframe, location.href);
   url.searchParams.set('role', 'designer');
+  // Le navigateur sert volontiers un wireframe de la veille : l'URL est la même
+  // d'une livraison à l'autre, et on a déjà perdu du temps à croire qu'une modif
+  // n'était pas passée alors qu'elle l'était. Le dashboard est le seul point
+  // d'entrée vers un wireframe, c'est donc ici qu'on force la version fraîche.
+  url.searchParams.set('cb', Date.now());
   window.location.href = url.toString();
 }
 
