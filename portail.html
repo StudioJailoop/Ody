@@ -265,6 +265,9 @@
     { id: 'Jerome',  password: 'Ody26', name: 'Jérôme' },
     { id: 'Kirsty',  password: 'Ody26', name: 'Kirsty' },
     { id: 'Laurent', password: 'Ody26', name: 'Laurent' },
+    // Tiphaine (PM) existait dans le dashboard Loopcraft mais pas ici : elle
+    // recevait un lien sur lequel elle ne pouvait pas se connecter.
+    { id: 'Tiphaine', password: 'Ody26', name: 'Tiphaine' },
   ];
 
   // Vérifier session existante
@@ -305,7 +308,10 @@
     // designer ni PO, le mode commentaire reste éteint et la PO ne peut pas
     // annoter. L'ancien lien n'envoyait que ?user=, d'où des retours impossibles
     // à déposer. Forme imposée par la Constitution Loopcraft.
-    window.open(`${fichier}?role=po&user=${name}`, '_blank');
+    // L'URL d'un wireframe ne change jamais d'une livraison à l'autre, donc le
+    // navigateur ressert volontiers celle de la veille. Une PO verrait un écran
+    // périmé sans s'en douter, et commenterait à côté. On horodate l'ouverture.
+    window.open(`${fichier}?role=po&user=${name}&cb=${Date.now()}`, '_blank');
   }
 
   function doLogout() {
