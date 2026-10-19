@@ -953,7 +953,7 @@
   .brief-drag-handle:hover { color:#6B7280; }
     /* ══════════════════════════════════════════════════════════════
        ASSURANCE SKI — écran de vente + panneau latéral (Layer)
-       Toutes les valeurs sont relevées sur les maquettes Figma et sur
+       Valeurs relevées sur les maquettes Figma et sur
        develop.trident-ui.pro.clubmed — voir l'en-tête de screens_v2.py.
        ══════════════════════════════════════════════════════════════ */
     .ski-stage      { display: grid; }
@@ -967,7 +967,7 @@
     .fc-crumb b     { color: #1E2643; }
     .fc-back        { font-size: 13px; font-weight: 600; }
     .fc-id          { display: grid; gap: 12px;
-                      grid-template-columns: 96px 1fr 1fr 1.2fr 1.4fr; }
+                      grid-template-columns: 96px 1fr 1fr 1.3fr; }
     .fc-id-card     { background: #F5F0E8; border-radius: 12px; padding: 12px 16px;
                       display: flex; flex-direction: column; gap: 4px; min-width: 0; }
     .fc-id-card span{ font-size: 11px; color: #6B7280; }
@@ -980,10 +980,10 @@
                       padding: 14px; }
     .fc-search      { flex: 1; background: #fff; border: 1px solid #CCC; border-radius: 100px;
                       padding: 10px 16px; color: #9CA3AF; }
-    .fc-select      { width: 200px; background: #fff; border: 1px solid #CCC;
+    .fc-select      { width: 180px; background: #fff; border: 1px solid #CCC;
                       border-radius: 100px; padding: 10px 16px; color: #6B7280; }
     .fc-thead, .fc-row { display: grid; align-items: center; gap: 12px;
-                         grid-template-columns: 1fr 44px 140px 120px 90px 36px; }
+                         grid-template-columns: 1fr 40px 130px 110px 80px 36px; }
     .fc-thead       { background: #1E2643; color: #fff; border-radius: 12px;
                       padding: 14px 20px; font-weight: 600; }
     .fc-row         { background: #fff; border: 1px solid #E5E5E5; border-radius: 12px;
@@ -992,14 +992,14 @@
     .fc-prod        { font-weight: 500; line-height: 1.35; }
     .fc-gift        { display: inline-block; width: 18px; height: 13px; border-radius: 2px;
                       border: 1.5px solid #088A20; }
-    .fc-qty         { display: flex; align-items: center; gap: 8px; }
-    .fc-qty em, .fc-qty b { width: 28px; height: 28px; border-radius: 50%; display: grid;
+    .fc-qty         { display: flex; align-items: center; gap: 6px; }
+    .fc-qty em, .fc-qty b { width: 26px; height: 26px; border-radius: 50%; display: grid;
                             place-items: center; font-style: normal; font-weight: 600; }
     .fc-qty em      { background: #111; color: #fff; }
     .fc-qty b       { background: #FDBE00; color: #1E2643; }
-    .fc-qty i       { width: 44px; height: 30px; border: 1px solid #CCC; border-radius: 100px;
+    .fc-qty i       { width: 40px; height: 28px; border: 1px solid #CCC; border-radius: 100px;
                       display: grid; place-items: center; font-style: normal; background: #fff; }
-    .fc-price       { border: 1px solid #CCC; border-radius: 100px; padding: 7px 12px;
+    .fc-price       { border: 1px solid #CCC; border-radius: 100px; padding: 7px 10px;
                       text-align: center; background: #fff; }
     .fc-sub         { text-align: right; }
     .fc-plus        { text-align: center; font-size: 20px; font-weight: 600; color: #1E2643;
@@ -1010,51 +1010,61 @@
 
     /* ── Panneau latéral : scrim + Layer ─────────────────────────── */
     .ski-overlay    { display: flex; align-items: stretch; }
-    .ski-scrim      { flex: 1; background: #000000; opacity: .7; }
-    .ski-layer      { width: 570px; flex: 0 0 570px; background: #FFFFFF;
+    .ski-scrim      { flex: 1; min-width: 80px; background: #000000; opacity: .7; }
+    /* 860 au lieu des 570 relevés : demandé pour que la ligne GM tienne
+       sur une seule ligne, comme dans 4.2.3.5. */
+    .ski-layer      { width: 860px; flex: 0 1 860px; background: #FFFFFF;
                       display: flex; flex-direction: column; }
-    .ski-layer-head { display: flex; align-items: center; gap: 12px; padding: 20px 20px 0; }
+    .ski-layer-head { display: flex; align-items: center; gap: 12px; padding: 24px 24px 0; }
     .ski-round      { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%;
                       background: #fff; border: 1px solid #CCCCCC; color: #1E2643;
                       display: grid; place-items: center; cursor: pointer; }
     .ski-round:focus-visible { outline: 3px solid #2563EB; outline-offset: 2px; }
     .ski-layer-title{ font-size: 28px; font-weight: 600; color: #000000; margin: 0; }
-    .ski-divider    { height: 1px; background: #CCCCCC; margin: 20px; }
-    .ski-layer-body { padding: 0 20px; display: flex; flex-direction: column; gap: 24px;
+    .ski-divider    { height: 1px; background: #CCCCCC; margin: 20px 24px; }
+    .ski-layer-body { padding: 0 24px; display: flex; flex-direction: column; gap: 28px;
                       flex: 1; }
-    .ski-layer-foot { padding: 0 20px 20px; display: flex; justify-content: center; }
+    .ski-layer-foot { padding: 0 24px 24px; display: flex; flex-direction: column;
+                      align-items: center; gap: 10px; }
+    .ski-status     { font-size: 13px; color: #1E6B33; margin: 0; text-align: center; }
+    .ski-status:empty { display: none; }
     .ski-cta        { height: 48px; padding: 0 28px; border: 0; border-radius: 100px;
                       background: #FDBE00; color: #1E2643; font-family: inherit;
                       font-size: 15px; font-weight: 600; cursor: pointer; }
     .ski-cta:focus-visible { outline: 3px solid #2563EB; outline-offset: 2px; }
+    .ski-cta:disabled { background: #EFEFEF; color: #9A9A9A; cursor: not-allowed; }
 
-    .ski-info       { background: #F8F8F8; border-radius: 12px; padding: 14px 16px;
+    .ski-info       { background: #F8F8F8; border-radius: 12px; padding: 16px;
                       display: flex; align-items: center; justify-content: space-between;
-                      gap: 14px; }
+                      gap: 16px; }
     .ski-info-txt   { font-size: 16px; color: #000; }
     .ski-info-card  { display: flex; align-items: stretch; border: 1px solid #CCCCCC;
                       border-radius: 10px; overflow: hidden; background: #fff; flex: 0 0 auto; }
     .ski-info-strip { width: 10px; background: #1E2643; }
-    .ski-info-lines { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; }
+    .ski-info-lines { display: flex; flex-direction: column; gap: 2px; padding: 8px 14px; }
     .ski-info-l1    { font-size: 14px; font-weight: 600; color: #000; }
     .ski-info-l2    { font-size: 12px; color: #333333; }
 
-    .ski-sec        { display: flex; flex-direction: column; gap: 12px;
+    .ski-sec        { display: flex; flex-direction: column; gap: 14px;
                       border: 0; padding: 0; margin: 0; }
     .ski-sec-title  { font-size: 14px; font-weight: 600; color: #000; margin: 0;
                       padding: 0; text-transform: uppercase; letter-spacing: .02em; }
     .ski-list       { display: flex; flex-direction: column; gap: 10px; }
+    .ski-list[hidden] { display: none; }
+    .ski-empty      { font-size: 14px; color: #6B7280; font-style: italic; margin: 0;
+                      padding: 10px 2px; }
 
-    /* Carte GM compacte — modèle « Room card » du panneau Lock a room */
-    .ski-gm         { display: flex; align-items: center; gap: 12px; padding: 10px 14px;
-                      border: 1px solid #CCCCCC; border-radius: 12px; background: #fff;
-                      cursor: pointer; min-height: 56px; }
-    .ski-gm-body    { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-    .ski-gm-l1      { font-size: 14px; font-weight: 600; color: #000; }
-    .ski-gm-tag     { display: inline-block; margin-left: 8px; padding: 1px 8px;
-                      border-radius: 100px; background: #F8F8F8; border: 1px solid #CCCCCC;
-                      font-size: 11px; font-weight: 500; color: #333333; }
-    .ski-gm-l2      { font-size: 12px; color: #333333; }
+    /* Ligne GM — mêmes colonnes que 4.2.3.5, relevé : radius 16, bord #CCCCCC, 14px */
+    .ski-row        { display: grid; align-items: center; gap: 16px; min-height: 68px;
+                      padding: 12px 20px; background: #fff; border: 1px solid #CCCCCC;
+                      border-radius: 16px; font-size: 14px; color: #000;
+                      grid-template-columns: 24px 128px 96px 96px 62px 72px 34px 1fr auto; }
+    .ski-row.is-locked { background: #F8F8F8; }
+    .ski-dates      { line-height: 1.45; }
+    .ski-strong     { font-weight: 600; }
+    .ski-lock       { font-size: 12px; font-weight: 600; color: #333333;
+                      background: #FFFFFF; border: 1px solid #CCCCCC;
+                      border-radius: 100px; padding: 4px 12px; white-space: nowrap; }
 
     .ski-filbar     { display: flex; align-items: center; justify-content: space-between;
                       gap: 16px; flex-wrap: wrap; }
@@ -1085,6 +1095,8 @@
     .ski-check:checked::after {
                       content: ''; position: absolute; left: 8px; top: 3px; width: 6px; height: 12px;
                       border: solid #000000; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+    .ski-check:disabled { background: #F8F8F8; border-color: #666666; cursor: not-allowed; }
+    .ski-check:disabled::after { border-color: #666666; }
     .ski-radio input:checked::after {
                       content: ''; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px;
                       border-radius: 50%; background: #000000; transform: translate(-50%,-50%); }
@@ -1092,7 +1104,7 @@
                       outline: 3px solid #2563EB; outline-offset: 2px; }
     .ski-radio      { display: flex; align-items: center; gap: 12px; min-height: 44px; }
     .ski-radio label{ font-size: 14px; color: #1E2643; cursor: pointer; }
-    .ski-radios     { display: flex; flex-direction: column; gap: 4px; }
+    .ski-radios     { display: flex; gap: 32px; flex-wrap: wrap; }
     .ski-fieldset   { border: 0; }
 
   </style>
@@ -1393,13 +1405,12 @@
               <div class="fc-id-card"><span>Last Name</span><b>Dupont</b></div>
               <div class="fc-id-card"><span>First name</span><b>Jeanne</b></div>
               <div class="fc-id-card"><span>Phone number</span><b>+33 6 20 00 76 00</b></div>
-              <div class="fc-id-card"><span>Email</span><b>jeanne.dupont@gmail.com</b></div>
             </div>
 
             <div class="fc-tabs">
               <span>Check-in</span><span>Prepaids</span>
               <span class="is-on">Sell services</span>
-              <span>Sale history</span><span>Deposit / Withdrawal</span><span>Invoice</span>
+              <span>Sale history</span><span>Invoice</span>
             </div>
 
             <div class="fc-filters">
@@ -1416,10 +1427,10 @@
             <div class="fc-row fc-row--on">
               <span class="fc-prod">Ski insurance</span>
               <span class="fc-eli"><span class="fc-gift" aria-hidden="true"></span></span>
-              <span class="fc-qty"><em>&minus;</em><i>1</i><b>+</b></span>
+              <span class="fc-qty"><em>&minus;</em><i id="ski-qty">1</i><b>+</b></span>
               <span class="fc-price">100,00 €</span>
-              <span class="fc-sub">100,00€</span>
-              <button class="fc-plus is-trigger" type="button"
+              <span class="fc-sub" id="ski-subtotal">100,00€</span>
+              <button class="fc-plus is-trigger" type="button" id="ski-open"
                       aria-label="Open the ski insurance panel">+</button>
             </div>
             <div class="fc-row">
@@ -1464,8 +1475,7 @@
             </div>
           </div>
 
-          <!-- Panneau latéral — composant Layer de la librairie partagée.
-               Ouvert d'emblée : le wireframe montre l'état après clic sur le +. -->
+          <!-- Panneau latéral — composant Layer de la librairie partagée -->
           <div class="ski-overlay">
             <div class="ski-scrim"></div>
 
@@ -1495,58 +1505,24 @@
                 </div>
 
                 <section class="ski-sec">
-                  <h3 class="ski-sec-title">GM covered</h3>
-                  <div class="ski-list">
-            <label class="ski-gm" for="ski-ins-J">
-              <input class="ski-check" type="checkbox" id="ski-ins-J" checked
-                     aria-label="Remove ski insurance for Jeanne Dupont" />
-              <span class="ski-gm-body">
-                <span class="ski-gm-l1">Dupont Jeanne
-                  <span class="ski-gm-tag">GM Ordi</span>
-                </span>
-                <span class="ski-gm-l2">From 04/09/2024 to 17/09/2024 &nbsp;·&nbsp;
-                  42 ans &nbsp;·&nbsp; C2 &nbsp;·&nbsp; Room 0324 A</span>
-              </span>
-            </label>
-                  </div>
+                  <h3 class="ski-sec-title">GM covered <span id="ski-covered-n"></span></h3>
+                  <div class="ski-list" id="ski-covered"></div>
                 </section>
 
                 <section class="ski-sec">
                   <div class="ski-filbar">
                     <label class="ski-switch">
-                      <input type="checkbox" checked aria-label="Show GMs from affiliation" />
+                      <input type="checkbox" checked id="ski-show-fil"
+                             aria-label="Show GMs from affiliation" />
                       <span class="ski-track" aria-hidden="true"></span>
-                      <span class="ski-switch-txt">Show GMs from affiliation (2)</span>
+                      <span class="ski-switch-txt" id="ski-fil-label">Show GMs from affiliation</span>
                     </label>
                     <span class="ski-selall">
                       <input class="ski-check" type="checkbox" id="ski-all" />
                       <label for="ski-all">Select all</label>
                     </span>
                   </div>
-                  <div class="ski-list">
-            <label class="ski-gm" for="ski-fil-P">
-              <input class="ski-check" type="checkbox" id="ski-fil-P"
-                     aria-label="Add ski insurance for Pierre Dupont" />
-              <span class="ski-gm-body">
-                <span class="ski-gm-l1">Dupont Pierre
-                  <span class="ski-gm-tag">GM Ordi</span>
-                </span>
-                <span class="ski-gm-l2">From 05/09/2024 to 17/09/2024 &nbsp;·&nbsp;
-                  40 ans &nbsp;·&nbsp; C2 &nbsp;·&nbsp; Room 0325 A</span>
-              </span>
-            </label>
-            <label class="ski-gm" for="ski-fil-L">
-              <input class="ski-check" type="checkbox" id="ski-fil-L"
-                     aria-label="Add ski insurance for Paul Dupont" />
-              <span class="ski-gm-body">
-                <span class="ski-gm-l1">Dupont Paul
-                  <span class="ski-gm-tag">GM Ordi</span>
-                </span>
-                <span class="ski-gm-l2">From 05/09/2024 to 17/09/2024 &nbsp;·&nbsp;
-                  32 ans &nbsp;·&nbsp; C2 &nbsp;·&nbsp; Room 0325 A</span>
-              </span>
-            </label>
-                  </div>
+                  <div class="ski-list" id="ski-affiliation"></div>
                 </section>
 
                 <fieldset class="ski-sec ski-fieldset">
@@ -1567,7 +1543,8 @@
 
               <div class="ski-divider"></div>
               <div class="ski-layer-foot">
-                <button class="ski-cta" type="button">Confirm the insurance</button>
+                <p class="ski-status" id="ski-status" role="status" aria-live="polite"></p>
+                <button class="ski-cta" type="button" id="ski-confirm">Confirm the insurance</button>
               </div>
             </aside>
           </div>
@@ -5010,6 +4987,115 @@ window.LOOPCRAFT_CONFIG = {
 
 <!-- Modale validation (télécollecte + régularisation) -->
 <!-- Modale de validation et toaster : composants métier, retirés de la coquille. -->
+
+
+<script>
+/* ══ ASSURANCE SKI — comportement du panneau ════════════════════════════
+   Reprend l'UX de 4.2.3.5 : cocher un GM de la filiation le fait monter
+   dans GM COVERED, le décocher le fait redescendre.
+   « Confirm the insurance » vend : les GM couverts restent en haut, cochés
+   et verrouillés — on ne peut plus les décocher à la vente suivante.      */
+(function () {
+  var GM = {
+    J: { first:'Jeanne', last:'Dupont', age:'42 ans', qual:'GM Ordi',
+         cat:'C2', room:'Room 0324 A', frm:'04/09/2024', to:'17/09/2024' },
+    P: { first:'Pierre', last:'Dupont', age:'40 ans', qual:'GM Ordi',
+         cat:'C2', room:'Room 0325 A', frm:'05/09/2024', to:'17/09/2024' },
+    L: { first:'Paul',   last:'Dupont', age:'32 ans', qual:'GM Ordi',
+         cat:'C2', room:'Room 0325 A', frm:'05/09/2024', to:'17/09/2024' }
+  };
+  var ORDER   = ['J', 'P', 'L'];
+  var covered = ['J'];   // le GM du dossier, coché par défaut
+  var sold    = [];      // assurances déjà vendues → lignes verrouillées
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) {
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
+
+  function rowHtml(key, isCovered) {
+    var g = GM[key], locked = sold.indexOf(key) !== -1;
+    var label = (locked ? 'Already insured — ' : (isCovered ? 'Remove ski insurance for '
+                                                            : 'Add ski insurance for '))
+              + g.first + ' ' + g.last;
+    return '<div class="ski-row' + (locked ? ' is-locked' : '') + '" data-gm="' + key + '">'
+         +   '<input class="ski-check" type="checkbox" data-gm="' + key + '"'
+         +     (isCovered ? ' checked' : '') + (locked ? ' disabled' : '')
+         +     ' aria-label="' + esc(label) + '" />'
+         +   '<span class="ski-dates">From ' + g.frm + '<br />To ' + g.to + '</span>'
+         +   '<span class="ski-strong">' + g.last + '</span>'
+         +   '<span class="ski-strong">' + g.first + '</span>'
+         +   '<span>' + g.age + '</span>'
+         +   '<span>' + g.qual + '</span>'
+         +   '<span>' + g.cat + '</span>'
+         +   '<span>' + g.room + '</span>'
+         +   (locked ? '<span class="ski-lock">Already insured</span>' : '<span></span>')
+         + '</div>';
+  }
+
+  function render() {
+    var cov = ORDER.filter(function (k) { return covered.indexOf(k) !== -1; });
+    var fil = ORDER.filter(function (k) { return covered.indexOf(k) === -1; });
+
+    document.getElementById('ski-covered').innerHTML =
+      cov.length ? cov.map(function (k) { return rowHtml(k, true); }).join('')
+                 : '<p class="ski-empty">No GM selected yet.</p>';
+    document.getElementById('ski-affiliation').innerHTML =
+      fil.length ? fil.map(function (k) { return rowHtml(k, false); }).join('')
+                 : '<p class="ski-empty">All GMs from the affiliation are already selected.</p>';
+
+    document.getElementById('ski-covered-n').textContent = '(' + cov.length + ')';
+    document.getElementById('ski-fil-label').textContent =
+      'Show GMs from affiliation (' + fil.length + ')';
+
+    var all = document.getElementById('ski-all');
+    all.checked = fil.length === 0;
+    all.disabled = fil.length === 0;
+
+    // Seuls les GM pas encore vendus comptent dans la vente en cours.
+    var toSell = cov.filter(function (k) { return sold.indexOf(k) === -1; }).length;
+    var qty = document.getElementById('ski-qty');
+    var sub = document.getElementById('ski-subtotal');
+    if (qty) qty.textContent = toSell;
+    if (sub) sub.textContent = (toSell * 100) + ',00€';
+    var cta = document.getElementById('ski-confirm');
+    cta.disabled = toSell === 0;
+    cta.textContent = toSell === 0 ? 'Nothing left to insure'
+                                   : 'Confirm the insurance (' + toSell + ')';
+  }
+
+  document.addEventListener('change', function (e) {
+    var cb = e.target;
+    if (cb.id === 'ski-show-fil') {
+      document.getElementById('ski-affiliation').hidden = !cb.checked;
+      return;
+    }
+    if (cb.id === 'ski-all') {
+      if (cb.checked) covered = ORDER.slice();
+      render();
+      return;
+    }
+    if (!cb.classList.contains('ski-check') || !cb.dataset.gm) return;
+    var key = cb.dataset.gm;
+    if (sold.indexOf(key) !== -1) { render(); return; }   // verrouillé
+    if (cb.checked) { if (covered.indexOf(key) === -1) covered.push(key); }
+    else { covered = covered.filter(function (k) { return k !== key; }); }
+    render();
+  });
+
+  document.addEventListener('click', function (e) {
+    if (e.target.closest && e.target.closest('#ski-confirm')) {
+      var fresh = covered.filter(function (k) { return sold.indexOf(k) === -1; });
+      if (!fresh.length) return;
+      sold = sold.concat(fresh);
+      document.getElementById('ski-status').textContent =
+        fresh.length + ' ski insurance' + (fresh.length > 1 ? 's' : '') + ' sold. '
+        + 'These GMs stay listed and can no longer be unchecked.';
+      render();
+    }
+  });
+
+  if (document.getElementById('ski-covered')) render();
+})();
+</script>
 
 </body>
 </html>
