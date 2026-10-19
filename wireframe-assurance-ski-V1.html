@@ -956,10 +956,6 @@
        Valeurs relevées sur les maquettes Figma et sur
        develop.trident-ui.pro.clubmed — voir l'en-tête de screens_v2.py.
        ══════════════════════════════════════════════════════════════ */
-    .ski-stage      { display: grid; }
-    .ski-stage > .fc,
-    .ski-stage > .ski-overlay { grid-area: 1 / 1; }
-
     /* ── Écran de vente ──────────────────────────────────────────── */
     .fc             { display: flex; flex-direction: column; gap: 14px;
                       font-size: 13px; color: #1E2643; }
@@ -1008,13 +1004,22 @@
                           display: grid; place-items: center; }
     .fc-plus.is-trigger:focus-visible { outline: 3px solid #2563EB; outline-offset: 2px; }
 
-    /* ── Panneau latéral : scrim + Layer ─────────────────────────── */
-    .ski-overlay    { display: flex; align-items: stretch; }
-    .ski-scrim      { flex: 1; min-width: 80px; background: #000000; opacity: .7; }
+    /* ── Panneau latéral : scrim + Layer ─────────────────────────────
+       Fixé au viewport et non dans .content : sur la maquette Lock a room
+       le voile part de x:0 / y:72 — il recouvre donc le menu latéral et
+       s'arrête pile sous le header. --ski-top est renseigné à l'init
+       depuis la hauteur réelle du header, pour ne pas figer 72 en dur.
+       z-index 500 : au-dessus de .content (1) et du header (100), mais
+       sous le panel Loopcraft (999) qui doit rester utilisable par le PO. */
+    .ski-overlay    { position: fixed; top: var(--ski-top, 72px); left: 0; right: 0;
+                      bottom: 0; display: flex; align-items: stretch; z-index: 500; }
+    .ski-overlay[hidden] { display: none; }
+    .ski-scrim      { flex: 1; min-width: 80px; background: #000000; opacity: .7;
+                      cursor: pointer; }
     /* 860 au lieu des 570 relevés : demandé pour que la ligne GM tienne
        sur une seule ligne, comme dans 4.2.3.5. */
     .ski-layer      { width: 860px; flex: 0 1 860px; background: #FFFFFF;
-                      display: flex; flex-direction: column; }
+                      display: flex; flex-direction: column; overflow-y: auto; }
     .ski-layer-head { display: flex; align-items: center; gap: 12px; padding: 24px 24px 0; }
     .ski-round      { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%;
                       background: #fff; border: 1px solid #CCCCCC; color: #1E2643;
@@ -1394,7 +1399,6 @@
     <div class="content">
       <div class="lc-canvas">
       <div class="lc-screen is-active" data-scope="main">
-        <div class="ski-stage">
 
           <div class="fc">
             <div class="fc-crumb">Home &nbsp;•&nbsp; GM list &nbsp;•&nbsp; … &nbsp;•&nbsp; <b>Customer file</b></div>
@@ -1475,14 +1479,19 @@
             </div>
           </div>
 
-          <!-- Panneau latéral — composant Layer de la librairie partagée -->
-          <div class="ski-overlay">
-            <div class="ski-scrim"></div>
+          <!-- Panneau latéral — composant Layer de la librairie partagée.
+               Volontairement HORS de .content : sur la maquette Lock a room le
+               voile part de x:0 / y:72, donc il recouvre aussi le menu latéral
+               et s'arrête pile sous le header. Un overlay posé dans .content
+               ne peut couvrir ni la sidebar ni les marges : il est donc fixé
+               au viewport, sous le header dont la hauteur est lue à l'init. -->
+          <div class="ski-overlay" id="ski-overlay" hidden>
+            <div class="ski-scrim" id="ski-scrim"></div>
 
             <aside class="ski-layer" role="dialog" aria-modal="true"
                    aria-labelledby="ski-layer-title">
               <div class="ski-layer-head">
-                <button class="ski-round" type="button" aria-label="Back">
+                <button class="ski-round" type="button" id="ski-back" aria-label="Back">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M15 18l-6-6 6-6"/></svg>
@@ -1548,7 +1557,6 @@
               </div>
             </aside>
           </div>
-        </div>
       </div>
       </div>
     </div>
@@ -5081,8 +5089,43 @@ window.LOOPCRAFT_CONFIG = {
     render();
   });
 
+  /* ── Ouverture / fermeture du panneau ────────────────────────────────
+     Comportement du composant Layer : ouverture depuis un déclencheur,
+     fermeture par le bouton retour, par le voile ou par Échap, défilement
+     de la page bloqué, focus piégé dans le panneau et rendu au + ensuite. */
+  var overlay = document.getElementById('ski-overlay');
+  var layer   = overlay ? overlay.querySelector('.ski-layer') : null;
+  var lastTrigger = null;
+
+  function focusables() {
+    return Array.prototype.filter.call(
+      layer.querySelectorAll('button, input, [href], select, textarea, [tabindex]'),
+      function (el) { return !el.disabled && el.offsetParent !== null; });
+  }
+
+  function openPanel(trigger) {
+    lastTrigger = trigger || null;
+    overlay.hidden = false;
+    var content = document.querySelector('.content');
+    if (content) content.style.overflow = 'hidden';
+    var back = document.getElementById('ski-back');
+    if (back) back.focus();
+  }
+
+  function closePanel() {
+    overlay.hidden = true;
+    var content = document.querySelector('.content');
+    if (content) content.style.overflow = '';
+    if (lastTrigger) { lastTrigger.focus(); lastTrigger = null; }
+  }
+
   document.addEventListener('click', function (e) {
-    if (e.target.closest && e.target.closest('#ski-confirm')) {
+    var t = e.target;
+    if (!t.closest) return;
+    if (t.closest('#ski-open'))  { openPanel(t.closest('#ski-open')); return; }
+    if (t.closest('#ski-back'))  { closePanel(); return; }
+    if (t.closest('#ski-scrim')) { closePanel(); return; }
+    if (t.closest('#ski-confirm')) {
       var fresh = covered.filter(function (k) { return sold.indexOf(k) === -1; });
       if (!fresh.length) return;
       sold = sold.concat(fresh);
@@ -5093,7 +5136,24 @@ window.LOOPCRAFT_CONFIG = {
     }
   });
 
-  if (document.getElementById('ski-covered')) render();
+  document.addEventListener('keydown', function (e) {
+    if (overlay.hidden) return;
+    if (e.key === 'Escape') { e.stopPropagation(); closePanel(); return; }
+    if (e.key !== 'Tab') return;
+    var f = focusables();
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }, true);
+
+  if (document.getElementById('ski-covered')) {
+    // Hauteur réelle du header : le voile doit s'arrêter pile dessous.
+    var h = document.querySelector('header');
+    if (h) document.documentElement.style.setProperty(
+      '--ski-top', Math.round(h.getBoundingClientRect().height) + 'px');
+    render();
+  }
 })();
 </script>
 
