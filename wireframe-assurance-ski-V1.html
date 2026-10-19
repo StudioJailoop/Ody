@@ -952,34 +952,97 @@
   .brief-drag-handle { display:flex; align-items:center; color:#CBD5E1; padding:0 8px 0 0; flex-shrink:0; cursor:grab; }
   .brief-drag-handle:hover { color:#6B7280; }
     /* ══════════════════════════════════════════════════════════════
-       ASSURANCE SKI — calqué sur 4.2.3.5 « Manage the GM's presence »
-       Mesures relevées sur la maquette : ligne 1229x68, radius 16,
-       bord #CCCCCC, texte 14px, switch 56x32.
-       Briques absentes du catalogue .lc-* (ECRANS.md §7) : pop-in de
-       caisse, ligne GM, case à cocher, radio, interrupteur.
+       ASSURANCE SKI
+       Fond : fiche client GM, onglet Sell services (node 11742:3667).
+       Modale : pop-in calquée sur 4.2.3.5 (node 11730:2815).
+       Valeurs relevées sur les maquettes, pas estimées — voir l'en-tête
+       de screens_v2.py. Briques absentes du catalogue .lc-* : ECRANS.md §7.
        ══════════════════════════════════════════════════════════════ */
-    .ski-stage      { position: relative; }
-    .ski-overlay    { position: absolute; inset: -12px -12px -24px; border-radius: 12px;
-                      background: rgba(30,38,67,.45); display: flex;
-                      align-items: flex-start; justify-content: center; padding: 24px 16px 32px; }
-    .ski-popin      { position: relative; width: 100%; max-width: 1357px; }
+    /* Fiche client et scrim occupent la MÊME cellule de grille : la scène
+       prend la hauteur du plus grand des deux, donc le noir couvre toujours
+       le fond, même quand la modale est plus haute que la fiche. */
+    .ski-stage      { display: grid; }
+    .ski-stage > .fc,
+    .ski-stage > .ski-scrim { grid-area: 1 / 1; }
+
+    /* ── Fond : fiche client ─────────────────────────────────────── */
+    .fc             { display: flex; flex-direction: column; gap: 16px;
+                      font-size: 13px; color: #1E2643; }
+    .fc-crumb       { font-size: 12px; color: #6B7280; }
+    .fc-crumb b     { color: #1E2643; }
+    .fc-back        { font-size: 13px; font-weight: 600; }
+    .fc-id          { display: grid; gap: 12px;
+                      grid-template-columns: 110px 1fr 1fr 1.2fr 1.4fr; }
+    .fc-id-card     { background: #F5F0E8; border-radius: 12px; padding: 12px 16px;
+                      display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .fc-id-card span{ font-size: 11px; color: #6B7280; }
+    .fc-id-card b   { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .fc-tabs        { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .fc-tabs span   { padding: 10px 18px; border-radius: 100px; font-weight: 600; font-size: 13px; }
+    .fc-tabs .is-on { background: #000; color: #fff; }
+    .fc-exchange    { border: 1.5px solid #1E2643; margin-left: auto; }
+    .fc-cols        { display: grid; grid-template-columns: 1fr 340px; gap: 16px; align-items: start; }
+    .fc-filters     { display: flex; gap: 12px; background: #F8F8F8; border-radius: 12px;
+                      padding: 14px; margin-bottom: 12px; }
+    .fc-search      { flex: 1; background: #fff; border: 1px solid #CCC; border-radius: 100px;
+                      padding: 10px 16px; color: #9CA3AF; }
+    .fc-select      { width: 200px; background: #fff; border: 1px solid #CCC; border-radius: 100px;
+                      padding: 10px 16px; color: #6B7280; }
+    .fc-thead, .fc-row { display: grid; align-items: center; gap: 12px;
+                         grid-template-columns: 1fr 44px 150px 130px 90px 32px; }
+    .fc-thead       { background: #1E2643; color: #fff; border-radius: 12px;
+                      padding: 14px 20px; font-weight: 600; }
+    .fc-row         { background: #fff; border: 1px solid #E5E5E5; border-radius: 12px;
+                      padding: 12px 20px; margin-top: 10px; min-height: 60px; }
+    .fc-row--on     { background: #EAF5EC; }
+    .fc-prod        { font-weight: 500; line-height: 1.35; }
+    .fc-gift        { display: inline-block; width: 18px; height: 13px; border-radius: 2px;
+                      border: 1.5px solid #088A20; }
+    .fc-qty         { display: flex; align-items: center; gap: 8px; }
+    .fc-qty em, .fc-qty b { width: 28px; height: 28px; border-radius: 50%; display: grid;
+                            place-items: center; font-style: normal; font-weight: 600; }
+    .fc-qty em      { background: #111; color: #fff; }
+    .fc-qty b       { background: #FDBE00; color: #1E2643; }
+    .fc-qty i       { width: 46px; height: 30px; border: 1px solid #CCC; border-radius: 100px;
+                      display: grid; place-items: center; font-style: normal; background: #fff; }
+    .fc-price       { border: 1px solid #CCC; border-radius: 100px; padding: 7px 14px;
+                      text-align: center; background: #fff; }
+    .fc-sub         { text-align: right; }
+    .fc-add         { text-align: center; font-size: 18px; font-weight: 600; }
+    .fc-cart        { border: 1px solid #E5E5E5; border-radius: 12px; overflow: hidden; }
+    .fc-cart-head   { background: #1E2643; color: #fff; padding: 16px 20px; font-weight: 600; }
+    .fc-cart-body   { padding: 16px 20px; min-height: 180px; background: #F8F8F8; }
+    .fc-cart-line   { display: flex; justify-content: space-between; gap: 12px; }
+    .fc-cart-foot   { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+    .fc-cart-total  { display: flex; justify-content: space-between; align-items: baseline; }
+    .fc-cart-total b{ font-size: 18px; }
+    .fc-cart-btns   { display: flex; gap: 10px; }
+    .fc-btn, .fc-btn-ghost { flex: 1; text-align: center; padding: 11px 0; border-radius: 100px;
+                             font-weight: 600; }
+    .fc-btn         { background: #FDBE00; color: #1E2643; }
+    .fc-btn-ghost   { border: 1.5px solid #1E2643; }
+
+    /* ── Modale ──────────────────────────────────────────────────── */
+    .ski-scrim      { background: rgba(0,0,0,.6); display: flex;
+                      align-items: flex-start; justify-content: center;
+                      padding: 40px 24px; }
+    /* Plus étroite que la fiche : on doit voir l'écran de dessous sur les
+       côtés, sinon ça ne se lit pas comme une modale. */
+    .ski-popin      { position: relative; width: 100%; max-width: 1120px; }
     .ski-close      { position: absolute; top: -14px; right: -14px; width: 48px; height: 48px;
                       border-radius: 50%; background: #fff; color: #1E2643;
                       border: 1.5px solid #1E2643; display: flex; align-items: center;
                       justify-content: center; cursor: pointer; z-index: 2;
                       box-shadow: 0 2px 8px rgba(0,0,0,.18); }
     .ski-card       { background: #fff; border-radius: 16px; overflow: hidden;
-                      box-shadow: 0 12px 40px rgba(0,0,0,.22); }
+                      box-shadow: 0 16px 48px rgba(0,0,0,.35); }
     .ski-card-head  { background: #1E2643; color: #fff; height: 76px; display: flex;
                       align-items: center; padding: 0 24px; font-size: 20px; font-weight: 600; }
     .ski-card-body  { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
     .ski-lead       { font-size: 20px; font-weight: 600; color: #1E2643; margin: 0; }
-
-    /* Groupe de lignes GM — la carte blanche de la maquette */
     .ski-group      { display: flex; flex-direction: column; gap: 12px; }
-    .ski-group--fil { opacity: .95; }
 
-    /* Ligne GM — 8 colonnes, cf. relevé des positions sur 4.2.3.5 */
+    /* Ligne GM — relevé 4.2.3.5 : 68px, radius 16, bord #CCCCCC, 14px */
     .ski-row        { display: grid; align-items: center; gap: 20px; min-height: 68px;
                       padding: 12px 24px; background: #fff; border: 1px solid #CCCCCC;
                       border-radius: 16px; font-size: 14px; color: #000;
@@ -987,42 +1050,38 @@
     .ski-dates      { line-height: 1.45; }
     .ski-strong     { font-weight: 600; }
 
-    /* Barre de bascule filiation */
     .ski-filbar     { display: flex; align-items: center; justify-content: space-between;
                       gap: 24px; flex-wrap: wrap; }
     .ski-switch     { display: inline-flex; align-items: center; gap: 12px;
-                      min-height: 44px; cursor: pointer; }
+                      min-height: 44px; cursor: pointer; position: relative; }
     .ski-switch input { position: absolute; opacity: 0; width: 56px; height: 32px; margin: 0;
                         cursor: pointer; }
     .ski-track      { width: 56px; height: 32px; border-radius: 100px; background: #CCCCCC;
                       position: relative; transition: background .15s; flex: 0 0 56px; }
     .ski-track::after { content: ''; position: absolute; top: 4px; left: 4px; width: 24px;
-                        height: 24px; border-radius: 50%; background: #fff;
+                        height: 24px; border-radius: 50%; background: #FFFFFF;
                         transition: transform .15s; }
-    .ski-switch input:checked + .ski-track          { background: #FDBE00; }
-    .ski-switch input:checked + .ski-track::after   { transform: translateX(24px); }
-    .ski-switch input:focus-visible + .ski-track    { outline: 3px solid #2563EB;
-                                                      outline-offset: 2px; }
+    .ski-switch input:checked + .ski-track        { background: #FDBE00; }
+    .ski-switch input:checked + .ski-track::after { transform: translateX(24px); }
+    .ski-switch input:focus-visible + .ski-track  { outline: 3px solid #2563EB; outline-offset: 2px; }
     .ski-switch-txt { font-size: 15px; font-weight: 600; color: #1E2643; }
+    .ski-empty-fil  { font-size: 14px; color: #6B7280; font-style: italic; padding: 12px 24px; }
 
-    .ski-empty-fil  { font-size: 14px; color: #6B7280; font-style: italic;
-                      padding: 12px 24px; }
-
-    /* Cases à cocher et boutons radio */
+    /* Checkbox DS : 24x24, radius 8, bord #666666 / #000000, coche #000000 */
     .ski-cb, .ski-radio { display: flex; align-items: center; gap: 12px; min-height: 44px; }
     .ski-cb input, .ski-radio input {
                       appearance: none; -webkit-appearance: none; width: 24px; height: 24px;
-                      flex: 0 0 24px; margin: 0; background: #fff; cursor: pointer;
-                      border: 1.5px solid #1E2643; position: relative; }
-    .ski-cb input    { border-radius: 6px; }
+                      flex: 0 0 24px; margin: 0; background: #FFFFFF; cursor: pointer;
+                      border: 1px solid #666666; position: relative; }
+    .ski-cb input    { border-radius: 8px; }
     .ski-radio input { border-radius: 50%; }
+    .ski-cb input:checked, .ski-radio input:checked { border-color: #000000; }
     .ski-cb input:checked::after {
-                      content: ''; position: absolute; left: 7px; top: 3px; width: 7px; height: 12px;
-                      border: solid #1E2643; border-width: 0 2px 2px 0; transform: rotate(45deg); }
-    .ski-radio input:checked { border: 2px solid #FDBE00; }
+                      content: ''; position: absolute; left: 8px; top: 3px; width: 6px; height: 12px;
+                      border: solid #000000; border-width: 0 2px 2px 0; transform: rotate(45deg); }
     .ski-radio input:checked::after {
-                      content: ''; position: absolute; left: 50%; top: 50%; width: 10px; height: 10px;
-                      border-radius: 50%; background: #1E2643; transform: translate(-50%,-50%); }
+                      content: ''; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px;
+                      border-radius: 50%; background: #000000; transform: translate(-50%,-50%); }
     .ski-cb input:focus-visible, .ski-radio input:focus-visible {
                       outline: 3px solid #2563EB; outline-offset: 2px; }
     .ski-cb label, .ski-radio label { font-size: 15px; color: #1E2643; cursor: pointer; }
@@ -1032,11 +1091,8 @@
                       flex-direction: column; gap: 12px; }
     .ski-legend     { font-size: 20px; font-weight: 600; color: #1E2643; padding: 0; }
     .ski-radios     { display: flex; gap: 40px; flex-wrap: wrap; }
-
     .ski-footer     { display: flex; justify-content: center; gap: 16px;
                       padding: 20px 24px 24px; border-top: 1px solid #EEE; }
-    .ski-footer .lc-btn[disabled] { background: #EFEFEF; border-color: #EFEFEF;
-                                    color: #9A9A9A; cursor: not-allowed; }
 
   </style>
 </head>
@@ -1261,15 +1317,20 @@
       <div class="icon-circle">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 22V12h6v10"/></svg>
       </div>
-      <div class="nav-text"><div class="nav-label">Dashboard</div></div>
+      <div class="nav-text"><div class="nav-label">Home</div></div>
     </div>
 
-    <!-- GM list -->
-    <div class="nav-item">
+    <!-- GM list — ACTIF : on est sur la fiche d'un GM, onglet Sell services -->
+    <div class="nav-item active" style="align-items:flex-start;">
       <div class="icon-circle">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="7" r="4"/><path d="M2 21c0-4 3.1-7 7-7"/><circle cx="17" cy="11" r="3"/><path d="M22 21c0-2.8-2.2-5-5-5"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E2643" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="7" r="4"/><path d="M2 21c0-4 3.1-7 7-7"/><circle cx="17" cy="11" r="3"/><path d="M22 21c0-2.8-2.2-5-5-5"/></svg>
       </div>
-      <div class="nav-text"><div class="nav-label">Section 1</div></div>
+      <div class="nav-text">
+        <div class="nav-label">GM list</div>
+        <div class="submenu">
+          <div class="sub-item active" id="sub-main">Customer file</div>
+        </div>
+      </div>
     </div>
 
     <!-- Room list -->
@@ -1277,24 +1338,15 @@
       <div class="icon-circle">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="13" width="20" height="8" rx="1"/><path d="M2 13v-2a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v2"/><path d="M6 9V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3"/></svg>
       </div>
-      <div class="nav-text"><div class="nav-label">Section 2</div></div>
+      <div class="nav-text"><div class="nav-label">Room list</div></div>
     </div>
 
-    <!-- Cash register — ACTIF, Télécollecte active -->
-    <div class="nav-item active" style="align-items:flex-start;">
+    <!-- Cash register -->
+    <div class="nav-item">
       <div class="icon-circle">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E2643" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M7 15h.01M12 15h.01M17 15h.01"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M7 15h.01M12 15h.01M17 15h.01"/></svg>
       </div>
-      <div class="nav-text">
-        <div class="nav-label">Section 3</div>
-        <div class="submenu">
-          <div class="sub-item">Sous-écran 1</div>
-          <div class="sub-item">Sous-écran 2</div>
-          <div class="sub-item">Sous-écran 3</div>
-          <div class="sub-item">Sous-écran 4</div>
-          <div class="sub-item active" id="sub-main">Écran principal</div>
-        </div>
-      </div>
+      <div class="nav-text"><div class="nav-label">Cash register</div></div>
     </div>
 
     <!-- Settings -->
@@ -1331,22 +1383,92 @@
       <div class="lc-screen is-active" data-scope="s1">
         <div class="ski-stage">
 
-          <!-- Contexte : l'écran de vente, hors périmètre de ce ticket. -->
-          <div class="lc-table" style="--lc-cols: 1fr 140px 110px 140px;" aria-hidden="true">
-            <div class="lc-table-head">
-              <span>Product name</span><span>Unit price</span>
-              <span>Quantity</span><span class="lc-cell--num">Sub total</span>
+          <div class="fc" aria-hidden="true">
+            <div class="fc-crumb">Home &nbsp;•&nbsp; GM list &nbsp;•&nbsp; … &nbsp;•&nbsp; <b>Customer file</b></div>
+            <div class="fc-back">&larr; Back</div>
+
+            <div class="fc-id">
+              <div class="fc-id-card"><span>Civility</span><b>Mr</b></div>
+              <div class="fc-id-card"><span>Last Name</span><b>Dupont</b></div>
+              <div class="fc-id-card"><span>First name</span><b>Jeanne</b></div>
+              <div class="fc-id-card"><span>Phone number</span><b>+33 6 20 00 76 00</b></div>
+              <div class="fc-id-card"><span>Email</span><b>jeanne.dupont@gmail.com</b></div>
             </div>
-            <div class="lc-table-row">
-              <span class="lc-cell--strong">Ski insurance</span>
-              <span class="lc-cell--num">100,00 &euro;</span>
-              <span>1</span>
-              <span class="lc-cell--num">100,00 &euro;</span>
+
+            <div class="fc-tabs">
+              <span>Check-in</span><span>Prepaids</span>
+              <span class="is-on">Sell services</span>
+              <span>Sale history</span><span>Deposit / Withdrawal</span><span>Invoice</span>
+              <span class="fc-exchange">Exchange</span>
+            </div>
+
+            <div class="fc-cols">
+              <div class="fc-main">
+                <div class="fc-filters">
+                  <span class="fc-search">Prestation name</span>
+                  <span class="fc-select">Type of service</span>
+                </div>
+                <div class="fc-thead">
+                  <span>Product name</span><span>Eli.</span><span>Quantity</span>
+                  <span>Unit Price</span><span>Sub Tot.</span><span></span>
+                </div>
+                <div class="fc-row fc-row--on">
+                  <span class="fc-prod">Ski insurance</span>
+                  <span class="fc-eli"><span class="fc-gift" aria-hidden="true"></span></span>
+                  <span class="fc-qty"><em>&minus;</em><i>1</i><b>+</b></span>
+                  <span class="fc-price">100,00 €</span>
+                  <span class="fc-sub">100,00€</span>
+                  <span class="fc-add">+</span>
+                </div>
+              <div class="fc-row">
+                <span class="fc-prod">Bar<br />Non Alcohol</span>
+                <span class="fc-eli"><span class="fc-gift" aria-hidden="true"></span></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">1 200,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              <div class="fc-row">
+                <span class="fc-prod">Non Alcohol BSI</span>
+                <span class="fc-eli"></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">12,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              <div class="fc-row">
+                <span class="fc-prod">Masque adulte UV / Vue</span>
+                <span class="fc-eli"></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">51,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              <div class="fc-row">
+                <span class="fc-prod">Bar / Flute</span>
+                <span class="fc-eli"><span class="fc-gift" aria-hidden="true"></span></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">5,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              </div>
+
+              <div class="fc-cart">
+                <div class="fc-cart-head">Shopping cart</div>
+                <div class="fc-cart-body">
+                  <div class="fc-cart-line"><span>Ski insurance &times;1</span><b>100,00 €</b></div>
+                </div>
+                <div class="fc-cart-foot">
+                  <div class="fc-cart-total"><span>Total in the shopping cart</span><b>100,00 €</b></div>
+                  <div class="fc-cart-btns"><span class="fc-btn-ghost">Clear</span><span class="fc-btn">Validate</span></div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Pop-in GM insurance — anatomie calquée sur 4.2.3.5 -->
-          <div class="ski-overlay">
+          <!-- Vraie modale : scrim noir sur la fiche client -->
+          <div class="ski-scrim">
             <div class="ski-popin" role="dialog" aria-modal="true"
                  aria-labelledby="ski-title-s1">
               <button class="ski-close" type="button" aria-label="Close">
@@ -1358,32 +1480,28 @@
                 <div class="ski-card-head" id="ski-title-s1">GM insurance</div>
 
                 <div class="ski-card-body">
-
                   <h2 class="ski-lead">GM covered by the ski insurance</h2>
 
-                  <!-- Le GM du dossier et ceux montés depuis la filiation.
-                       Tous décochables : on peut n'assurer qu'un membre. -->
+                  <!-- Le GM du dossier et ceux montés depuis la filiation -->
                   <div class="ski-group">
-              <div class="ski-row">
-                <span class="ski-cb">
-                  <input type="checkbox" id="ski-s1-ins-J" checked
-                         aria-label="Remove ski insurance for Jeanne Dupont" />
-                </span>
-                <span class="ski-dates">From 04/09/2024<br />To 17/09/2024</span>
-                <span class="ski-strong">Dupont</span>
-                <span class="ski-strong">Jeanne</span>
-                <span>42 ans</span>
-                <span>GM Ordi</span>
-                <span>C2</span>
-                <span>Room 0324 A</span>
-              </div>
+                <div class="ski-row">
+                  <span class="ski-cb">
+                    <input type="checkbox" id="ski-s1-ins-J" checked
+                           aria-label="Remove ski insurance for Jeanne Dupont" />
+                  </span>
+                  <span class="ski-dates">From 04/09/2024<br />To 17/09/2024</span>
+                  <span class="ski-strong">Dupont</span>
+                  <span class="ski-strong">Jeanne</span>
+                  <span>42 ans</span>
+                  <span>GM Ordi</span>
+                  <span>C2</span>
+                  <span>Room 0324 A</span>
+                </div>
                   </div>
 
-                  <!-- Bascule de la filiation + sélection globale -->
                   <div class="ski-filbar">
                     <label class="ski-switch">
-                      <input type="checkbox" checked
-                             aria-label="Show GMs from affiliation" />
+                      <input type="checkbox" checked aria-label="Show GMs from affiliation" />
                       <span class="ski-track" aria-hidden="true"></span>
                       <span class="ski-switch-txt">Show GMs from affiliation (2)</span>
                     </label>
@@ -1393,34 +1511,34 @@
                     </span>
                   </div>
 
-            <div class="ski-group ski-group--fil">
-              <div class="ski-row">
-                <span class="ski-cb">
-                  <input type="checkbox" id="ski-s1-fil-P"
-                         aria-label="Add ski insurance for Pierre Dupont" />
-                </span>
-                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
-                <span class="ski-strong">Dupont</span>
-                <span class="ski-strong">Pierre</span>
-                <span>40 ans</span>
-                <span>GM Ordi</span>
-                <span>C2</span>
-                <span>Room 0325 A</span>
+              <div class="ski-group">
+                <div class="ski-row">
+                  <span class="ski-cb">
+                    <input type="checkbox" id="ski-s1-fil-P"
+                           aria-label="Add ski insurance for Pierre Dupont" />
+                  </span>
+                  <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                  <span class="ski-strong">Dupont</span>
+                  <span class="ski-strong">Pierre</span>
+                  <span>40 ans</span>
+                  <span>GM Ordi</span>
+                  <span>C2</span>
+                  <span>Room 0325 A</span>
+                </div>
+                <div class="ski-row">
+                  <span class="ski-cb">
+                    <input type="checkbox" id="ski-s1-fil-L"
+                           aria-label="Add ski insurance for Paul Dupont" />
+                  </span>
+                  <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                  <span class="ski-strong">Dupont</span>
+                  <span class="ski-strong">Paul</span>
+                  <span>32 ans</span>
+                  <span>GM Ordi</span>
+                  <span>C2</span>
+                  <span>Room 0325 A</span>
+                </div>
               </div>
-              <div class="ski-row">
-                <span class="ski-cb">
-                  <input type="checkbox" id="ski-s1-fil-L"
-                         aria-label="Add ski insurance for Paul Dupont" />
-                </span>
-                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
-                <span class="ski-strong">Dupont</span>
-                <span class="ski-strong">Paul</span>
-                <span>32 ans</span>
-                <span>GM Ordi</span>
-                <span>C2</span>
-                <span>Room 0325 A</span>
-              </div>
-            </div>
 
                   <fieldset class="ski-fieldset">
                     <legend class="ski-legend">Insurance card format</legend>
@@ -1435,7 +1553,6 @@
                       </span>
                     </div>
                   </fieldset>
-
                 </div>
 
                 <div class="ski-footer">
@@ -1450,22 +1567,92 @@
       <div class="lc-screen" data-scope="s2">
         <div class="ski-stage">
 
-          <!-- Contexte : l'écran de vente, hors périmètre de ce ticket. -->
-          <div class="lc-table" style="--lc-cols: 1fr 140px 110px 140px;" aria-hidden="true">
-            <div class="lc-table-head">
-              <span>Product name</span><span>Unit price</span>
-              <span>Quantity</span><span class="lc-cell--num">Sub total</span>
+          <div class="fc" aria-hidden="true">
+            <div class="fc-crumb">Home &nbsp;•&nbsp; GM list &nbsp;•&nbsp; … &nbsp;•&nbsp; <b>Customer file</b></div>
+            <div class="fc-back">&larr; Back</div>
+
+            <div class="fc-id">
+              <div class="fc-id-card"><span>Civility</span><b>Mr</b></div>
+              <div class="fc-id-card"><span>Last Name</span><b>Dupont</b></div>
+              <div class="fc-id-card"><span>First name</span><b>Jeanne</b></div>
+              <div class="fc-id-card"><span>Phone number</span><b>+33 6 20 00 76 00</b></div>
+              <div class="fc-id-card"><span>Email</span><b>jeanne.dupont@gmail.com</b></div>
             </div>
-            <div class="lc-table-row">
-              <span class="lc-cell--strong">Ski insurance</span>
-              <span class="lc-cell--num">100,00 &euro;</span>
-              <span>2</span>
-              <span class="lc-cell--num">200,00 &euro;</span>
+
+            <div class="fc-tabs">
+              <span>Check-in</span><span>Prepaids</span>
+              <span class="is-on">Sell services</span>
+              <span>Sale history</span><span>Deposit / Withdrawal</span><span>Invoice</span>
+              <span class="fc-exchange">Exchange</span>
+            </div>
+
+            <div class="fc-cols">
+              <div class="fc-main">
+                <div class="fc-filters">
+                  <span class="fc-search">Prestation name</span>
+                  <span class="fc-select">Type of service</span>
+                </div>
+                <div class="fc-thead">
+                  <span>Product name</span><span>Eli.</span><span>Quantity</span>
+                  <span>Unit Price</span><span>Sub Tot.</span><span></span>
+                </div>
+                <div class="fc-row fc-row--on">
+                  <span class="fc-prod">Ski insurance</span>
+                  <span class="fc-eli"><span class="fc-gift" aria-hidden="true"></span></span>
+                  <span class="fc-qty"><em>&minus;</em><i>2</i><b>+</b></span>
+                  <span class="fc-price">100,00 €</span>
+                  <span class="fc-sub">200,00€</span>
+                  <span class="fc-add">+</span>
+                </div>
+              <div class="fc-row">
+                <span class="fc-prod">Bar<br />Non Alcohol</span>
+                <span class="fc-eli"><span class="fc-gift" aria-hidden="true"></span></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">1 200,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              <div class="fc-row">
+                <span class="fc-prod">Non Alcohol BSI</span>
+                <span class="fc-eli"></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">12,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              <div class="fc-row">
+                <span class="fc-prod">Masque adulte UV / Vue</span>
+                <span class="fc-eli"></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">51,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              <div class="fc-row">
+                <span class="fc-prod">Bar / Flute</span>
+                <span class="fc-eli"><span class="fc-gift" aria-hidden="true"></span></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">5,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              </div>
+
+              <div class="fc-cart">
+                <div class="fc-cart-head">Shopping cart</div>
+                <div class="fc-cart-body">
+                  <div class="fc-cart-line"><span>Ski insurance &times;2</span><b>200,00 €</b></div>
+                </div>
+                <div class="fc-cart-foot">
+                  <div class="fc-cart-total"><span>Total in the shopping cart</span><b>200,00 €</b></div>
+                  <div class="fc-cart-btns"><span class="fc-btn-ghost">Clear</span><span class="fc-btn">Validate</span></div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Pop-in GM insurance — anatomie calquée sur 4.2.3.5 -->
-          <div class="ski-overlay">
+          <!-- Vraie modale : scrim noir sur la fiche client -->
+          <div class="ski-scrim">
             <div class="ski-popin" role="dialog" aria-modal="true"
                  aria-labelledby="ski-title-s2">
               <button class="ski-close" type="button" aria-label="Close">
@@ -1477,45 +1664,41 @@
                 <div class="ski-card-head" id="ski-title-s2">GM insurance</div>
 
                 <div class="ski-card-body">
-
                   <h2 class="ski-lead">GM covered by the ski insurance</h2>
 
-                  <!-- Le GM du dossier et ceux montés depuis la filiation.
-                       Tous décochables : on peut n'assurer qu'un membre. -->
+                  <!-- Le GM du dossier et ceux montés depuis la filiation -->
                   <div class="ski-group">
-              <div class="ski-row">
-                <span class="ski-cb">
-                  <input type="checkbox" id="ski-s2-ins-J" checked
-                         aria-label="Remove ski insurance for Jeanne Dupont" />
-                </span>
-                <span class="ski-dates">From 04/09/2024<br />To 17/09/2024</span>
-                <span class="ski-strong">Dupont</span>
-                <span class="ski-strong">Jeanne</span>
-                <span>42 ans</span>
-                <span>GM Ordi</span>
-                <span>C2</span>
-                <span>Room 0324 A</span>
-              </div>
-              <div class="ski-row">
-                <span class="ski-cb">
-                  <input type="checkbox" id="ski-s2-ins-P" checked
-                         aria-label="Remove ski insurance for Pierre Dupont" />
-                </span>
-                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
-                <span class="ski-strong">Dupont</span>
-                <span class="ski-strong">Pierre</span>
-                <span>40 ans</span>
-                <span>GM Ordi</span>
-                <span>C2</span>
-                <span>Room 0325 A</span>
-              </div>
+                <div class="ski-row">
+                  <span class="ski-cb">
+                    <input type="checkbox" id="ski-s2-ins-J" checked
+                           aria-label="Remove ski insurance for Jeanne Dupont" />
+                  </span>
+                  <span class="ski-dates">From 04/09/2024<br />To 17/09/2024</span>
+                  <span class="ski-strong">Dupont</span>
+                  <span class="ski-strong">Jeanne</span>
+                  <span>42 ans</span>
+                  <span>GM Ordi</span>
+                  <span>C2</span>
+                  <span>Room 0324 A</span>
+                </div>
+                <div class="ski-row">
+                  <span class="ski-cb">
+                    <input type="checkbox" id="ski-s2-ins-P" checked
+                           aria-label="Remove ski insurance for Pierre Dupont" />
+                  </span>
+                  <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                  <span class="ski-strong">Dupont</span>
+                  <span class="ski-strong">Pierre</span>
+                  <span>40 ans</span>
+                  <span>GM Ordi</span>
+                  <span>C2</span>
+                  <span>Room 0325 A</span>
+                </div>
                   </div>
 
-                  <!-- Bascule de la filiation + sélection globale -->
                   <div class="ski-filbar">
                     <label class="ski-switch">
-                      <input type="checkbox" checked
-                             aria-label="Show GMs from affiliation" />
+                      <input type="checkbox" checked aria-label="Show GMs from affiliation" />
                       <span class="ski-track" aria-hidden="true"></span>
                       <span class="ski-switch-txt">Show GMs from affiliation (1)</span>
                     </label>
@@ -1525,21 +1708,21 @@
                     </span>
                   </div>
 
-            <div class="ski-group ski-group--fil">
-              <div class="ski-row">
-                <span class="ski-cb">
-                  <input type="checkbox" id="ski-s2-fil-L"
-                         aria-label="Add ski insurance for Paul Dupont" />
-                </span>
-                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
-                <span class="ski-strong">Dupont</span>
-                <span class="ski-strong">Paul</span>
-                <span>32 ans</span>
-                <span>GM Ordi</span>
-                <span>C2</span>
-                <span>Room 0325 A</span>
+              <div class="ski-group">
+                <div class="ski-row">
+                  <span class="ski-cb">
+                    <input type="checkbox" id="ski-s2-fil-L"
+                           aria-label="Add ski insurance for Paul Dupont" />
+                  </span>
+                  <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                  <span class="ski-strong">Dupont</span>
+                  <span class="ski-strong">Paul</span>
+                  <span>32 ans</span>
+                  <span>GM Ordi</span>
+                  <span>C2</span>
+                  <span>Room 0325 A</span>
+                </div>
               </div>
-            </div>
 
                   <fieldset class="ski-fieldset">
                     <legend class="ski-legend">Insurance card format</legend>
@@ -1554,7 +1737,6 @@
                       </span>
                     </div>
                   </fieldset>
-
                 </div>
 
                 <div class="ski-footer">
@@ -1569,22 +1751,92 @@
       <div class="lc-screen" data-scope="s3">
         <div class="ski-stage">
 
-          <!-- Contexte : l'écran de vente, hors périmètre de ce ticket. -->
-          <div class="lc-table" style="--lc-cols: 1fr 140px 110px 140px;" aria-hidden="true">
-            <div class="lc-table-head">
-              <span>Product name</span><span>Unit price</span>
-              <span>Quantity</span><span class="lc-cell--num">Sub total</span>
+          <div class="fc" aria-hidden="true">
+            <div class="fc-crumb">Home &nbsp;•&nbsp; GM list &nbsp;•&nbsp; … &nbsp;•&nbsp; <b>Customer file</b></div>
+            <div class="fc-back">&larr; Back</div>
+
+            <div class="fc-id">
+              <div class="fc-id-card"><span>Civility</span><b>Mr</b></div>
+              <div class="fc-id-card"><span>Last Name</span><b>Dupont</b></div>
+              <div class="fc-id-card"><span>First name</span><b>Jeanne</b></div>
+              <div class="fc-id-card"><span>Phone number</span><b>+33 6 20 00 76 00</b></div>
+              <div class="fc-id-card"><span>Email</span><b>jeanne.dupont@gmail.com</b></div>
             </div>
-            <div class="lc-table-row">
-              <span class="lc-cell--strong">Ski insurance</span>
-              <span class="lc-cell--num">100,00 &euro;</span>
-              <span>3</span>
-              <span class="lc-cell--num">300,00 &euro;</span>
+
+            <div class="fc-tabs">
+              <span>Check-in</span><span>Prepaids</span>
+              <span class="is-on">Sell services</span>
+              <span>Sale history</span><span>Deposit / Withdrawal</span><span>Invoice</span>
+              <span class="fc-exchange">Exchange</span>
+            </div>
+
+            <div class="fc-cols">
+              <div class="fc-main">
+                <div class="fc-filters">
+                  <span class="fc-search">Prestation name</span>
+                  <span class="fc-select">Type of service</span>
+                </div>
+                <div class="fc-thead">
+                  <span>Product name</span><span>Eli.</span><span>Quantity</span>
+                  <span>Unit Price</span><span>Sub Tot.</span><span></span>
+                </div>
+                <div class="fc-row fc-row--on">
+                  <span class="fc-prod">Ski insurance</span>
+                  <span class="fc-eli"><span class="fc-gift" aria-hidden="true"></span></span>
+                  <span class="fc-qty"><em>&minus;</em><i>3</i><b>+</b></span>
+                  <span class="fc-price">100,00 €</span>
+                  <span class="fc-sub">300,00€</span>
+                  <span class="fc-add">+</span>
+                </div>
+              <div class="fc-row">
+                <span class="fc-prod">Bar<br />Non Alcohol</span>
+                <span class="fc-eli"><span class="fc-gift" aria-hidden="true"></span></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">1 200,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              <div class="fc-row">
+                <span class="fc-prod">Non Alcohol BSI</span>
+                <span class="fc-eli"></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">12,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              <div class="fc-row">
+                <span class="fc-prod">Masque adulte UV / Vue</span>
+                <span class="fc-eli"></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">51,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              <div class="fc-row">
+                <span class="fc-prod">Bar / Flute</span>
+                <span class="fc-eli"><span class="fc-gift" aria-hidden="true"></span></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">5,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              </div>
+
+              <div class="fc-cart">
+                <div class="fc-cart-head">Shopping cart</div>
+                <div class="fc-cart-body">
+                  <div class="fc-cart-line"><span>Ski insurance &times;3</span><b>300,00 €</b></div>
+                </div>
+                <div class="fc-cart-foot">
+                  <div class="fc-cart-total"><span>Total in the shopping cart</span><b>300,00 €</b></div>
+                  <div class="fc-cart-btns"><span class="fc-btn-ghost">Clear</span><span class="fc-btn">Validate</span></div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Pop-in GM insurance — anatomie calquée sur 4.2.3.5 -->
-          <div class="ski-overlay">
+          <!-- Vraie modale : scrim noir sur la fiche client -->
+          <div class="ski-scrim">
             <div class="ski-popin" role="dialog" aria-modal="true"
                  aria-labelledby="ski-title-s3">
               <button class="ski-close" type="button" aria-label="Close">
@@ -1596,58 +1848,54 @@
                 <div class="ski-card-head" id="ski-title-s3">GM insurance</div>
 
                 <div class="ski-card-body">
-
                   <h2 class="ski-lead">GM covered by the ski insurance</h2>
 
-                  <!-- Le GM du dossier et ceux montés depuis la filiation.
-                       Tous décochables : on peut n'assurer qu'un membre. -->
+                  <!-- Le GM du dossier et ceux montés depuis la filiation -->
                   <div class="ski-group">
-              <div class="ski-row">
-                <span class="ski-cb">
-                  <input type="checkbox" id="ski-s3-ins-J" checked
-                         aria-label="Remove ski insurance for Jeanne Dupont" />
-                </span>
-                <span class="ski-dates">From 04/09/2024<br />To 17/09/2024</span>
-                <span class="ski-strong">Dupont</span>
-                <span class="ski-strong">Jeanne</span>
-                <span>42 ans</span>
-                <span>GM Ordi</span>
-                <span>C2</span>
-                <span>Room 0324 A</span>
-              </div>
-              <div class="ski-row">
-                <span class="ski-cb">
-                  <input type="checkbox" id="ski-s3-ins-P" checked
-                         aria-label="Remove ski insurance for Pierre Dupont" />
-                </span>
-                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
-                <span class="ski-strong">Dupont</span>
-                <span class="ski-strong">Pierre</span>
-                <span>40 ans</span>
-                <span>GM Ordi</span>
-                <span>C2</span>
-                <span>Room 0325 A</span>
-              </div>
-              <div class="ski-row">
-                <span class="ski-cb">
-                  <input type="checkbox" id="ski-s3-ins-L" checked
-                         aria-label="Remove ski insurance for Paul Dupont" />
-                </span>
-                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
-                <span class="ski-strong">Dupont</span>
-                <span class="ski-strong">Paul</span>
-                <span>32 ans</span>
-                <span>GM Ordi</span>
-                <span>C2</span>
-                <span>Room 0325 A</span>
-              </div>
+                <div class="ski-row">
+                  <span class="ski-cb">
+                    <input type="checkbox" id="ski-s3-ins-J" checked
+                           aria-label="Remove ski insurance for Jeanne Dupont" />
+                  </span>
+                  <span class="ski-dates">From 04/09/2024<br />To 17/09/2024</span>
+                  <span class="ski-strong">Dupont</span>
+                  <span class="ski-strong">Jeanne</span>
+                  <span>42 ans</span>
+                  <span>GM Ordi</span>
+                  <span>C2</span>
+                  <span>Room 0324 A</span>
+                </div>
+                <div class="ski-row">
+                  <span class="ski-cb">
+                    <input type="checkbox" id="ski-s3-ins-P" checked
+                           aria-label="Remove ski insurance for Pierre Dupont" />
+                  </span>
+                  <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                  <span class="ski-strong">Dupont</span>
+                  <span class="ski-strong">Pierre</span>
+                  <span>40 ans</span>
+                  <span>GM Ordi</span>
+                  <span>C2</span>
+                  <span>Room 0325 A</span>
+                </div>
+                <div class="ski-row">
+                  <span class="ski-cb">
+                    <input type="checkbox" id="ski-s3-ins-L" checked
+                           aria-label="Remove ski insurance for Paul Dupont" />
+                  </span>
+                  <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                  <span class="ski-strong">Dupont</span>
+                  <span class="ski-strong">Paul</span>
+                  <span>32 ans</span>
+                  <span>GM Ordi</span>
+                  <span>C2</span>
+                  <span>Room 0325 A</span>
+                </div>
                   </div>
 
-                  <!-- Bascule de la filiation + sélection globale -->
                   <div class="ski-filbar">
                     <label class="ski-switch">
-                      <input type="checkbox" checked
-                             aria-label="Show GMs from affiliation" />
+                      <input type="checkbox" checked aria-label="Show GMs from affiliation" />
                       <span class="ski-track" aria-hidden="true"></span>
                       <span class="ski-switch-txt">Show GMs from affiliation (0)</span>
                     </label>
@@ -1657,7 +1905,7 @@
                     </span>
                   </div>
 
-            <div class="ski-empty-fil">All GMs from the affiliation are already selected.</div>
+              <div class="ski-empty-fil">All GMs from the affiliation are already selected.</div>
 
                   <fieldset class="ski-fieldset">
                     <legend class="ski-legend">Insurance card format</legend>
@@ -1672,7 +1920,6 @@
                       </span>
                     </div>
                   </fieldset>
-
                 </div>
 
                 <div class="ski-footer">
@@ -1687,22 +1934,92 @@
       <div class="lc-screen" data-scope="s4">
         <div class="ski-stage">
 
-          <!-- Contexte : l'écran de vente, hors périmètre de ce ticket. -->
-          <div class="lc-table" style="--lc-cols: 1fr 140px 110px 140px;" aria-hidden="true">
-            <div class="lc-table-head">
-              <span>Product name</span><span>Unit price</span>
-              <span>Quantity</span><span class="lc-cell--num">Sub total</span>
+          <div class="fc" aria-hidden="true">
+            <div class="fc-crumb">Home &nbsp;•&nbsp; GM list &nbsp;•&nbsp; … &nbsp;•&nbsp; <b>Customer file</b></div>
+            <div class="fc-back">&larr; Back</div>
+
+            <div class="fc-id">
+              <div class="fc-id-card"><span>Civility</span><b>Mr</b></div>
+              <div class="fc-id-card"><span>Last Name</span><b>Dupont</b></div>
+              <div class="fc-id-card"><span>First name</span><b>Jeanne</b></div>
+              <div class="fc-id-card"><span>Phone number</span><b>+33 6 20 00 76 00</b></div>
+              <div class="fc-id-card"><span>Email</span><b>jeanne.dupont@gmail.com</b></div>
             </div>
-            <div class="lc-table-row">
-              <span class="lc-cell--strong">Ski insurance</span>
-              <span class="lc-cell--num">100,00 &euro;</span>
-              <span>2</span>
-              <span class="lc-cell--num">200,00 &euro;</span>
+
+            <div class="fc-tabs">
+              <span>Check-in</span><span>Prepaids</span>
+              <span class="is-on">Sell services</span>
+              <span>Sale history</span><span>Deposit / Withdrawal</span><span>Invoice</span>
+              <span class="fc-exchange">Exchange</span>
+            </div>
+
+            <div class="fc-cols">
+              <div class="fc-main">
+                <div class="fc-filters">
+                  <span class="fc-search">Prestation name</span>
+                  <span class="fc-select">Type of service</span>
+                </div>
+                <div class="fc-thead">
+                  <span>Product name</span><span>Eli.</span><span>Quantity</span>
+                  <span>Unit Price</span><span>Sub Tot.</span><span></span>
+                </div>
+                <div class="fc-row fc-row--on">
+                  <span class="fc-prod">Ski insurance</span>
+                  <span class="fc-eli"><span class="fc-gift" aria-hidden="true"></span></span>
+                  <span class="fc-qty"><em>&minus;</em><i>2</i><b>+</b></span>
+                  <span class="fc-price">100,00 €</span>
+                  <span class="fc-sub">200,00€</span>
+                  <span class="fc-add">+</span>
+                </div>
+              <div class="fc-row">
+                <span class="fc-prod">Bar<br />Non Alcohol</span>
+                <span class="fc-eli"><span class="fc-gift" aria-hidden="true"></span></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">1 200,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              <div class="fc-row">
+                <span class="fc-prod">Non Alcohol BSI</span>
+                <span class="fc-eli"></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">12,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              <div class="fc-row">
+                <span class="fc-prod">Masque adulte UV / Vue</span>
+                <span class="fc-eli"></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">51,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              <div class="fc-row">
+                <span class="fc-prod">Bar / Flute</span>
+                <span class="fc-eli"><span class="fc-gift" aria-hidden="true"></span></span>
+                <span class="fc-qty"><em>&minus;</em><i>0</i><b>+</b></span>
+                <span class="fc-price">5,00 €</span>
+                <span class="fc-sub">0,00€</span>
+                <span class="fc-add">+</span>
+              </div>
+              </div>
+
+              <div class="fc-cart">
+                <div class="fc-cart-head">Shopping cart</div>
+                <div class="fc-cart-body">
+                  <div class="fc-cart-line"><span>Ski insurance &times;2</span><b>200,00 €</b></div>
+                </div>
+                <div class="fc-cart-foot">
+                  <div class="fc-cart-total"><span>Total in the shopping cart</span><b>200,00 €</b></div>
+                  <div class="fc-cart-btns"><span class="fc-btn-ghost">Clear</span><span class="fc-btn">Validate</span></div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Pop-in GM insurance — anatomie calquée sur 4.2.3.5 -->
-          <div class="ski-overlay">
+          <!-- Vraie modale : scrim noir sur la fiche client -->
+          <div class="ski-scrim">
             <div class="ski-popin" role="dialog" aria-modal="true"
                  aria-labelledby="ski-title-s4">
               <button class="ski-close" type="button" aria-label="Close">
@@ -1714,45 +2031,41 @@
                 <div class="ski-card-head" id="ski-title-s4">GM insurance</div>
 
                 <div class="ski-card-body">
-
                   <h2 class="ski-lead">GM covered by the ski insurance</h2>
 
-                  <!-- Le GM du dossier et ceux montés depuis la filiation.
-                       Tous décochables : on peut n'assurer qu'un membre. -->
+                  <!-- Le GM du dossier et ceux montés depuis la filiation -->
                   <div class="ski-group">
-              <div class="ski-row">
-                <span class="ski-cb">
-                  <input type="checkbox" id="ski-s4-ins-J" checked
-                         aria-label="Remove ski insurance for Jeanne Dupont" />
-                </span>
-                <span class="ski-dates">From 04/09/2024<br />To 17/09/2024</span>
-                <span class="ski-strong">Dupont</span>
-                <span class="ski-strong">Jeanne</span>
-                <span>42 ans</span>
-                <span>GM Ordi</span>
-                <span>C2</span>
-                <span>Room 0324 A</span>
-              </div>
-              <div class="ski-row">
-                <span class="ski-cb">
-                  <input type="checkbox" id="ski-s4-ins-P" checked
-                         aria-label="Remove ski insurance for Pierre Dupont" />
-                </span>
-                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
-                <span class="ski-strong">Dupont</span>
-                <span class="ski-strong">Pierre</span>
-                <span>40 ans</span>
-                <span>GM Ordi</span>
-                <span>C2</span>
-                <span>Room 0325 A</span>
-              </div>
+                <div class="ski-row">
+                  <span class="ski-cb">
+                    <input type="checkbox" id="ski-s4-ins-J" checked
+                           aria-label="Remove ski insurance for Jeanne Dupont" />
+                  </span>
+                  <span class="ski-dates">From 04/09/2024<br />To 17/09/2024</span>
+                  <span class="ski-strong">Dupont</span>
+                  <span class="ski-strong">Jeanne</span>
+                  <span>42 ans</span>
+                  <span>GM Ordi</span>
+                  <span>C2</span>
+                  <span>Room 0324 A</span>
+                </div>
+                <div class="ski-row">
+                  <span class="ski-cb">
+                    <input type="checkbox" id="ski-s4-ins-P" checked
+                           aria-label="Remove ski insurance for Pierre Dupont" />
+                  </span>
+                  <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                  <span class="ski-strong">Dupont</span>
+                  <span class="ski-strong">Pierre</span>
+                  <span>40 ans</span>
+                  <span>GM Ordi</span>
+                  <span>C2</span>
+                  <span>Room 0325 A</span>
+                </div>
                   </div>
 
-                  <!-- Bascule de la filiation + sélection globale -->
                   <div class="ski-filbar">
                     <label class="ski-switch">
-                      <input type="checkbox" checked
-                             aria-label="Show GMs from affiliation" />
+                      <input type="checkbox" checked aria-label="Show GMs from affiliation" />
                       <span class="ski-track" aria-hidden="true"></span>
                       <span class="ski-switch-txt">Show GMs from affiliation (1)</span>
                     </label>
@@ -1762,21 +2075,21 @@
                     </span>
                   </div>
 
-            <div class="ski-group ski-group--fil">
-              <div class="ski-row">
-                <span class="ski-cb">
-                  <input type="checkbox" id="ski-s4-fil-L"
-                         aria-label="Add ski insurance for Paul Dupont" />
-                </span>
-                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
-                <span class="ski-strong">Dupont</span>
-                <span class="ski-strong">Paul</span>
-                <span>32 ans</span>
-                <span>GM Ordi</span>
-                <span>C2</span>
-                <span>Room 0325 A</span>
+              <div class="ski-group">
+                <div class="ski-row">
+                  <span class="ski-cb">
+                    <input type="checkbox" id="ski-s4-fil-L"
+                           aria-label="Add ski insurance for Paul Dupont" />
+                  </span>
+                  <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                  <span class="ski-strong">Dupont</span>
+                  <span class="ski-strong">Paul</span>
+                  <span>32 ans</span>
+                  <span>GM Ordi</span>
+                  <span>C2</span>
+                  <span>Room 0325 A</span>
+                </div>
               </div>
-            </div>
 
                   <fieldset class="ski-fieldset">
                     <legend class="ski-legend">Insurance card format</legend>
@@ -1791,7 +2104,6 @@
                       </span>
                     </div>
                   </fieldset>
-
                 </div>
 
                 <div class="ski-footer">
