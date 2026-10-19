@@ -1063,21 +1063,18 @@
     .ski-row        { display: grid; align-items: center; gap: 16px; min-height: 68px;
                       padding: 12px 20px; background: #fff; border: 1px solid #CCCCCC;
                       border-radius: 16px; font-size: 14px; color: #000;
-                      grid-template-columns: 24px 128px 96px 96px 62px 72px 34px minmax(112px, 1fr) auto; }
-    /* Sans ceci, le tag « Already insured » comprime la colonne chambre,
-       qui passe sur deux lignes : la ligne verrouillée devenait plus haute
-       que les autres. */
+                      grid-template-columns: 24px 128px 110px 110px 68px 80px 40px minmax(112px, 1fr); }
     .ski-row > span { white-space: nowrap; }
     .ski-row > .ski-dates { white-space: normal; }
     .ski-row.is-locked { background: #F8F8F8; }
-    /* Déjà assuré : pas de case, juste la gouttière, pour que les colonnes
-       restent alignées avec les lignes encore modifiables. */
-    .ski-nocheck    { display: block; width: 24px; height: 24px; }
+    /* Déjà assuré : le picto de validation du DS occupe la place de la case,
+       pour que les colonnes restent alignées avec les lignes modifiables. */
+    .ski-done       { display: grid; place-items: center; width: 24px; height: 24px;
+                      position: relative; }
+    .ski-sr         { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+                      overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
     .ski-dates      { line-height: 1.45; }
     .ski-strong     { font-weight: 600; }
-    .ski-lock       { font-size: 12px; font-weight: 600; color: #333333;
-                      background: #FFFFFF; border: 1px solid #CCCCCC;
-                      border-radius: 100px; padding: 4px 12px; white-space: nowrap; }
 
     .ski-filbar     { display: flex; align-items: center; justify-content: space-between;
                       gap: 16px; flex-wrap: wrap; }
@@ -4912,15 +4909,32 @@ window.LOOPCRAFT_CONFIG = {
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) {
     return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
 
+  /* Picto « Actions / Check » variant Outline du DS — tracé exporté depuis
+     Figma (celui qui marque une chambre prête). Vert Layout colors #088A20. */
+  var CHECK_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"'
+    + ' xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">'
+    + '<path d="M10 2C14.4113 2 18 5.58867 18 10C18 14.4113 14.4113 18 10 18C5.58867 18'
+    + ' 2 14.4113 2 10C2 5.58867 5.58867 2 10 2ZM10 3.32422C6.31812 3.32435 3.32325'
+    + ' 6.31876 3.32324 10C3.32324 13.6819 6.31811 16.6776 10 16.6777C13.6807 16.6777'
+    + ' 16.6758 13.682 16.6758 10C16.6758 6.31867 13.6807 3.32422 10 3.32422ZM13.4805'
+    + ' 7.06641C13.6585 7.06641 13.8283 7.13648 13.9463 7.25781C14.1982 7.51783 14.1982'
+    + ' 7.95653 13.9463 8.21582L9.53223 12.7373C9.40889 12.864 9.24338 12.9336 9.06738'
+    + ' 12.9336C8.89106 12.9335 8.72541 12.8633 8.60156 12.7363L6.06152 10.1436C5.93622'
+    + ' 10.0136 5.86722 9.84273 5.86719 9.66211C5.86719 9.48224 5.93574 9.31223 6.05957'
+    + ' 9.18359C6.17957 9.06026 6.34939 8.98926 6.52539 8.98926C6.70396 8.98931 6.87024'
+    + ' 9.05833 6.99219 9.18359L9.06738 11.2979L13.0156 7.25684C13.1336 7.1356 13.3032'
+    + ' 7.06642 13.4805 7.06641Z" fill="#088A20"/></svg>';
+
   function rowHtml(key, isCovered) {
     var g = GM[key], locked = sold.indexOf(key) !== -1;
     var label = (isCovered ? 'Remove ski insurance for ' : 'Add ski insurance for ')
               + g.first + ' ' + g.last;
-    // Déjà assuré → PAS de case à cocher du tout : l'absence de contrôle dit
-    // qu'on ne peut plus rien changer. Une case grisée resterait ambiguë, et
-    // le variant Disabled du DS est presque identique au variant vide.
+    // Déjà assuré → pas de case, le picto de validation du DS à la place
+    // (Actions / Check, variant Outline — celui du statut « chambre prête »).
+    // Le libellé reste accessible aux lecteurs d'écran, sans tag visible.
     var control = locked
-      ? '<span class="ski-nocheck" aria-hidden="true"></span>'
+      ? '<span class="ski-done">' + CHECK_SVG
+        + '<span class="ski-sr">Already insured</span></span>'
       : '<input class="ski-check" type="checkbox" data-gm="' + key + '"'
         + (isCovered ? ' checked' : '') + ' aria-label="' + esc(label) + '" />';
     return '<div class="ski-row' + (locked ? ' is-locked' : '') + '" data-gm="' + key + '">'
@@ -4932,7 +4946,6 @@ window.LOOPCRAFT_CONFIG = {
          +   '<span>' + g.qual + '</span>'
          +   '<span>' + g.cat + '</span>'
          +   '<span>' + g.room + '</span>'
-         +   (locked ? '<span class="ski-lock">Already insured</span>' : '<span></span>')
          + '</div>';
   }
 
