@@ -952,17 +952,17 @@
   .brief-drag-handle { display:flex; align-items:center; color:#CBD5E1; padding:0 8px 0 0; flex-shrink:0; cursor:grab; }
   .brief-drag-handle:hover { color:#6B7280; }
     /* ══════════════════════════════════════════════════════════════
-       ASSURANCE SKI — briques absentes du catalogue .lc-*
-       ECRANS.md §7 : la pop-in de caisse, la case à cocher et le
-       bouton radio n'existent pas en primitive. Déclarés ici, à
-       remonter dans ecrans.css s'ils resservent sur un autre projet.
-       Boutons, tableaux et titres utilisent les primitives .lc-*.
+       ASSURANCE SKI — calqué sur 4.2.3.5 « Manage the GM's presence »
+       Mesures relevées sur la maquette : ligne 1229x68, radius 16,
+       bord #CCCCCC, texte 14px, switch 56x32.
+       Briques absentes du catalogue .lc-* (ECRANS.md §7) : pop-in de
+       caisse, ligne GM, case à cocher, radio, interrupteur.
        ══════════════════════════════════════════════════════════════ */
     .ski-stage      { position: relative; }
     .ski-overlay    { position: absolute; inset: -12px -12px -24px; border-radius: 12px;
                       background: rgba(30,38,67,.45); display: flex;
                       align-items: flex-start; justify-content: center; padding: 24px 16px 32px; }
-    .ski-popin      { position: relative; width: 100%; max-width: 900px; }
+    .ski-popin      { position: relative; width: 100%; max-width: 1357px; }
     .ski-close      { position: absolute; top: -14px; right: -14px; width: 48px; height: 48px;
                       border-radius: 50%; background: #fff; color: #1E2643;
                       border: 1.5px solid #1E2643; display: flex; align-items: center;
@@ -972,15 +972,43 @@
                       box-shadow: 0 12px 40px rgba(0,0,0,.22); }
     .ski-card-head  { background: #1E2643; color: #fff; height: 76px; display: flex;
                       align-items: center; padding: 0 24px; font-size: 20px; font-weight: 600; }
-    .ski-card-msg   { background: #F8F8F8; border-bottom: 1px solid #E5E7EB; padding: 22px 24px;
-                      text-align: center; font-size: 20px; font-weight: 600; color: #1E2643; }
-    .ski-card-body  { padding: 24px; display: flex; flex-direction: column; gap: 24px; }
-    .ski-sec        { display: flex; flex-direction: column; gap: 16px; }
-    .ski-fieldset   { border: 0; padding: 0; margin: 0; }
-    .ski-sec-title  { font-size: 20px; font-weight: 600; color: #1E2643; padding: 0; }
-    .ski-radios     { display: flex; gap: 40px; flex-wrap: wrap; }
+    .ski-card-body  { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+    .ski-lead       { font-size: 20px; font-weight: 600; color: #1E2643; margin: 0; }
 
-    /* Cible tactile 44 px — la case fait 24 px, la ligne entière porte le clic. */
+    /* Groupe de lignes GM — la carte blanche de la maquette */
+    .ski-group      { display: flex; flex-direction: column; gap: 12px; }
+    .ski-group--fil { opacity: .95; }
+
+    /* Ligne GM — 8 colonnes, cf. relevé des positions sur 4.2.3.5 */
+    .ski-row        { display: grid; align-items: center; gap: 20px; min-height: 68px;
+                      padding: 12px 24px; background: #fff; border: 1px solid #CCCCCC;
+                      border-radius: 16px; font-size: 14px; color: #000;
+                      grid-template-columns: 24px 150px 150px 150px 70px 80px 40px 1fr; }
+    .ski-dates      { line-height: 1.45; }
+    .ski-strong     { font-weight: 600; }
+
+    /* Barre de bascule filiation */
+    .ski-filbar     { display: flex; align-items: center; justify-content: space-between;
+                      gap: 24px; flex-wrap: wrap; }
+    .ski-switch     { display: inline-flex; align-items: center; gap: 12px;
+                      min-height: 44px; cursor: pointer; }
+    .ski-switch input { position: absolute; opacity: 0; width: 56px; height: 32px; margin: 0;
+                        cursor: pointer; }
+    .ski-track      { width: 56px; height: 32px; border-radius: 100px; background: #CCCCCC;
+                      position: relative; transition: background .15s; flex: 0 0 56px; }
+    .ski-track::after { content: ''; position: absolute; top: 4px; left: 4px; width: 24px;
+                        height: 24px; border-radius: 50%; background: #fff;
+                        transition: transform .15s; }
+    .ski-switch input:checked + .ski-track          { background: #FDBE00; }
+    .ski-switch input:checked + .ski-track::after   { transform: translateX(24px); }
+    .ski-switch input:focus-visible + .ski-track    { outline: 3px solid #2563EB;
+                                                      outline-offset: 2px; }
+    .ski-switch-txt { font-size: 15px; font-weight: 600; color: #1E2643; }
+
+    .ski-empty-fil  { font-size: 14px; color: #6B7280; font-style: italic;
+                      padding: 12px 24px; }
+
+    /* Cases à cocher et boutons radio */
     .ski-cb, .ski-radio { display: flex; align-items: center; gap: 12px; min-height: 44px; }
     .ski-cb input, .ski-radio input {
                       appearance: none; -webkit-appearance: none; width: 24px; height: 24px;
@@ -998,10 +1026,17 @@
     .ski-cb input:focus-visible, .ski-radio input:focus-visible {
                       outline: 3px solid #2563EB; outline-offset: 2px; }
     .ski-cb label, .ski-radio label { font-size: 15px; color: #1E2643; cursor: pointer; }
+    .ski-row .ski-cb { min-height: 0; }
 
-    .ski-actions    { display: flex; justify-content: center; gap: 16px; padding-top: 8px; }
-    .ski-actions .lc-btn[disabled] { background: #EFEFEF; border-color: #EFEFEF;
-                                     color: #9A9A9A; cursor: not-allowed; }
+    .ski-fieldset   { border: 0; padding: 0; margin: 0; display: flex;
+                      flex-direction: column; gap: 12px; }
+    .ski-legend     { font-size: 20px; font-weight: 600; color: #1E2643; padding: 0; }
+    .ski-radios     { display: flex; gap: 40px; flex-wrap: wrap; }
+
+    .ski-footer     { display: flex; justify-content: center; gap: 16px;
+                      padding: 20px 24px 24px; border-top: 1px solid #EEE; }
+    .ski-footer .lc-btn[disabled] { background: #EFEFEF; border-color: #EFEFEF;
+                                    color: #9A9A9A; cursor: not-allowed; }
 
   </style>
 </head>
@@ -1294,10 +1329,9 @@
     <div class="content">
       <div class="lc-canvas">
       <div class="lc-screen is-active" data-scope="s1">
-
-        <!-- Contexte : écran de vente. Toujours en Odyssey V1 côté produit,
-             hors périmètre de ce ticket — il situe seulement la pop-in. -->
         <div class="ski-stage">
+
+          <!-- Contexte : l'écran de vente, hors périmètre de ce ticket. -->
           <div class="lc-table" style="--lc-cols: 1fr 140px 110px 140px;" aria-hidden="true">
             <div class="lc-table-head">
               <span>Product name</span><span>Unit price</span>
@@ -1311,7 +1345,7 @@
             </div>
           </div>
 
-          <!-- Pop-in GM insurance — anatomie DS caisse (board 5.1 Cash Register / PopUp) -->
+          <!-- Pop-in GM insurance — anatomie calquée sur 4.2.3.5 -->
           <div class="ski-overlay">
             <div class="ski-popin" role="dialog" aria-modal="true"
                  aria-labelledby="ski-title-s1">
@@ -1319,28 +1353,77 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
               </button>
+
               <div class="ski-card">
                 <div class="ski-card-head" id="ski-title-s1">GM insurance</div>
-                <div class="ski-card-msg">Please select the GM concerned by the insurance</div>
+
                 <div class="ski-card-body">
 
-                  <div class="ski-sec">
-              <span class="ski-cb">
-                <input type="checkbox" id="ski-s1-todo-P" />
-                <label for="ski-s1-todo-P">Mr DUPONT Pierre</label>
-              </span>
-              <span class="ski-cb">
-                <input type="checkbox" id="ski-s1-todo-J" />
-                <label for="ski-s1-todo-J">Mrs DUPONT Jeanne</label>
-              </span>
-              <span class="ski-cb">
-                <input type="checkbox" id="ski-s1-todo-L" />
-                <label for="ski-s1-todo-L">Mr DUPONT Paul</label>
-              </span>
+                  <h2 class="ski-lead">GM covered by the ski insurance</h2>
+
+                  <!-- Le GM du dossier et ceux montés depuis la filiation.
+                       Tous décochables : on peut n'assurer qu'un membre. -->
+                  <div class="ski-group">
+              <div class="ski-row">
+                <span class="ski-cb">
+                  <input type="checkbox" id="ski-s1-ins-J" checked
+                         aria-label="Remove ski insurance for Jeanne Dupont" />
+                </span>
+                <span class="ski-dates">From 04/09/2024<br />To 17/09/2024</span>
+                <span class="ski-strong">Dupont</span>
+                <span class="ski-strong">Jeanne</span>
+                <span>42 ans</span>
+                <span>GM Ordi</span>
+                <span>C2</span>
+                <span>Room 0324 A</span>
+              </div>
                   </div>
 
-                  <fieldset class="ski-sec ski-fieldset">
-                    <legend class="ski-sec-title">Insurance card format</legend>
+                  <!-- Bascule de la filiation + sélection globale -->
+                  <div class="ski-filbar">
+                    <label class="ski-switch">
+                      <input type="checkbox" checked
+                             aria-label="Show GMs from affiliation" />
+                      <span class="ski-track" aria-hidden="true"></span>
+                      <span class="ski-switch-txt">Show GMs from affiliation (2)</span>
+                    </label>
+                    <span class="ski-cb">
+                      <input type="checkbox" id="ski-s1-all" />
+                      <label for="ski-s1-all">Select all GM's from affiliation</label>
+                    </span>
+                  </div>
+
+            <div class="ski-group ski-group--fil">
+              <div class="ski-row">
+                <span class="ski-cb">
+                  <input type="checkbox" id="ski-s1-fil-P"
+                         aria-label="Add ski insurance for Pierre Dupont" />
+                </span>
+                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                <span class="ski-strong">Dupont</span>
+                <span class="ski-strong">Pierre</span>
+                <span>40 ans</span>
+                <span>GM Ordi</span>
+                <span>C2</span>
+                <span>Room 0325 A</span>
+              </div>
+              <div class="ski-row">
+                <span class="ski-cb">
+                  <input type="checkbox" id="ski-s1-fil-L"
+                         aria-label="Add ski insurance for Paul Dupont" />
+                </span>
+                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                <span class="ski-strong">Dupont</span>
+                <span class="ski-strong">Paul</span>
+                <span>32 ans</span>
+                <span>GM Ordi</span>
+                <span>C2</span>
+                <span>Room 0325 A</span>
+              </div>
+            </div>
+
+                  <fieldset class="ski-fieldset">
+                    <legend class="ski-legend">Insurance card format</legend>
                     <div class="ski-radios">
                       <span class="ski-radio">
                         <input type="radio" name="fmt-s1" id="fmt-s1-p" checked />
@@ -1353,23 +1436,21 @@
                     </div>
                   </fieldset>
 
-                  <div class="ski-actions">
-                    <button class="lc-btn lc-btn--secondary" type="button">Cancel</button>
-                    <button class="lc-btn" type="button" disabled>Confirm</button>
-                  </div>
+                </div>
 
+                <div class="ski-footer">
+                  <button class="lc-btn lc-btn--secondary" type="button">Leave</button>
+                  <button class="lc-btn" type="button">Confirm</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
       </div>
       <div class="lc-screen" data-scope="s2">
-
-        <!-- Contexte : écran de vente. Toujours en Odyssey V1 côté produit,
-             hors périmètre de ce ticket — il situe seulement la pop-in. -->
         <div class="ski-stage">
+
+          <!-- Contexte : l'écran de vente, hors périmètre de ce ticket. -->
           <div class="lc-table" style="--lc-cols: 1fr 140px 110px 140px;" aria-hidden="true">
             <div class="lc-table-head">
               <span>Product name</span><span>Unit price</span>
@@ -1378,12 +1459,12 @@
             <div class="lc-table-row">
               <span class="lc-cell--strong">Ski insurance</span>
               <span class="lc-cell--num">100,00 &euro;</span>
-              <span>1</span>
-              <span class="lc-cell--num">100,00 &euro;</span>
+              <span>2</span>
+              <span class="lc-cell--num">200,00 &euro;</span>
             </div>
           </div>
 
-          <!-- Pop-in GM insurance — anatomie DS caisse (board 5.1 Cash Register / PopUp) -->
+          <!-- Pop-in GM insurance — anatomie calquée sur 4.2.3.5 -->
           <div class="ski-overlay">
             <div class="ski-popin" role="dialog" aria-modal="true"
                  aria-labelledby="ski-title-s2">
@@ -1391,31 +1472,77 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
               </button>
+
               <div class="ski-card">
                 <div class="ski-card-head" id="ski-title-s2">GM insurance</div>
-                <div class="ski-card-msg">Please select the GM concerned by the insurance</div>
+
                 <div class="ski-card-body">
 
-                  <div class="ski-sec">
-              <span class="ski-cb">
-                <input type="checkbox" id="ski-s2-todo-J" />
-                <label for="ski-s2-todo-J">Mrs DUPONT Jeanne</label>
-              </span>
-              <span class="ski-cb">
-                <input type="checkbox" id="ski-s2-todo-L" />
-                <label for="ski-s2-todo-L">Mr DUPONT Paul</label>
-              </span>
+                  <h2 class="ski-lead">GM covered by the ski insurance</h2>
+
+                  <!-- Le GM du dossier et ceux montés depuis la filiation.
+                       Tous décochables : on peut n'assurer qu'un membre. -->
+                  <div class="ski-group">
+              <div class="ski-row">
+                <span class="ski-cb">
+                  <input type="checkbox" id="ski-s2-ins-J" checked
+                         aria-label="Remove ski insurance for Jeanne Dupont" />
+                </span>
+                <span class="ski-dates">From 04/09/2024<br />To 17/09/2024</span>
+                <span class="ski-strong">Dupont</span>
+                <span class="ski-strong">Jeanne</span>
+                <span>42 ans</span>
+                <span>GM Ordi</span>
+                <span>C2</span>
+                <span>Room 0324 A</span>
+              </div>
+              <div class="ski-row">
+                <span class="ski-cb">
+                  <input type="checkbox" id="ski-s2-ins-P" checked
+                         aria-label="Remove ski insurance for Pierre Dupont" />
+                </span>
+                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                <span class="ski-strong">Dupont</span>
+                <span class="ski-strong">Pierre</span>
+                <span>40 ans</span>
+                <span>GM Ordi</span>
+                <span>C2</span>
+                <span>Room 0325 A</span>
+              </div>
                   </div>
-            <div class="ski-sec">
-              <div class="ski-sec-title">Insured GM</div>
-              <span class="ski-cb">
-                <input type="checkbox" id="ski-s2-ins-P" checked />
-                <label for="ski-s2-ins-P">Mr DUPONT Pierre</label>
-              </span>
+
+                  <!-- Bascule de la filiation + sélection globale -->
+                  <div class="ski-filbar">
+                    <label class="ski-switch">
+                      <input type="checkbox" checked
+                             aria-label="Show GMs from affiliation" />
+                      <span class="ski-track" aria-hidden="true"></span>
+                      <span class="ski-switch-txt">Show GMs from affiliation (1)</span>
+                    </label>
+                    <span class="ski-cb">
+                      <input type="checkbox" id="ski-s2-all" />
+                      <label for="ski-s2-all">Select all GM's from affiliation</label>
+                    </span>
+                  </div>
+
+            <div class="ski-group ski-group--fil">
+              <div class="ski-row">
+                <span class="ski-cb">
+                  <input type="checkbox" id="ski-s2-fil-L"
+                         aria-label="Add ski insurance for Paul Dupont" />
+                </span>
+                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                <span class="ski-strong">Dupont</span>
+                <span class="ski-strong">Paul</span>
+                <span>32 ans</span>
+                <span>GM Ordi</span>
+                <span>C2</span>
+                <span>Room 0325 A</span>
+              </div>
             </div>
 
-                  <fieldset class="ski-sec ski-fieldset">
-                    <legend class="ski-sec-title">Insurance card format</legend>
+                  <fieldset class="ski-fieldset">
+                    <legend class="ski-legend">Insurance card format</legend>
                     <div class="ski-radios">
                       <span class="ski-radio">
                         <input type="radio" name="fmt-s2" id="fmt-s2-p" checked />
@@ -1428,23 +1555,21 @@
                     </div>
                   </fieldset>
 
-                  <div class="ski-actions">
-                    <button class="lc-btn lc-btn--secondary" type="button">Cancel</button>
-                    <button class="lc-btn" type="button">Confirm</button>
-                  </div>
+                </div>
 
+                <div class="ski-footer">
+                  <button class="lc-btn lc-btn--secondary" type="button">Leave</button>
+                  <button class="lc-btn" type="button">Confirm</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
       </div>
       <div class="lc-screen" data-scope="s3">
-
-        <!-- Contexte : écran de vente. Toujours en Odyssey V1 côté produit,
-             hors périmètre de ce ticket — il situe seulement la pop-in. -->
         <div class="ski-stage">
+
+          <!-- Contexte : l'écran de vente, hors périmètre de ce ticket. -->
           <div class="lc-table" style="--lc-cols: 1fr 140px 110px 140px;" aria-hidden="true">
             <div class="lc-table-head">
               <span>Product name</span><span>Unit price</span>
@@ -1453,12 +1578,12 @@
             <div class="lc-table-row">
               <span class="lc-cell--strong">Ski insurance</span>
               <span class="lc-cell--num">100,00 &euro;</span>
-              <span>1</span>
-              <span class="lc-cell--num">100,00 &euro;</span>
+              <span>3</span>
+              <span class="lc-cell--num">300,00 &euro;</span>
             </div>
           </div>
 
-          <!-- Pop-in GM insurance — anatomie DS caisse (board 5.1 Cash Register / PopUp) -->
+          <!-- Pop-in GM insurance — anatomie calquée sur 4.2.3.5 -->
           <div class="ski-overlay">
             <div class="ski-popin" role="dialog" aria-modal="true"
                  aria-labelledby="ski-title-s3">
@@ -1466,31 +1591,76 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
               </button>
+
               <div class="ski-card">
                 <div class="ski-card-head" id="ski-title-s3">GM insurance</div>
-                <div class="ski-card-msg">Please select the GM concerned by the insurance</div>
+
                 <div class="ski-card-body">
 
-                  <div class="ski-sec">
-              <span class="ski-cb">
-                <input type="checkbox" id="ski-s3-todo-L" />
-                <label for="ski-s3-todo-L">Mr DUPONT Paul</label>
-              </span>
-                  </div>
-            <div class="ski-sec">
-              <div class="ski-sec-title">Insured GM</div>
-              <span class="ski-cb">
-                <input type="checkbox" id="ski-s3-ins-P" checked />
-                <label for="ski-s3-ins-P">Mr DUPONT Pierre</label>
-              </span>
-              <span class="ski-cb">
-                <input type="checkbox" id="ski-s3-ins-J" checked />
-                <label for="ski-s3-ins-J">Mrs DUPONT Jeanne</label>
-              </span>
-            </div>
+                  <h2 class="ski-lead">GM covered by the ski insurance</h2>
 
-                  <fieldset class="ski-sec ski-fieldset">
-                    <legend class="ski-sec-title">Insurance card format</legend>
+                  <!-- Le GM du dossier et ceux montés depuis la filiation.
+                       Tous décochables : on peut n'assurer qu'un membre. -->
+                  <div class="ski-group">
+              <div class="ski-row">
+                <span class="ski-cb">
+                  <input type="checkbox" id="ski-s3-ins-J" checked
+                         aria-label="Remove ski insurance for Jeanne Dupont" />
+                </span>
+                <span class="ski-dates">From 04/09/2024<br />To 17/09/2024</span>
+                <span class="ski-strong">Dupont</span>
+                <span class="ski-strong">Jeanne</span>
+                <span>42 ans</span>
+                <span>GM Ordi</span>
+                <span>C2</span>
+                <span>Room 0324 A</span>
+              </div>
+              <div class="ski-row">
+                <span class="ski-cb">
+                  <input type="checkbox" id="ski-s3-ins-P" checked
+                         aria-label="Remove ski insurance for Pierre Dupont" />
+                </span>
+                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                <span class="ski-strong">Dupont</span>
+                <span class="ski-strong">Pierre</span>
+                <span>40 ans</span>
+                <span>GM Ordi</span>
+                <span>C2</span>
+                <span>Room 0325 A</span>
+              </div>
+              <div class="ski-row">
+                <span class="ski-cb">
+                  <input type="checkbox" id="ski-s3-ins-L" checked
+                         aria-label="Remove ski insurance for Paul Dupont" />
+                </span>
+                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                <span class="ski-strong">Dupont</span>
+                <span class="ski-strong">Paul</span>
+                <span>32 ans</span>
+                <span>GM Ordi</span>
+                <span>C2</span>
+                <span>Room 0325 A</span>
+              </div>
+                  </div>
+
+                  <!-- Bascule de la filiation + sélection globale -->
+                  <div class="ski-filbar">
+                    <label class="ski-switch">
+                      <input type="checkbox" checked
+                             aria-label="Show GMs from affiliation" />
+                      <span class="ski-track" aria-hidden="true"></span>
+                      <span class="ski-switch-txt">Show GMs from affiliation (0)</span>
+                    </label>
+                    <span class="ski-cb">
+                      <input type="checkbox" id="ski-s3-all" />
+                      <label for="ski-s3-all">Select all GM's from affiliation</label>
+                    </span>
+                  </div>
+
+            <div class="ski-empty-fil">All GMs from the affiliation are already selected.</div>
+
+                  <fieldset class="ski-fieldset">
+                    <legend class="ski-legend">Insurance card format</legend>
                     <div class="ski-radios">
                       <span class="ski-radio">
                         <input type="radio" name="fmt-s3" id="fmt-s3-p" checked />
@@ -1503,23 +1673,21 @@
                     </div>
                   </fieldset>
 
-                  <div class="ski-actions">
-                    <button class="lc-btn lc-btn--secondary" type="button">Cancel</button>
-                    <button class="lc-btn" type="button">Confirm</button>
-                  </div>
+                </div>
 
+                <div class="ski-footer">
+                  <button class="lc-btn lc-btn--secondary" type="button">Leave</button>
+                  <button class="lc-btn" type="button">Confirm</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
       </div>
       <div class="lc-screen" data-scope="s4">
-
-        <!-- Contexte : écran de vente. Toujours en Odyssey V1 côté produit,
-             hors périmètre de ce ticket — il situe seulement la pop-in. -->
         <div class="ski-stage">
+
+          <!-- Contexte : l'écran de vente, hors périmètre de ce ticket. -->
           <div class="lc-table" style="--lc-cols: 1fr 140px 110px 140px;" aria-hidden="true">
             <div class="lc-table-head">
               <span>Product name</span><span>Unit price</span>
@@ -1528,12 +1696,12 @@
             <div class="lc-table-row">
               <span class="lc-cell--strong">Ski insurance</span>
               <span class="lc-cell--num">100,00 &euro;</span>
-              <span>1</span>
-              <span class="lc-cell--num">100,00 &euro;</span>
+              <span>2</span>
+              <span class="lc-cell--num">200,00 &euro;</span>
             </div>
           </div>
 
-          <!-- Pop-in GM insurance — anatomie DS caisse (board 5.1 Cash Register / PopUp) -->
+          <!-- Pop-in GM insurance — anatomie calquée sur 4.2.3.5 -->
           <div class="ski-overlay">
             <div class="ski-popin" role="dialog" aria-modal="true"
                  aria-labelledby="ski-title-s4">
@@ -1541,31 +1709,77 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
               </button>
+
               <div class="ski-card">
                 <div class="ski-card-head" id="ski-title-s4">GM insurance</div>
-                <div class="ski-card-msg">Please select the GM concerned by the insurance</div>
+
                 <div class="ski-card-body">
 
-                  <div class="ski-sec">
-              <span class="ski-cb">
-                <input type="checkbox" id="ski-s4-todo-J" />
-                <label for="ski-s4-todo-J">Mrs DUPONT Jeanne</label>
-              </span>
-              <span class="ski-cb">
-                <input type="checkbox" id="ski-s4-todo-L" />
-                <label for="ski-s4-todo-L">Mr DUPONT Paul</label>
-              </span>
+                  <h2 class="ski-lead">GM covered by the ski insurance</h2>
+
+                  <!-- Le GM du dossier et ceux montés depuis la filiation.
+                       Tous décochables : on peut n'assurer qu'un membre. -->
+                  <div class="ski-group">
+              <div class="ski-row">
+                <span class="ski-cb">
+                  <input type="checkbox" id="ski-s4-ins-J" checked
+                         aria-label="Remove ski insurance for Jeanne Dupont" />
+                </span>
+                <span class="ski-dates">From 04/09/2024<br />To 17/09/2024</span>
+                <span class="ski-strong">Dupont</span>
+                <span class="ski-strong">Jeanne</span>
+                <span>42 ans</span>
+                <span>GM Ordi</span>
+                <span>C2</span>
+                <span>Room 0324 A</span>
+              </div>
+              <div class="ski-row">
+                <span class="ski-cb">
+                  <input type="checkbox" id="ski-s4-ins-P" checked
+                         aria-label="Remove ski insurance for Pierre Dupont" />
+                </span>
+                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                <span class="ski-strong">Dupont</span>
+                <span class="ski-strong">Pierre</span>
+                <span>40 ans</span>
+                <span>GM Ordi</span>
+                <span>C2</span>
+                <span>Room 0325 A</span>
+              </div>
                   </div>
-            <div class="ski-sec">
-              <div class="ski-sec-title">Insured GM</div>
-              <span class="ski-cb">
-                <input type="checkbox" id="ski-s4-ins-P" checked />
-                <label for="ski-s4-ins-P">Mr DUPONT Pierre</label>
-              </span>
+
+                  <!-- Bascule de la filiation + sélection globale -->
+                  <div class="ski-filbar">
+                    <label class="ski-switch">
+                      <input type="checkbox" checked
+                             aria-label="Show GMs from affiliation" />
+                      <span class="ski-track" aria-hidden="true"></span>
+                      <span class="ski-switch-txt">Show GMs from affiliation (1)</span>
+                    </label>
+                    <span class="ski-cb">
+                      <input type="checkbox" id="ski-s4-all" />
+                      <label for="ski-s4-all">Select all GM's from affiliation</label>
+                    </span>
+                  </div>
+
+            <div class="ski-group ski-group--fil">
+              <div class="ski-row">
+                <span class="ski-cb">
+                  <input type="checkbox" id="ski-s4-fil-L"
+                         aria-label="Add ski insurance for Paul Dupont" />
+                </span>
+                <span class="ski-dates">From 05/09/2024<br />To 17/09/2024</span>
+                <span class="ski-strong">Dupont</span>
+                <span class="ski-strong">Paul</span>
+                <span>32 ans</span>
+                <span>GM Ordi</span>
+                <span>C2</span>
+                <span>Room 0325 A</span>
+              </div>
             </div>
 
-                  <fieldset class="ski-sec ski-fieldset">
-                    <legend class="ski-sec-title">Insurance card format</legend>
+                  <fieldset class="ski-fieldset">
+                    <legend class="ski-legend">Insurance card format</legend>
                     <div class="ski-radios">
                       <span class="ski-radio">
                         <input type="radio" name="fmt-s4" id="fmt-s4-p" checked />
@@ -1578,17 +1792,16 @@
                     </div>
                   </fieldset>
 
-                  <div class="ski-actions">
-                    <button class="lc-btn lc-btn--secondary" type="button">Cancel</button>
-                    <button class="lc-btn" type="button" disabled>Confirm</button>
-                  </div>
+                </div>
 
+                <div class="ski-footer">
+                  <button class="lc-btn lc-btn--secondary" type="button">Leave</button>
+                  <button class="lc-btn" type="button">Confirm</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
       </div>
       </div>
     </div>
@@ -1789,10 +2002,10 @@ window.LOOPCRAFT_CONFIG = {
   scopes: {
     default: 's1',
     list: [
-      { id: 's1', label: '1 \u00b7 Opening',         bg: '#F3F4F6', fg: '#374151' },
-      { id: 's2', label: '2 \u00b7 Pierre selected', bg: '#E8F4FD', fg: '#0057A8' },
-      { id: 's3', label: '3 \u00b7 Pierre + Jeanne', bg: '#E8F4FD', fg: '#0057A8' },
-      { id: 's4', label: '4 \u00b7 Resale',          bg: '#FEF3C7', fg: '#92400E' }
+      { id: 's1', label: '1 \u00b7 GM du dossier seul',   bg: '#F3F4F6', fg: '#374151' },
+      { id: 's2', label: '2 \u00b7 Pierre ajout\u00e9',       bg: '#E8F4FD', fg: '#0057A8' },
+      { id: 's3', label: '3 \u00b7 Toute la filiation',    bg: '#E8F4FD', fg: '#0057A8' },
+      { id: 's4', label: '4 \u00b7 Revente',               bg: '#FEF3C7', fg: '#92400E' }
     ],
     aliases: {},
     strict:  false,
@@ -1810,7 +2023,9 @@ window.LOOPCRAFT_CONFIG = {
     contextLines: [
       "Sous-projet : vente de l'assurance ski depuis la caisse Odyssey.",
       "La pop-in « GM insurance » s'ouvre au clic sur « Confirm purchases ».",
-      "Le GO coche les GM à assurer ; un GM coché passe dans « Insured GM ».",
+      "Le GM du dossier est en haut, coché par défaut et décochable.",
+      "La filiation est listée en dessous ; cocher une ligne la fait monter en haut.",
+      "UI et UX calquées sur l'écran DS 4.2.3.5 « Manage the GM's presence ».",
       "Les écrans sont maquettés en Ody Trident \u03a8 2.0 (board DS 5.1 Cash Register / PopUp)."
     ],
     targetFile: 'wireframe-assurance-ski-V1.html'
